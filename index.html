@@ -745,7 +745,7 @@ const CONFIG = {
 
   // URL del Google Apps Script publicado como Web App
   // Para crear: en tu Sheet → Extensiones → Apps Script → pega el código de abajo → Publicar → Implementar como app web → Acceso: Cualquiera
-  SHEETS_URL: 'https://script.google.com/macros/s/AKfycbzNF8dzP3vV4t2YjVxTlB8Alt5vFg-T8MzuCMg33BcTbM3xIRjvG3bvF5dFWwMLBjJivA/exec',
+  SHEETS_URL: 'https://script.google.com/macros/s/AKfycbzm1dlyu3jtoTC0bEPayAN4nAaP7VNsh45eJFGw3J6ZdljDZLpd6JD2rAkLfx5ZiUOmfw/exec',
 
   // Nombre del sheet destino en Google Sheets
   SHEET_NAME: 'Respuestas_EvaluacionCurricular'
@@ -2275,37 +2275,10 @@ function loadDashboard() {
   document.getElementById('dash-content').style.display = 'none';
   document.getElementById('dash-error').style.display   = 'none';
   if (dashChart) { try { dashChart.destroy(); } catch(e){} dashChart = null; }
-
-  // Detect environment: file:// needs JSONP, https:// can use fetch
-  var isLocal = window.location.protocol === 'file:';
-  if (isLocal) {
-    loadDashboardJSONP();
-  } else {
-    loadDashboardFetch();
-  }
+  loadDashboardJSONP();
 }
 
-/* fetch — para GitHub Pages y cualquier servidor HTTPS */
-function loadDashboardFetch() {
-  fetch(CONFIG.SHEETS_URL + '?action=read')
-    .then(function(r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function(data) {
-      if (data && data.ok) {
-        onDashDataLoaded(data.rows || []);
-      } else {
-        showDashError(data ? (data.error || 'El script respondió sin datos') : 'Sin respuesta');
-      }
-    })
-    .catch(function(err) {
-      // fetch falló (puede ser CORS en edge cases) — intentar JSONP como fallback
-      loadDashboardJSONP();
-    });
-}
-
-/* JSONP — para archivo local (file://) */
+/* JSONP — funciona tanto en file:// como en GitHub Pages */
 function loadDashboardJSONP() {
   var cbName = '_dashCb_' + Date.now();
   var scriptTag = document.createElement('script');
