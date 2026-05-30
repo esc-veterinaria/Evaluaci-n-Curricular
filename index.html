@@ -2276,12 +2276,43 @@ function loadDashboard() {
   document.getElementById('dash-error').style.display   = 'none';
   if (dashChart) { try { dashChart.destroy(); } catch(e){} dashChart = null; }
 
+  // Detect environment: file:// needs JSONP, https:// can use fetch
+  var isLocal = window.location.protocol === 'file:';
+  if (isLocal) {
+    loadDashboardJSONP();
+  } else {
+    loadDashboardFetch();
+  }
+}
+
+/* fetch — para GitHub Pages y cualquier servidor HTTPS */
+function loadDashboardFetch() {
+  fetch(CONFIG.SHEETS_URL + '?action=read')
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      if (data && data.ok) {
+        onDashDataLoaded(data.rows || []);
+      } else {
+        showDashError(data ? (data.error || 'El script respondió sin datos') : 'Sin respuesta');
+      }
+    })
+    .catch(function(err) {
+      // fetch falló (puede ser CORS en edge cases) — intentar JSONP como fallback
+      loadDashboardJSONP();
+    });
+}
+
+/* JSONP — para archivo local (file://) */
+function loadDashboardJSONP() {
   var cbName = '_dashCb_' + Date.now();
   var scriptTag = document.createElement('script');
   var timeout = setTimeout(function() {
     try { document.body.removeChild(scriptTag); } catch(e){}
     delete window[cbName];
-    showDashError('Tiempo agotado. Verifica que el Apps Script esté publicado.');
+    showDashError('Tiempo agotado. Verifica que el Apps Script esté publicado como "Cualquier usuario".');
   }, 12000);
 
   window[cbName] = function(data) {
@@ -2289,22 +2320,26 @@ function loadDashboard() {
     try { document.body.removeChild(scriptTag); } catch(e){}
     delete window[cbName];
     if (data && data.ok) {
-      dashData = parseRows(data.rows || []);
-      document.getElementById('dash-loading').style.display = 'none';
-      document.getElementById('dash-content').style.display = 'block';
-      renderGrupoSelector();
+      onDashDataLoaded(data.rows || []);
     } else {
-      showDashError(data ? (data.error || 'Sin datos') : 'Sin respuesta');
+      showDashError(data ? (data.error || 'Sin datos') : 'Sin respuesta del servidor');
     }
   };
   scriptTag.onerror = function() {
     clearTimeout(timeout);
     try { document.body.removeChild(scriptTag); } catch(e){}
     delete window[cbName];
-    showDashError('No se pudo conectar. Verifica la URL y los permisos del Apps Script.');
+    showDashError('No se pudo conectar. Verifica la URL y que el Apps Script esté publicado como "Cualquier usuario".');
   };
   scriptTag.src = CONFIG.SHEETS_URL + '?action=read&callback=' + cbName;
   document.body.appendChild(scriptTag);
+}
+
+function onDashDataLoaded(rows) {
+  dashData = parseRows(rows);
+  document.getElementById('dash-loading').style.display = 'none';
+  document.getElementById('dash-content').style.display = 'block';
+  renderGrupoSelector();
 }
 
 function parseRows(rows) {
