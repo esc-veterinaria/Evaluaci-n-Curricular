@@ -2275,37 +2275,64 @@ function loadDashboard() {
   document.getElementById('dash-content').style.display = 'none';
   document.getElementById('dash-error').style.display   = 'none';
   if (dashChart) { try { dashChart.destroy(); } catch(e){} dashChart = null; }
-  loadDashboardJSONP();
+
+  // Lee directamente desde Google Sheets CSV export — no necesita Apps Script ni CORS
+  var sheetId   = '1LAtWwuzqEdGKqT78uJRVQe4R6AsnAUuFb8FbtOJkxWE';
+  var sheetName = encodeURIComponent('Respuestas_EvaluacionCurricular');
+  var url = 'https://docs.google.com/spreadsheets/d/' + sheetId
+          + '/gviz/tq?tqx=out:csv&sheet=' + sheetName;
+
+  fetch(url)
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
+    .then(function(csv) {
+      var rows = parseCSV(csv);
+      if (!rows || rows.length < 2) {
+        showDashError('La hoja está vacía o no tiene respuestas aún.');
+        return;
+      }
+      var headers = rows[0];
+      var data = rows.slice(1).map(function(r) {
+        var obj = {};
+        headers.forEach(function(h, i){ obj[h.trim()] = r[i] || ''; });
+        try { obj['Respuestas (JSON)']  = JSON.parse(obj['Respuestas (JSON)']);  } catch(e){}
+        try { obj['Indicadores (JSON)'] = JSON.parse(obj['Indicadores (JSON)']); } catch(e){}
+        return obj;
+      });
+      onDashDataLoaded(data);
+    })
+    .catch(function(err) {
+      showDashError('No se pudo leer la hoja. Verifica que esté compartida como "Cualquier persona con el enlace puede ver". Error: ' + err.message);
+    });
 }
 
-/* JSONP — funciona tanto en file:// como en GitHub Pages */
-function loadDashboardJSONP() {
-  var cbName = '_dashCb_' + Date.now();
-  var scriptTag = document.createElement('script');
-  var timeout = setTimeout(function() {
-    try { document.body.removeChild(scriptTag); } catch(e){}
-    delete window[cbName];
-    showDashError('Tiempo agotado. Verifica que el Apps Script esté publicado como "Cualquier usuario".');
-  }, 12000);
-
-  window[cbName] = function(data) {
-    clearTimeout(timeout);
-    try { document.body.removeChild(scriptTag); } catch(e){}
-    delete window[cbName];
-    if (data && data.ok) {
-      onDashDataLoaded(data.rows || []);
+function parseCSV(text) {
+  var rows = [];
+  var row = [];
+  var cell = '';
+  var inQuotes = false;
+  for (var i = 0; i < text.length; i++) {
+    var ch = text[i];
+    var next = text[i+1];
+    if (inQuotes) {
+      if (ch === '"' && next === '"') { cell += '"'; i++; }
+      else if (ch === '"') { inQuotes = false; }
+      else { cell += ch; }
     } else {
-      showDashError(data ? (data.error || 'Sin datos') : 'Sin respuesta del servidor');
+      if (ch === '"') { inQuotes = true; }
+      else if (ch === ',') { row.push(cell); cell = ''; }
+      else if (ch === '\n' || (ch === '\r' && next === '\n')) {
+        if (ch === '\r') i++;
+        row.push(cell); cell = '';
+        if (row.some(function(c){ return c !== ''; })) rows.push(row);
+        row = [];
+      } else { cell += ch; }
     }
-  };
-  scriptTag.onerror = function() {
-    clearTimeout(timeout);
-    try { document.body.removeChild(scriptTag); } catch(e){}
-    delete window[cbName];
-    showDashError('No se pudo conectar. Verifica la URL y que el Apps Script esté publicado como "Cualquier usuario".');
-  };
-  scriptTag.src = CONFIG.SHEETS_URL + '?action=read&callback=' + cbName;
-  document.body.appendChild(scriptTag);
+  }
+  if (cell !== '' || row.length) { row.push(cell); if (row.some(function(c){ return c!==''; })) rows.push(row); }
+  return rows;
 }
 
 function onDashDataLoaded(rows) {
