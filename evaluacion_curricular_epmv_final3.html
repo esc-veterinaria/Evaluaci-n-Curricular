@@ -1,0 +1,2691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#334a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Evaluación Curricular Plan 24 — EPMV · URP</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --wine: #4a6741;
+  --wine-dark: #334a2e;
+  --wine-light: #f0f5ef;
+  --wine-mid: #4a674140;
+  --gold: #8a9e3a;
+  --gold-light: #f5f8e8;
+  --ink: #1a1e14;
+  --ink-mid: #3d4535;
+  --ink-light: #7a8470;
+  --surface: #fdfdfb;
+  --surface-2: #f4f5f1;
+  --surface-3: #e8ebe3;
+  --border: #d4d9cc;
+  --border-light: #e8ebe3;
+  --success: #2d6a4f;
+  --success-bg: #e8f5ee;
+  --warn: #b45309;
+  --warn-bg: #fef3c7;
+  --radius: 12px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(26,30,20,.08), 0 4px 16px rgba(26,30,20,.06);
+  --shadow-lg: 0 8px 40px rgba(26,30,20,.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--surface-2);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── HEADER ── */
+.site-header {
+  background: var(--wine-dark);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,.25);
+}
+.header-inner {
+  max-width: 900px; margin: 0 auto;
+  padding: 0 2rem;
+  display: flex; align-items: center; gap: 1rem; height: 64px;
+}
+.header-logo {
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(255,255,255,.3); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.header-logo svg { width: 20px; height: 20px; color: rgba(255,255,255,.9); }
+.header-text h1 {
+  font-family: 'DM Serif Display', serif; font-size: 15px;
+  color: #fff; font-weight: 400; letter-spacing: .01em;
+}
+.header-text p { font-size: 11px; color: rgba(255,255,255,.55); letter-spacing: .03em; text-transform: uppercase; }
+.header-badge {
+  margin-left: auto;
+  background: rgba(138,158,58,.2); border: 1px solid rgba(138,158,58,.4);
+  color: var(--gold); font-size: 10px; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px;
+}
+
+/* ── LAYOUT ── */
+.app-layout {
+  max-width: 900px; margin: 0 auto;
+  padding: 2rem 2rem 4rem;
+  display: grid; grid-template-columns: 200px 1fr;
+  gap: 2rem; align-items: start;
+}
+.sidebar { position: sticky; top: 88px; }
+.sidebar-title {
+  font-size: 10px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-light);
+  margin-bottom: 1rem; padding-left: 4px;
+}
+.step-nav { display: flex; flex-direction: column; gap: 2px; }
+.step-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: all .2s;
+  border: 1px solid transparent;
+}
+.step-item:hover { background: var(--surface-3); }
+.step-item.active { background: var(--wine-light); border-color: var(--wine-mid); }
+.step-item.done { opacity: .7; }
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: var(--ink-light);
+  flex-shrink: 0; transition: all .2s;
+}
+.step-item.active .step-num { background: var(--wine); border-color: var(--wine); color: #fff; }
+.step-item.done .step-num { background: var(--success-bg); border-color: var(--success); color: var(--success); font-size: 10px; }
+.step-label { font-size: 12px; font-weight: 500; color: var(--ink-mid); }
+.step-item.active .step-label { color: var(--wine-dark); font-weight: 600; }
+
+.sidebar-progress {
+  margin-top: 1.5rem; padding: 14px;
+  background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius);
+}
+.progress-label { font-size: 11px; color: var(--ink-light); margin-bottom: 8px; display: flex; justify-content: space-between; }
+.progress-label span { font-weight: 600; color: var(--wine); }
+.progress-bar { height: 4px; background: var(--border-light); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--wine); border-radius: 2px; transition: width .4s ease; }
+
+.main-content { min-width: 0; }
+
+/* ── PAGE HERO ── */
+.page-hero {
+  background: var(--surface); border: 1px solid var(--border-light);
+  border-radius: var(--radius); padding: 1.75rem 2rem; margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.page-hero-icon {
+  width: 48px; height: 48px; background: var(--wine-light);
+  border: 1px solid var(--wine-mid); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.page-hero-icon svg { width: 22px; height: 22px; color: var(--wine); }
+.page-hero h2 { font-family: 'DM Serif Display', serif; font-size: 20px; font-weight: 400; color: var(--ink); margin-bottom: 3px; }
+.page-hero p { font-size: 13px; color: var(--ink-light); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border-light);
+  border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+}
+.card-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 1.25rem; padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-light);
+}
+.card-header-icon {
+  width: 32px; height: 32px; background: var(--gold-light);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.card-header-icon svg { width: 16px; height: 16px; color: var(--gold); }
+.card-header h3 { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: .01em; }
+.card-header p { font-size: 11px; color: var(--ink-light); margin-top: 1px; }
+
+/* ── FIELDS ── */
+.field-grid { display: grid; gap: .875rem; }
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-mid); }
+.req { color: var(--wine); margin-left: 2px; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 9px 12px;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+  background: var(--surface); transition: border-color .15s, box-shadow .15s; outline: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--wine); box-shadow: 0 0 0 3px rgba(74,103,65,.08);
+}
+.field input::placeholder, .field textarea::placeholder { color: var(--ink-light); }
+.field textarea { resize: vertical; min-height: 80px; }
+.field.invalid input, .field.invalid select, .field.invalid textarea { border-color: #e24b4a; }
+.err-msg { font-size: 11px; color: #c0392b; display: none; }
+.field.invalid .err-msg { display: block; }
+
+/* ── PILLS / GROUP SELECTOR ── */
+.group-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+.group-card {
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 1rem; text-align: center; cursor: pointer;
+  transition: all .2s; background: var(--surface);
+}
+.group-card:hover { border-color: var(--wine); background: var(--wine-light); }
+.group-card.selected { border-color: var(--wine); background: var(--wine-light); box-shadow: 0 0 0 2px var(--wine-mid); }
+.group-card-icon { font-size: 22px; margin-bottom: 6px; }
+.group-card-label { font-size: 12px; font-weight: 600; color: var(--ink-mid); }
+.group-card.selected .group-card-label { color: var(--wine-dark); }
+
+/* ── RADIO PILLS ── */
+.radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.radio-pill {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 14px; border: 1.5px solid var(--border); border-radius: 30px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: all .15s; color: var(--ink-mid); background: var(--surface); user-select: none;
+}
+.radio-pill:hover { border-color: var(--wine); color: var(--wine); }
+.radio-pill.selected { background: var(--wine-light); border-color: var(--wine); color: var(--wine-dark); }
+.radio-pill input { display: none; }
+.pill-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid currentColor; transition: all .15s; flex-shrink: 0; }
+.radio-pill.selected .pill-dot { background: var(--wine); border-color: var(--wine); }
+
+/* ── SCALE BUTTONS ── */
+.scale-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 8px;
+  align-items: start; padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.scale-row:last-child { border-bottom: none; }
+.scale-question {
+  font-size: 13px; color: var(--ink); line-height: 1.5;
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.scale-num { font-weight: 700; color: var(--ink-light); font-size: 12px; min-width: 18px; margin-top: 2px; }
+.scale-btns { display: flex; gap: 4px; flex-shrink: 0; }
+.scale-btn {
+  width: 38px; height: 38px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all .15s; color: var(--ink-light);
+  display: flex; align-items: center; justify-content: center;
+}
+.scale-btn:hover { border-color: var(--wine); color: var(--wine); background: var(--wine-light); }
+.scale-btn.sel-1 { background: #fee2e2; border-color: #f87171; color: #b91c1c; }
+.scale-btn.sel-2 { background: #fef3c7; border-color: #fbbf24; color: #92400e; }
+.scale-btn.sel-3 { background: #d1fae5; border-color: #34d399; color: #065f46; }
+.scale-btn.sel-4 { background: #dbeafe; border-color: #60a5fa; color: #1e40af; }
+
+.scale-legend {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; padding: 10px 12px;
+  background: var(--surface-2); border-radius: var(--radius-sm); border: 1px solid var(--border-light);
+}
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; }
+.legend-dot { width: 18px; height: 18px; border-radius: 4px; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.l1 { background: #fee2e2; color: #b91c1c; }
+.l2 { background: #fef3c7; color: #92400e; }
+.l3 { background: #d1fae5; color: #065f46; }
+.l4 { background: #dbeafe; color: #1e40af; }
+
+/* ── OPEN QUESTIONS ── */
+.open-question { margin-bottom: 1.25rem; }
+.open-question-label {
+  font-size: 13px; font-weight: 500; color: var(--ink);
+  margin-bottom: 6px; display: flex; gap: 6px; align-items: flex-start; line-height: 1.5;
+}
+.oq-num { font-weight: 700; color: var(--wine); font-size: 12px; min-width: 18px; margin-top: 2px; }
+
+/* ── HELP TOOLTIP ── */
+.help-btn {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--gold-light); border: 1px solid var(--gold);
+  color: var(--gold); font-size: 10px; font-weight: 700;
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-left: 4px; transition: all .15s;
+}
+.help-btn:hover { background: var(--gold); color: #fff; }
+
+.help-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.help-modal-overlay.open { opacity: 1; pointer-events: all; }
+.help-modal {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 1.5rem; max-width: 520px; width: 100%;
+  box-shadow: var(--shadow-lg); transform: translateY(10px); transition: transform .2s;
+}
+.help-modal-overlay.open .help-modal { transform: translateY(0); }
+.help-modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+.help-modal-header h4 { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.4; max-width: 420px; }
+.help-close { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 50%; background: transparent; cursor: pointer; color: var(--ink-light); font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.help-content { font-size: 13px; color: var(--ink-mid); line-height: 1.7; min-height: 60px; }
+.help-loading { display: flex; gap: 8px; align-items: center; color: var(--ink-light); font-size: 13px; }
+.dot-loader span { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--wine); animation: dotbounce 1.2s infinite; }
+.dot-loader span:nth-child(2) { animation-delay: .2s; }
+.dot-loader span:nth-child(3) { animation-delay: .4s; }
+@keyframes dotbounce { 0%,80%,100%{transform:scale(0)} 40%{transform:scale(1)} }
+
+/* ── ALERT ── */
+.alert {
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  font-size: 13px; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 1rem;
+}
+.alert-info { background: #e8f2fb; border: 1px solid #b5d4f4; color: #0c447c; }
+.alert-warn { background: var(--warn-bg); border: 1px solid #fcd34d; color: var(--warn); }
+.alert-success { background: var(--success-bg); border: 1px solid #6ee7b7; color: var(--success); }
+.alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* ── INSTRUMENT SECTION ── */
+.instrument-header {
+  background: var(--wine-dark); color: #fff;
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 1rem 1.5rem; margin-bottom: 0;
+}
+.instrument-header h3 { font-family: 'DM Serif Display', serif; font-size: 16px; font-weight: 400; }
+.instrument-header p { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 2px; }
+.instrument-body {
+  background: var(--surface); border: 1px solid var(--border-light);
+  border-top: none; border-radius: 0 0 var(--radius) var(--radius);
+  padding: 1.5rem; margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+/* ── FODA MATRIX ── */
+.foda-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.foda-quadrant { border-radius: var(--radius-sm); overflow: hidden; }
+.foda-q-header { padding: 8px 12px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.foda-q-F .foda-q-header { background: #d1fae5; color: #065f46; }
+.foda-q-O .foda-q-header { background: #dbeafe; color: #1e40af; }
+.foda-q-D .foda-q-header { background: #fee2e2; color: #b91c1c; }
+.foda-q-A .foda-q-header { background: #fef3c7; color: #92400e; }
+.foda-q-body { padding: 10px; border: 1px solid var(--border-light); border-top: none; border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+.foda-entry { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+.foda-entry:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.foda-entry textarea { min-height: 52px; margin-bottom: 6px; font-size: 13px; }
+.foda-priority-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+.foda-mini-select { padding: 4px 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 11px; font-family: inherit; color: var(--ink); background: var(--surface); outline: none; width: 100%; }
+
+/* ── SILABO MATRIX ── */
+.silabo-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 1rem; }
+.silabo-table th { background: var(--wine-dark); color: #fff; padding: 8px 10px; text-align: left; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
+.silabo-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+.silabo-table tr:last-child td { border-bottom: none; }
+.silabo-table tr:hover td { background: var(--surface-2); }
+.silabo-check-group { display: flex; gap: 4px; }
+.silabo-check-btn {
+  padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px;
+  font-size: 10px; font-weight: 600; cursor: pointer; transition: all .15s;
+  background: var(--surface); color: var(--ink-light);
+}
+.silabo-check-btn.si { background: #d1fae5; border-color: #34d399; color: #065f46; }
+.silabo-check-btn.parcial { background: #fef3c7; border-color: #fbbf24; color: #92400e; }
+.silabo-check-btn.no { background: #fee2e2; border-color: #f87171; color: #b91c1c; }
+
+/* ── MATRIX ALIGNMENT ── */
+.matrix-wrapper { overflow-x: auto; margin-bottom: 1rem; }
+.matrix-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 500px; }
+.matrix-table th { background: var(--wine-dark); color: #fff; padding: 8px 10px; text-align: center; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.matrix-table th:first-child { text-align: left; min-width: 160px; }
+.matrix-table td { padding: 6px 8px; border-bottom: 1px solid var(--border-light); text-align: center; vertical-align: middle; }
+.matrix-table td:first-child { text-align: left; font-size: 11px; font-weight: 500; }
+.matrix-table tr:hover td { background: var(--surface-2); }
+.matrix-sel { width: 52px; padding: 3px 4px; border: 1px solid var(--border); border-radius: 4px; font-size: 11px; font-family: inherit; text-align: center; outline: none; background: var(--surface); }
+
+/* ── NAV FOOTER ── */
+.nav-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light);
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px; min-height: 44px;
+  border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all .15s; border: none;
+}
+.btn-ghost { background: transparent; color: var(--ink-mid); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: var(--surface-3); }
+.btn-primary { background: var(--wine); color: #fff; box-shadow: 0 2px 8px rgba(74,103,65,.25); }
+.btn-primary:hover { background: var(--wine-dark); }
+.btn-success { background: var(--success); color: #fff; box-shadow: 0 2px 8px rgba(45,106,79,.25); }
+.btn-success:hover { background: #1a4a36; }
+.btn svg { width: 14px; height: 14px; }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── SUCCESS SCREEN ── */
+.success-screen { text-align: center; padding: 3rem 2rem; }
+.success-icon { width: 80px; height: 80px; background: var(--success-bg); border: 2px solid var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+.success-icon svg { width: 36px; height: 36px; color: var(--success); }
+.success-screen h2 { font-family: 'DM Serif Display', serif; font-size: 24px; font-weight: 400; margin-bottom: .75rem; }
+.success-screen p { font-size: 14px; color: var(--ink-light); max-width: 400px; margin: 0 auto 2rem; line-height: 1.6; }
+.success-meta { display: inline-flex; flex-direction: column; gap: 6px; background: var(--surface-2); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 1rem 1.5rem; text-align: left; font-size: 13px; color: var(--ink-mid); margin-bottom: 2rem; }
+.success-meta strong { color: var(--wine); }
+
+/* ── SECTION TITLE ── */
+.section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--wine); margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--wine-mid); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  .app-layout { grid-template-columns: 1fr; padding: 1rem 1rem 5rem; gap: 1rem; }
+  .header-inner { padding: 0 1rem; height: 52px; }
+  .header-text h1 { font-size: 13px; }
+  .header-text p { display: none; }
+  .sidebar { position: static; }
+  .sidebar-title, .sidebar-progress { display: none; }
+  .step-nav { flex-direction: row; justify-content: center; gap: 0; background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 10px 8px; overflow-x: auto; }
+  .step-item { flex-direction: column; align-items: center; gap: 4px; padding: 6px 8px; flex: 1; min-width: 56px; border: none; }
+  .step-label { font-size: 9px; text-align: center; line-height: 1.2; }
+  .group-grid { grid-template-columns: repeat(2,1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+  .foda-grid { grid-template-columns: 1fr; }
+  .scale-btns .scale-btn { width: 32px; height: 32px; font-size: 11px; }
+  .field input, .field select, .field textarea { font-size: 16px; }
+}
+
+/* ── DASHBOARD ── */
+.dash-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+.dash-full { grid-column: 1/-1; }
+.dash-card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); }
+.dash-card-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+.dash-card-title span { font-size: 16px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: .875rem; margin-bottom: 1.25rem; }
+.kpi { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 1rem; text-align: center; box-shadow: var(--shadow); }
+.kpi-val { font-family: 'DM Serif Display',serif; font-size: 32px; font-weight: 400; line-height: 1; margin-bottom: 4px; }
+.kpi-label { font-size: 11px; color: var(--ink-light); font-weight: 500; }
+.kpi-sub { font-size: 10px; color: var(--ink-light); margin-top: 2px; }
+.semaforo { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 6px; }
+.sem-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.sem-label { font-size: 12px; font-weight: 600; flex: 1; }
+.sem-val { font-size: 13px; font-weight: 700; }
+.sem-bar-wrap { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+.sem-bar { height: 100%; border-radius: 3px; transition: width .6s ease; }
+.sem-green { background: #d1fae5; border: 1px solid #6ee7b7; }
+.sem-yellow { background: #fef3c7; border: 1px solid #fcd34d; }
+.sem-red { background: #fee2e2; border: 1px solid #fca5a5; }
+.sem-dot-green { background: #10b981; }
+.sem-dot-yellow { background: #f59e0b; }
+.sem-dot-red { background: #ef4444; }
+.resp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.resp-table th { background: var(--wine-dark); color: #fff; padding: 7px 10px; text-align: left; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
+.resp-table td { padding: 7px 10px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+.resp-table tr:hover td { background: var(--surface-2); }
+.grupo-pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+.dash-back { display: flex; align-items: center; gap: 8px; cursor: pointer; background: none; border: none; font-family: inherit; font-size: 13px; color: var(--ink-mid); padding: 0; margin-bottom: 1.5rem; }
+.dash-back:hover { color: var(--wine); }
+.dash-loading { text-align: center; padding: 3rem; color: var(--ink-light); font-size: 14px; }
+.chart-wrap { position: relative; height: 220px; }
+@media(max-width:680px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .dash-layout{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div class="header-text">
+      <h1>Universidad Ricardo Palma</h1>
+      <p>E.P. Medicina Veterinaria · Evaluación Curricular Plan 24</p>
+    </div>
+    <button class="header-badge" onclick="openDashboard()" style="cursor:pointer;background:rgba(138,158,58,.2);border:1px solid rgba(138,158,58,.4);color:#c8d96a;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:20px;transition:all .2s" onmouseover="this.style.background='rgba(138,158,58,.35)'" onmouseout="this.style.background='rgba(138,158,58,.2)'">
+      📊 Dashboard
+    </button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Progreso</div>
+    <nav class="step-nav" id="step-nav">
+      <div class="step-item active" id="nav1" onclick="tryGoStep(1)">
+        <div class="step-num" id="sn1">1</div>
+        <div class="step-label">Identificación</div>
+      </div>
+      <div class="step-item" id="nav2">
+        <div class="step-num" id="sn2">2</div>
+        <div class="step-label">Instrumentos</div>
+      </div>
+      <div class="step-item" id="nav3">
+        <div class="step-num" id="sn3">3</div>
+        <div class="step-label">Enviar</div>
+      </div>
+    </nav>
+    <div class="sidebar-progress">
+      <div class="progress-label">Completado <span id="progress-pct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- STEP 1: IDENTIFICACIÓN -->
+    <div class="page active" id="page1">
+      <div class="page-hero">
+        <div class="page-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <h2>Identificación del participante</h2>
+          <p>Complete sus datos y seleccione el grupo al que pertenece</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v4M16 4v4M3 10h18"/></svg>
+          </div>
+          <div><h3>Datos personales</h3><p>Campos marcados con * son obligatorios</p></div>
+        </div>
+        <div class="field-grid">
+          <div class="field" id="f-nombre">
+            <label>Nombres y apellidos completos <span class="req">*</span></label>
+            <input type="text" id="inp-nombre" placeholder="Ej. García López, Juan Carlos">
+            <div class="err-msg">Este campo es obligatorio</div>
+          </div>
+          <div class="field-grid grid-2">
+            <div class="field">
+              <label>Correo electrónico</label>
+              <input type="email" id="inp-correo" placeholder="correo@urp.edu.pe">
+            </div>
+            <div class="field">
+              <label>Institución / Centro de trabajo</label>
+              <input type="text" id="inp-institucion" placeholder="Opcional">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div><h3>Grupo de interés <span class="req">*</span></h3><p>Seleccione el grupo al que pertenece</p></div>
+        </div>
+        <div class="group-grid" id="group-grid">
+          <div class="group-card" onclick="selectGroup('expertos',this)">
+            <div class="group-card-icon">🔬</div>
+            <div class="group-card-label">Expertos</div>
+          </div>
+          <div class="group-card" onclick="selectGroup('empleadores',this)">
+            <div class="group-card-icon">🏥</div>
+            <div class="group-card-label">Empleadores</div>
+          </div>
+          <div class="group-card" onclick="selectGroup('egresados',this)">
+            <div class="group-card-icon">🎓</div>
+            <div class="group-card-label">Egresados</div>
+          </div>
+          <div class="group-card" onclick="selectGroup('docentes_p24',this)">
+            <div class="group-card-icon">📗</div>
+            <div class="group-card-label">Docentes Plan 24</div>
+          </div>
+          <div class="group-card" onclick="selectGroup('docentes_p52',this)">
+            <div class="group-card-icon">📘</div>
+            <div class="group-card-label">Docentes Plan 52</div>
+          </div>
+          <div class="group-card" onclick="selectGroup('docente_satelite',this)">
+            <div class="group-card-icon">🛰️</div>
+            <div class="group-card-label">Docente Curso Satélite</div>
+          </div>
+          <div class="group-card" onclick="selectGroup('comision',this)">
+            <div class="group-card-icon">⚙️</div>
+            <div class="group-card-label">Comisión Curricular</div>
+          </div>
+          <div class="group-card" onclick="selectGroup('estudiantes',this)">
+            <div class="group-card-icon">📖</div>
+            <div class="group-card-label">Estudiantes</div>
+          </div>
+        </div>
+        <div class="err-msg" id="err-grupo" style="display:none;margin-top:8px">Seleccione un grupo</div>
+
+        <!-- Especialidad para expertos -->
+        <div id="especialidad-section" style="display:none;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border-light)">
+          <div class="field" id="f-especialidad">
+            <label>Especialidad <span class="req">*</span></label>
+            <div class="radio-group" id="especialidad-group">
+              <label class="radio-pill" onclick="selectPill(this,'esp')"><input type="radio" name="esp" value="Aves"><span class="pill-dot"></span>Aves</label>
+              <label class="radio-pill" onclick="selectPill(this,'esp')"><input type="radio" name="esp" value="Animales menores"><span class="pill-dot"></span>Animales menores</label>
+              <label class="radio-pill" onclick="selectPill(this,'esp')"><input type="radio" name="esp" value="Salud Pública"><span class="pill-dot"></span>Salud Pública</label>
+              <label class="radio-pill" onclick="selectPill(this,'esp')"><input type="radio" name="esp" value="Animales mayores"><span class="pill-dot"></span>Animales mayores</label>
+              <label class="radio-pill" onclick="selectPill(this,'esp')"><input type="radio" name="esp" value="Laboratorio"><span class="pill-dot"></span>Laboratorio</label>
+              <label class="radio-pill" onclick="selectPill(this,'esp')"><input type="radio" name="esp" value="Investigación"><span class="pill-dot"></span>Investigación</label>
+              <label class="radio-pill" onclick="selectPill(this,'esp')"><input type="radio" name="esp" value="Silvestres y conservación"><span class="pill-dot"></span>Silvestres y conservación</label>
+              <label class="radio-pill" onclick="selectPill(this,'esp')"><input type="radio" name="esp" value="Marketing y ventas"><span class="pill-dot"></span>Marketing y ventas</label>
+            </div>
+            <div class="err-msg">Seleccione su especialidad</div>
+          </div>
+        </div>
+
+        <!-- Ciclo para estudiantes -->
+        <div id="ciclo-section" style="display:none;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border-light)">
+          <div class="field" id="f-ciclo">
+            <label>Ciclo académico <span class="req">*</span></label>
+            <select id="inp-ciclo">
+              <option value="">— Seleccione ciclo —</option>
+              <option value="III">III ciclo</option>
+              <option value="IV">IV ciclo</option>
+              <option value="V">V ciclo</option>
+              <option value="VI">VI ciclo</option>
+              <option value="VII">VII ciclo</option>
+              <option value="VIII">VIII ciclo</option>
+              <option value="IX">IX ciclo</option>
+              <option value="X">X ciclo</option>
+            </select>
+            <div class="err-msg">Seleccione su ciclo</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <div></div>
+        <button class="btn btn-primary" onclick="next1()">
+          Continuar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: INSTRUMENTOS -->
+    <div class="page" id="page2">
+      <div class="page-hero" id="instruments-hero">
+        <div class="page-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+        </div>
+        <div>
+          <h2 id="instruments-title">Instrumentos de evaluación</h2>
+          <p id="instruments-sub">Responda todos los instrumentos asignados a su grupo</p>
+        </div>
+      </div>
+
+      <div id="instruments-container"></div>
+
+      <div class="nav-footer">
+        <button class="btn btn-ghost" onclick="goStep(1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Anterior
+        </button>
+        <button class="btn btn-primary" onclick="next2()">
+          Revisar y enviar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3: CONFIRMACIÓN Y ENVÍO -->
+    <div class="page" id="page3">
+      <div class="page-hero">
+        <div class="page-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        </div>
+        <div>
+          <h2>Confirmar y enviar</h2>
+          <p>Verifique sus respuestas antes de enviar</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Datos del participante</div>
+        <div style="display:grid;gap:8px;font-size:13px">
+          <div style="display:grid;grid-template-columns:140px 1fr;gap:8px"><span style="color:var(--ink-light)">Nombre</span><strong id="rv-nombre">—</strong></div>
+          <div style="display:grid;grid-template-columns:140px 1fr;gap:8px"><span style="color:var(--ink-light)">Grupo</span><strong id="rv-grupo">—</strong></div>
+          <div style="display:grid;grid-template-columns:140px 1fr;gap:8px" id="rv-esp-row" style="display:none"><span style="color:var(--ink-light)">Especialidad</span><strong id="rv-esp">—</strong></div>
+          <div style="display:grid;grid-template-columns:140px 1fr;gap:8px"><span style="color:var(--ink-light)">Correo</span><strong id="rv-correo">—</strong></div>
+          <div style="display:grid;grid-template-columns:140px 1fr;gap:8px"><span style="color:var(--ink-light)">Institución</span><strong id="rv-inst">—</strong></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Resumen de instrumentos completados</div>
+        <div id="rv-instruments" style="font-size:13px;color:var(--ink-mid)"></div>
+      </div>
+
+      <div class="alert alert-info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Los datos se guardarán en la base de datos de la Comisión Curricular de la EPMV. El envío es anónimo respecto a sus respuestas individuales; solo se registra el nombre y grupo para trazabilidad.
+      </div>
+
+      <div id="send-status"></div>
+
+      <div class="nav-footer">
+        <button class="btn btn-ghost" onclick="goStep(2)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Anterior
+        </button>
+        <button class="btn btn-success" id="btn-send" onclick="sendData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/></svg>
+          Enviar evaluación
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 4: ÉXITO -->
+    <div class="page" id="page4">
+      <div class="card">
+        <div class="success-screen">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h2>¡Evaluación enviada con éxito!</h2>
+          <p>Gracias por su participación en el proceso de actualización del Plan Curricular 2024-I de la EPMV. Sus respuestas han sido registradas correctamente.</p>
+          <div class="success-meta">
+            <span>Participante: <strong id="sc-nombre">—</strong></span>
+            <span>Grupo: <strong id="sc-grupo">—</strong></span>
+            <span>Fecha: <strong id="sc-fecha">—</strong></span>
+          </div>
+          <button class="btn btn-ghost" onclick="location.reload()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+            Nueva evaluación
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- page5 moved outside layout -->
+
+  </main>
+</div>
+
+<!-- HELP MODAL -->
+<div class="help-modal-overlay" id="help-overlay" onclick="closeHelp(event)">
+  <div class="help-modal">
+    <div class="help-modal-header">
+      <h4 id="help-question-text">—</h4>
+      <button class="help-close" onclick="closeHelp()">✕</button>
+    </div>
+    <div class="help-content" id="help-content">
+      <div class="help-loading dot-loader">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   CONFIGURACIÓN — editar estas constantes
+══════════════════════════════════════════════ */
+const CONFIG = {
+  // API Key de Claude para explicaciones contextuales
+  CLAUDE_API_KEY: 'sk-ant-COLOCA-TU-API-KEY-AQUI',
+
+  // URL del Google Apps Script publicado como Web App
+  // Para crear: en tu Sheet → Extensiones → Apps Script → pega el código de abajo → Publicar → Implementar como app web → Acceso: Cualquiera
+  SHEETS_URL: 'https://script.google.com/macros/s/AKfycbxC9ceISaDZ0EwZ6BWWf7-nBU4xINFlG9AikdiJAjTe-HFedTLzJCEjFU2VQslmV3sZeQ/exec',
+
+  // Nombre del sheet destino en Google Sheets
+  SHEET_NAME: 'Respuestas_EvaluacionCurricular'
+};
+
+/*
+CÓDIGO PARA TU GOOGLE APPS SCRIPT:
+─────────────────────────────────────────────
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet()
+    .getSheetByName('Respuestas_EvaluacionCurricular')
+    || SpreadsheetApp.getActiveSpreadsheet().insertSheet('Respuestas_EvaluacionCurricular');
+  var data = JSON.parse(e.postData.contents);
+  var row = [
+    new Date().toISOString(), data.nombre, data.grupo, data.especialidad || '',
+    data.correo || '', data.institucion || '', JSON.stringify(data.respuestas)
+  ];
+  sheet.appendRow(row);
+  return ContentService.createTextOutput(JSON.stringify({ok:true}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+─────────────────────────────────────────────
+*/
+
+/* ══════════════════════════════════════════════
+   DEFINICIÓN DE INSTRUMENTOS
+══════════════════════════════════════════════ */
+const SCALE_LEGEND = `
+<div class="scale-legend">
+  <div class="legend-item"><div class="legend-dot l1">1</div><span>Deficiente / No cumple</span></div>
+  <div class="legend-item"><div class="legend-dot l2">2</div><span>Básico / Cumple parcialmente</span></div>
+  <div class="legend-item"><div class="legend-dot l3">3</div><span>Adecuado / Cumple</span></div>
+  <div class="legend-item"><div class="legend-dot l4">4</div><span>Sobresaliente / Cumple plenamente</span></div>
+</div>`;
+
+// Instrumento 1: todos los grupos
+const I1_ITEMS = [
+  "El perfil de egreso responde a las demandas actuales de la Medicina Veterinaria.",
+  "El perfil de egreso responde a las demandas futuras de la profesión.",
+  "El perfil evidencia una formación ética, científica, técnica y humanística.",
+  "El perfil integra adecuadamente la salud animal.",
+  "El perfil integra adecuadamente la salud pública veterinaria y el enfoque Una Salud.",
+  "El perfil integra adecuadamente la producción animal.",
+  "El perfil integra adecuadamente la investigación científica y tecnológica.",
+  "El perfil responde a las necesidades del mercado laboral.",
+  "El perfil favorece la empleabilidad del egresado.",
+  "El perfil permite comparabilidad con programas nacionales o internacionales.",
+  "El perfil incorpora responsabilidad social, bienestar animal y sostenibilidad.",
+  "El perfil está redactado de manera clara y comprensible."
+];
+const I1_OPEN = [
+  "¿Qué aspecto del perfil de egreso considera más sólido?",
+  "¿Qué aspecto del perfil de egreso debería actualizarse o reforzarse?",
+  "¿Qué competencia debería incorporarse, precisarse o fortalecerse?"
+];
+
+// Instrumento 2: expertos, docentes, comision
+const I2_ITEMS = [
+  "Las asignaturas están ordenadas de manera lógica entre ciclos.",
+  "Los cursos básicos preparan adecuadamente para los cursos profesionales.",
+  "Los cursos profesionales se articulan con los cursos especializados.",
+  "Los prerrequisitos son necesarios y pertinentes.",
+  "No existen prerrequisitos innecesarios o excesivamente restrictivos.",
+  "La carga académica por ciclo es razonable.",
+  "Existe equilibrio entre horas teóricas y prácticas.",
+  "Las asignaturas prácticas cuentan con tiempo suficiente para desarrollar competencias.",
+  "No se observan contenidos repetidos innecesariamente entre asignaturas.",
+  "No se observan vacíos importantes en la formación.",
+  "El número total de asignaturas es adecuado para el logro del perfil de egreso.",
+  "Las asignaturas electivas permiten rutas formativas útiles.",
+  "La estructura curricular facilita el tránsito hacia el internado."
+];
+const I2_OPEN = [
+  "¿Qué asignaturas deberían articularse mejor entre sí?",
+  "¿Existe algún curso que debería adelantarse, retrasarse, integrarse o dividirse?",
+  "¿Qué prerrequisito considera que debería revisarse?"
+];
+
+// Instrumento 6: cursos satélite
+const I6_ITEMS = [
+  "El curso permite observar claramente el nivel de competencia asignado.",
+  "El curso tiene actividades prácticas o aplicadas suficientes.",
+  "El curso cuenta con evidencias evaluables del desempeño del estudiante.",
+  "El instrumento de evaluación usado es pertinente para la competencia.",
+  "El curso se ubica en el ciclo adecuado para evaluar ese nivel.",
+  "El curso permite retroalimentar al estudiante antes del siguiente nivel.",
+  "El curso se articula con el curso satélite anterior.",
+  "El curso se articula con el curso satélite posterior.",
+  "La evidencia generada puede ser archivada para acreditación.",
+  "El curso debe mantenerse como satélite de esta competencia."
+];
+const I6_OPEN = [
+  "¿Qué ajuste recomienda para mejorar la evaluación de esta competencia en este curso?"
+];
+
+// Instrumento 7: egresados
+const I7_ITEMS = [
+  "La formación recibida me permitió desempeñarme adecuadamente en salud animal.",
+  "La formación recibida me permitió desempeñarme adecuadamente en salud pública.",
+  "La formación recibida me permitió desempeñarme adecuadamente en producción animal.",
+  "La formación recibida fortaleció mi capacidad de investigación.",
+  "Los cursos básicos fueron útiles para comprender los cursos profesionales.",
+  "Las prácticas preprofesionales fueron útiles para mi inserción laboral.",
+  "El internado fortaleció mis competencias profesionales.",
+  "La carrera desarrolló adecuadamente mis habilidades clínicas.",
+  "La carrera desarrolló adecuadamente mis habilidades comunicacionales.",
+  "La carrera desarrolló adecuadamente mi criterio ético y profesional.",
+  "La carrera me preparó para adaptarme al mercado laboral.",
+  "La carrera debería fortalecer gestión, administración o emprendimiento veterinario.",
+  "La carrera debería fortalecer competencias digitales o uso de IA.",
+  "Recomendaría la carrera por la calidad de su formación."
+];
+const I7_OPEN = [
+  "¿Qué curso considera que fue más útil para su desempeño profesional?",
+  "¿Qué curso o área debería reforzarse?",
+  "¿Qué competencia exige actualmente el mercado laboral y no fue suficientemente desarrollada?"
+];
+
+// Instrumento 8: empleadores
+const I8_ITEMS = [
+  "Demuestra conocimientos básicos adecuados.",
+  "Aplica criterios adecuados de salud animal.",
+  "Reconoce problemas relacionados con salud pública o zoonosis.",
+  "Comprende aspectos básicos de producción animal cuando corresponde.",
+  "Interpreta información clínica, productiva o laboratorial con criterio.",
+  "Muestra responsabilidad y puntualidad.",
+  "Se comunica adecuadamente con el equipo de trabajo.",
+  "Se comunica adecuadamente con propietarios, usuarios o productores.",
+  "Aplica principios de bioseguridad.",
+  "Aplica principios de bienestar animal.",
+  "Muestra capacidad para aprender en el campo laboral.",
+  "Maneja registros, formatos o información digital básica.",
+  "Resuelve problemas con criterio inicial adecuado.",
+  "Su desempeño general es satisfactorio."
+];
+const I8_OPEN = [
+  "¿Qué fortaleza observa en los estudiantes o egresados de la EPMV?",
+  "¿Qué debilidad debería corregirse desde el currículo?",
+  "¿Qué competencia considera indispensable para los próximos años?"
+];
+
+// Instrumento 9: expertos — parte A
+const I9_ITEMS = [
+  "El Plan 24 responde a las demandas actuales de su área de especialidad.",
+  "Las competencias específicas son pertinentes para su área.",
+  "Los cursos relacionados con su área están bien ubicados en la malla.",
+  "Los contenidos son actuales y suficientes.",
+  "Las prácticas son suficientes para desarrollar desempeño profesional.",
+  "El plan prepara adecuadamente para el internado.",
+  "El plan desarrolla criterio clínico, productivo, sanitario o investigativo según corresponda.",
+  "El plan incorpora adecuadamente bienestar animal y ética profesional.",
+  "El plan incorpora adecuadamente tecnología, digitalización o IA.",
+  "El plan responde a tendencias futuras de la profesión."
+];
+const I9_OPEN = [
+  "¿Qué fortaleza principal identifica en el Plan 24?",
+  "¿Qué brecha principal identifica en el Plan 24?",
+  "¿Qué curso debería reforzarse, incorporarse, fusionarse o reubicarse?",
+  "¿Qué recomendación concreta propone desde su especialidad?"
+];
+
+// Instrumento 10: estudiantes
+const I10_ITEMS = [
+  "Comprendo el propósito del Plan Curricular 24.",
+  "Los cursos del ciclo tienen relación entre sí.",
+  "Los cursos previos me preparan para los cursos posteriores.",
+  "La carga académica semanal es manejable.",
+  "Las prácticas ayudan a comprender la teoría.",
+  "Las evaluaciones miden lo trabajado en clase y práctica.",
+  "Las evaluaciones miden habilidades y no solo memoria.",
+  "Los sílabos explican claramente qué se espera del estudiante.",
+  "Los laboratorios, equipos o recursos son suficientes.",
+  "El plan permite desarrollar progresivamente competencias veterinarias.",
+  "El uso de recursos digitales favorece mi aprendizaje.",
+  "Me siento adecuadamente preparado para ciclos superiores o prácticas."
+];
+const I10_OPEN = [
+  "¿Qué curso considera mejor articulado con su formación?",
+  "¿Qué curso presenta mayor dificultad y por qué?",
+  "¿Qué mejora concreta propondría?"
+];
+
+// Contexto de explicación para ayuda IA
+const INSTRUMENT_CONTEXT = {
+  I1: "Instrumento 1: Evaluación del Perfil de Egreso del Plan Curricular 2024-I de la Escuela Profesional de Medicina Veterinaria de la Universidad Ricardo Palma. Este instrumento evalúa si el perfil de egreso describe adecuadamente al médico veterinario que la sociedad y el mercado laboral necesitan.",
+  I2: "Instrumento 2: Evaluación de la Estructura Curricular del Plan 24. Evalúa coherencia interna del plan de estudios: secuencia de asignaturas, prerrequisitos, equilibrio teoría-práctica y carga académica.",
+  I3: "Instrumento 3: Evaluación FODA por Asignatura del Plan 24 EPMV. Sistematiza fortalezas, oportunidades, debilidades y amenazas de asignaturas para generar evidencia curricular medible.",
+  I4: "Instrumento 4: Ficha de Análisis de Sílabos. Verifica si los sílabos del Plan 24 están alineados con el perfil de egreso, competencias, resultados de aprendizaje y evaluación por competencias.",
+  I5: "Instrumento 5: Matriz de Alineamiento Perfil-Currículo. Identifica si las asignaturas contribuyen al desarrollo progresivo de las 4 competencias específicas: Salud Animal, Salud Pública, Producción Animal e Investigación.",
+  I6: "Instrumento 6: Evaluación de Cursos Satélite por Competencia. Evalúa si los cursos satélite permiten medir adecuadamente el avance progresivo de las competencias.",
+  I7: "Instrumento 7: Encuesta para Egresados. Identifica la percepción de los egresados sobre la utilidad de la formación recibida y brechas entre el currículo y el desempeño profesional real.",
+  I8: "Instrumento 8: Encuesta para Empleadores. Evalúa la satisfacción de empleadores con el desempeño de estudiantes, practicantes, internos o egresados de la EPMV.",
+  I9: "Instrumento 9: Guía de Evaluación para Expertos Externos. Recoge opinión especializada sobre pertinencia, actualidad, coherencia y proyección del Plan Curricular 2024-I.",
+  I10: "Instrumento 10: Encuesta para Estudiantes. Recoge percepción estudiantil sobre carga académica, articulación entre cursos, evaluación y desarrollo progresivo de competencias."
+};
+
+/* ══════════════════════════════════════════════
+   ESTADO
+══════════════════════════════════════════════ */
+let state = {
+  step: 1,
+  grupo: '',
+  especialidad: '',
+  nombre: '',
+  correo: '',
+  institucion: '',
+  ciclo: '',
+  respuestas: {}  // { instrId: { cerradas: {1:val,...}, abiertas: {1:txt,...}, foda: [...], silabo: {...}, matriz: {...} } }
+};
+
+/* ══════════════════════════════════════════════
+   NAVEGACIÓN
+══════════════════════════════════════════════ */
+function goStep(n) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page' + n).classList.add('active');
+  document.querySelectorAll('.step-item').forEach((el, i) => {
+    el.classList.remove('active','done');
+    const num = document.getElementById('sn'+(i+1));
+    if (i+1===n) { el.classList.add('active'); num.textContent=i+1; }
+    else if (i+1<n) { el.classList.add('done'); num.innerHTML='&#10003;'; }
+    else { num.textContent=i+1; }
+  });
+  state.step = n;
+  const pct = Math.round(((n-1)/3)*100);
+  document.getElementById('progress-pct').textContent = pct+'%';
+  document.getElementById('progress-fill').style.width = pct+'%';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function tryGoStep(n) { if (n <= state.step) goStep(n); }
+
+/* ══════════════════════════════════════════════
+   STEP 1 — VALIDACIÓN E IDENTIFICACIÓN
+══════════════════════════════════════════════ */
+function selectGroup(grupo, el) {
+  var card = el;
+  while (card && !card.classList.contains('group-card')) card = card.parentElement;
+  if (!card) return;
+  document.querySelectorAll('.group-card').forEach(function(c){ c.classList.remove('selected'); });
+  card.classList.add('selected');
+  state.grupo = grupo;
+  document.getElementById('err-grupo').style.display = 'none';
+  document.getElementById('especialidad-section').style.display = grupo==='expertos' ? 'block' : 'none';
+  document.getElementById('ciclo-section').style.display = grupo==='estudiantes' ? 'block' : 'none';
+}
+
+function selectPill(el, name) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(i => {
+    i.closest('.radio-pill').classList.remove('selected');
+  });
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+  if (name==='esp') state.especialidad = el.querySelector('input').value;
+}
+
+function next1() {
+  let ok = true;
+  const nombre = document.getElementById('inp-nombre').value.trim();
+  if (!nombre) {
+    document.getElementById('f-nombre').classList.add('invalid');
+    ok = false;
+  } else {
+    document.getElementById('f-nombre').classList.remove('invalid');
+  }
+  if (!state.grupo) {
+    document.getElementById('err-grupo').style.display = 'block';
+    ok = false;
+  }
+  if (state.grupo==='expertos' && !state.especialidad) {
+    document.getElementById('f-especialidad').classList.add('invalid');
+    ok = false;
+  }
+  if (state.grupo==='estudiantes' && !document.getElementById('inp-ciclo').value) {
+    document.getElementById('f-ciclo').classList.add('invalid');
+    ok = false;
+  }
+  if (!ok) return;
+  state.nombre = nombre;
+  state.correo = document.getElementById('inp-correo').value.trim();
+  state.institucion = document.getElementById('inp-institucion').value.trim();
+  state.ciclo = document.getElementById('inp-ciclo')?.value || '';
+  buildInstruments();
+  goStep(2);
+}
+
+/* ══════════════════════════════════════════════
+   BUILD INSTRUMENTS PER GROUP
+══════════════════════════════════════════════ */
+function buildInstruments() {
+  const c = document.getElementById('instruments-container');
+  c.innerHTML = '';
+
+  const grpLabels = {expertos:'Expertos',empleadores:'Empleadores',egresados:'Egresados',docentes_p24:'Docentes Plan 24',docentes_p52:'Docentes Plan 52',docente_satelite:'Docente Curso Satélite',comision:'Comisión Curricular',estudiantes:'Estudiantes'};
+  document.getElementById('instruments-title').textContent = 'Instrumentos — '+grpLabels[state.grupo];
+
+  const instrMap = {
+    expertos:         ['I1','I2','I9'],
+    empleadores:      ['I8','I1'],
+    egresados:        ['I7','I1'],
+    docentes_p24:     ['I1','I2','I3','I5'],
+    docentes_p52:     ['I1','I2'],
+    docente_satelite: ['I6'],
+    comision:         ['I4'],
+    estudiantes:      ['I10']
+  };
+
+  const instrs = instrMap[state.grupo] || [];
+  instrs.forEach(id => {
+    c.appendChild(buildInstrument(id));
+  });
+}
+
+function buildInstrument(id) {
+  if (!state.respuestas[id]) state.respuestas[id] = {cerradas:{}, abiertas:{}, foda:[], silabo:{}, matriz:{}};
+
+  const defs = {
+    I1:{num:'1',title:'Evaluación del Perfil de Egreso',items:I1_ITEMS,open:I1_OPEN,ctx:'I1'},
+    I2:{num:'2',title:'Evaluación de la Estructura Curricular',items:I2_ITEMS,open:I2_OPEN,ctx:'I2'},
+    I3:{num:'3',title:'Evaluación FODA por Asignatura',items:null,open:null,ctx:'I3'},
+    I4:{num:'4',title:'Ficha de Análisis de Sílabos',items:null,open:null,ctx:'I4'},
+    I5:{num:'5',title:'Matriz de Alineamiento Perfil-Currículo',items:null,open:null,ctx:'I5'},
+    I6:{num:'6',title:'Evaluación de Cursos Satélite por Competencia',items:I6_ITEMS,open:I6_OPEN,ctx:'I6'},
+    I7:{num:'7',title:'Encuesta para Egresados',items:I7_ITEMS,open:I7_OPEN,ctx:'I7'},
+    I8:{num:'8',title:'Encuesta para Empleadores',items:I8_ITEMS,open:I8_OPEN,ctx:'I8'},
+    I9:{num:'9',title:'Guía de Evaluación para Expertos Externos',items:I9_ITEMS,open:I9_OPEN,ctx:'I9'},
+    I10:{num:'10',title:'Encuesta para Estudiantes',items:I10_ITEMS,open:I10_OPEN,ctx:'I10'}
+  };
+
+  const def = defs[id];
+  const wrap = document.createElement('div');
+
+  // Special instruments
+  if (id==='I3') { wrap.innerHTML = buildFODA(id); return wrap; }
+  if (id==='I4') { wrap.innerHTML = buildSilabo(id); return wrap; }
+  if (id==='I5') { wrap.innerHTML = buildMatriz(id); return wrap; }
+
+  let html = `
+  <div class="instrument-header">
+    <h3>Instrumento ${def.num} · ${def.title}</h3>
+    <p>${INSTRUMENT_CONTEXT[id].split('.')[0]}.</p>
+  </div>
+  <div class="instrument-body">`;
+
+  if (def.items) {
+    html += `<div class="section-title">Preguntas cerradas</div>`;
+    html += SCALE_LEGEND;
+    def.items.forEach((item, i) => {
+      const idx = i+1;
+      html += `<div class="scale-row">
+        <div class="scale-question">
+          <span class="scale-num">${idx}.</span>
+          <span>${item}</span>
+          <button class="help-btn" title="Explicar este ítem" onclick="openHelp('${escQ(item)}','${id}')">?</button>
+        </div>
+        <div class="scale-btns">
+          ${[1,2,3,4].map(v=>`<button class="scale-btn" id="${id}_c${idx}_${v}" onclick="setClosed('${id}',${idx},${v})">${v}</button>`).join('')}
+        </div>
+      </div>`;
+    });
+  }
+
+  if (def.open) {
+    html += `<div class="section-title" style="margin-top:1.5rem">Preguntas abiertas</div>`;
+    def.open.forEach((q, i) => {
+      const idx = i+1;
+      html += `<div class="open-question">
+        <div class="open-question-label">
+          <span class="oq-num">${idx}.</span>
+          <span>${q}</span>
+          <button class="help-btn" onclick="openHelp('${escQ(q)}','${id}')">?</button>
+        </div>
+        <textarea id="${id}_o${idx}" rows="3" placeholder="Escriba su respuesta aquí…" oninput="setOpen('${id}',${idx},this.value)" style="width:100%"></textarea>
+      </div>`;
+    });
+  }
+
+  // Instrumento 9 parte C — clasificación de aportes
+  if (id==='I9') {
+    html += `<div class="section-title" style="margin-top:1.5rem">Parte C · Clasificación de aportes</div>
+    <div class="alert alert-info" style="margin-bottom:1rem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Registre hasta 4 aportes concretos que recomienda incorporar al Plan 24, clasificados por pertinencia, viabilidad e impacto.
+    </div>
+    <div id="I9_aportes"></div>
+    <button class="btn btn-ghost" style="margin-top:8px;font-size:12px" onclick="addAporte()">+ Agregar aporte</button>`;
+  }
+
+  html += `</div>`;
+  wrap.innerHTML = html;
+
+  if (id==='I9') {
+    setTimeout(()=>{addAporte();addAporte();},50);
+  }
+  return wrap;
+}
+
+/* ══════════════════════════════════════════════
+   INSTRUMENTO 3 — FODA
+══════════════════════════════════════════════ */
+function buildFODA(id) {
+  const dims = [
+    {key:'F', label:'Fortalezas', cls:'foda-q-F'},
+    {key:'O', label:'Oportunidades', cls:'foda-q-O'},
+    {key:'D', label:'Debilidades', cls:'foda-q-D'},
+    {key:'A', label:'Amenazas', cls:'foda-q-A'}
+  ];
+  let inner = '';
+  dims.forEach(d => {
+    inner += `<div class="foda-quadrant">
+      <div class="foda-q-header ${d.cls}">${d.label}</div>
+      <div class="foda-q-body">`;
+    for (let i=1;i<=2;i++) {
+      inner += `<div class="foda-entry">
+        <textarea id="foda_${d.key}${i}" rows="2" placeholder="${d.label.slice(0,-1)} ${i}…" oninput="setFoda('${id}','${d.key}',${i},'hallazgo',this.value)"></textarea>
+        <div class="foda-priority-row">
+          <select class="foda-mini-select" onchange="setFoda('${id}','${d.key}',${i},'impacto',this.value)">
+            <option value="">Impacto</option>
+            <option value="1">1-Bajo</option><option value="2">2-Moderado</option>
+            <option value="3">3-Alto</option><option value="4">4-Muy alto</option>
+          </select>
+          <select class="foda-mini-select" onchange="setFoda('${id}','${d.key}',${i},'urgencia',this.value)">
+            <option value="">Urgencia</option>
+            <option value="1">1-No urgente</option><option value="2">2-Poco</option>
+            <option value="3">3-Urgente</option><option value="4">4-Muy urgente</option>
+          </select>
+          <select class="foda-mini-select" onchange="setFoda('${id}','${d.key}',${i},'viabilidad',this.value)">
+            <option value="">Viabilidad</option>
+            <option value="1">1-Difícil</option><option value="2">2-Parcial</option>
+            <option value="3">3-Viable</option><option value="4">4-Muy viable</option>
+          </select>
+        </div>
+      </div>`;
+    }
+    inner += `</div></div>`;
+  });
+
+  return `
+  <div class="instrument-header">
+    <h3>Instrumento 3 · Evaluación FODA por Asignatura</h3>
+    <p>Puede completar el FODA para una o más asignaturas. Use el botón para agregar.</p>
+  </div>
+  <div class="instrument-body">
+    <div id="foda-asignaturas-container"></div>
+    <button class="btn btn-ghost" style="margin-bottom:1.5rem;font-size:12px" onclick="addFodaAsignatura()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Agregar asignatura
+    </button>
+  `;
+  // Init: prepare state and render first asignatura block
+  if (!state.respuestas.I3) state.respuestas.I3 = {asignaturas:[]};
+  if (!state.respuestas.I3.asignaturas) state.respuestas.I3.asignaturas = [];
+  setTimeout(function(){
+    var c = document.getElementById("foda-asignaturas-container");
+    if (c && c.children.length === 0) addFodaAsignatura();
+  }, 50);
+}
+
+/* ── FODA DINÁMICA: una sección por asignatura ── */
+let fodaCount = 0;
+function addFodaAsignatura() {
+  var container = document.getElementById('foda-asignaturas-container');
+  if (!container) return;
+  if (!state.respuestas.I3) state.respuestas.I3 = {asignaturas:[]};
+  if (!state.respuestas.I3.asignaturas) state.respuestas.I3.asignaturas = [];
+  var idx = state.respuestas.I3.asignaturas.length;
+  state.respuestas.I3.asignaturas.push({asignatura:'',ciclo:'',foda:{},cerradas:{}});
+  fodaCount++;
+  var n = fodaCount;
+
+  var dims = [
+    {key:'F',label:'Fortalezas',cls:'foda-q-F'},
+    {key:'O',label:'Oportunidades',cls:'foda-q-O'},
+    {key:'D',label:'Debilidades',cls:'foda-q-D'},
+    {key:'A',label:'Amenazas',cls:'foda-q-A'}
+  ];
+
+  var wrap = document.createElement('div');
+  wrap.id = 'foda_asig_block_' + n;
+  wrap.style.cssText = 'border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem';
+
+  // Header
+  var header = document.createElement('div');
+  header.style.cssText = 'background:var(--wine-dark);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center';
+  header.innerHTML = '<span style="font-family:\'DM Serif Display\',serif;font-size:15px">Asignatura ' + n + '</span>';
+  if (idx > 0) {
+    var delBtn = document.createElement('button');
+    delBtn.textContent = 'Eliminar';
+    delBtn.style.cssText = 'background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer';
+    delBtn.onclick = (function(i, blockId){ return function(){ removeFodaAsig(i, blockId); }; })(idx, 'foda_asig_block_' + n);
+    header.appendChild(delBtn);
+  }
+  wrap.appendChild(header);
+
+  // Body
+  var body = document.createElement('div');
+  body.style.padding = '1.25rem';
+
+  // Fields: asignatura + ciclo
+  var fieldsHtml = '<div class="field-grid grid-2" style="margin-bottom:1.25rem">'
+    + '<div class="field"><label>Asignatura <span class="req">*</span></label>'
+    + '<input type="text" placeholder="Nombre de la asignatura"></div>'
+    + '<div class="field"><label>Ciclo</label>'
+    + '<input type="text" placeholder="Ej. III"></div>'
+    + '</div>';
+  body.innerHTML = fieldsHtml;
+
+  // Bind inputs to state
+  var inputs = body.querySelectorAll('input');
+  inputs[0].oninput = (function(i){ return function(){ state.respuestas.I3.asignaturas[i].asignatura = this.value; }; })(idx);
+  inputs[1].oninput = (function(i){ return function(){ state.respuestas.I3.asignaturas[i].ciclo = this.value; }; })(idx);
+
+  // FODA grid title
+  var t1 = document.createElement('div');
+  t1.className = 'section-title';
+  t1.textContent = 'Matriz FODA';
+  body.appendChild(t1);
+
+  // Info alert
+  var alert = document.createElement('div');
+  alert.className = 'alert alert-info';
+  alert.style.marginBottom = '1rem';
+  alert.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Impacto + Urgencia + Viabilidad = Prioridad';
+  body.appendChild(alert);
+
+  // FODA grid
+  var grid = document.createElement('div');
+  grid.className = 'foda-grid';
+  dims.forEach(function(d) {
+    var quad = document.createElement('div');
+    quad.className = 'foda-quadrant';
+    var qHeader = document.createElement('div');
+    qHeader.className = 'foda-q-header ' + d.cls;
+    qHeader.textContent = d.label;
+    quad.appendChild(qHeader);
+    var qBody = document.createElement('div');
+    qBody.className = 'foda-q-body';
+    for (var ei = 1; ei <= 2; ei++) {
+      var entry = document.createElement('div');
+      entry.className = 'foda-entry';
+      var ta = document.createElement('textarea');
+      ta.rows = 2;
+      ta.placeholder = d.label.slice(0,-1) + ' ' + ei + '…';
+      ta.style.marginBottom = '6px';
+      ta.oninput = (function(asigI, dk, en){ return function(){ setFodaA(asigI, dk, en, 'hallazgo', this.value); }; })(idx, d.key, ei);
+      entry.appendChild(ta);
+      var prow = document.createElement('div');
+      prow.className = 'foda-priority-row';
+      [
+        {field:'impacto', opts:['Impacto','1-Bajo','2-Moderado','3-Alto','4-Muy alto']},
+        {field:'urgencia', opts:['Urgencia','1-No urgente','2-Poco','3-Urgente','4-Muy urgente']},
+        {field:'viabilidad', opts:['Viabilidad','1-Difícil','2-Parcial','3-Viable','4-Muy viable']}
+      ].forEach(function(sel) {
+        var s = document.createElement('select');
+        s.className = 'foda-mini-select';
+        sel.opts.forEach(function(opt, oi) {
+          var o = document.createElement('option');
+          o.value = oi === 0 ? '' : String(oi);
+          o.textContent = opt;
+          s.appendChild(o);
+        });
+        s.onchange = (function(asigI, dk, en, fld){ return function(){ setFodaA(asigI, dk, en, fld, this.value); }; })(idx, d.key, ei, sel.field);
+        prow.appendChild(s);
+      });
+      entry.appendChild(prow);
+      qBody.appendChild(entry);
+    }
+    quad.appendChild(qBody);
+    grid.appendChild(quad);
+  });
+  body.appendChild(grid);
+
+  // Closed questions title
+  var t2 = document.createElement('div');
+  t2.className = 'section-title';
+  t2.style.marginTop = '1.5rem';
+  t2.textContent = 'Preguntas cerradas';
+  body.appendChild(t2);
+
+  // Scale legend
+  var leg = document.createElement('div');
+  leg.innerHTML = SCALE_LEGEND;
+  body.appendChild(leg);
+
+  // Scale rows
+  var closedItems = [
+    'La asignatura contribuye claramente al perfil de egreso.',
+    'La sumilla está actualizada.',
+    'Los contenidos son pertinentes para el ciclo en que se dicta.',
+    'La asignatura se articula con cursos previos.',
+    'La asignatura se articula con cursos posteriores.',
+    'Las prácticas permiten desarrollar competencias observables.',
+    'Los instrumentos de evaluación miden competencias y no solo memoria.',
+    'La bibliografía está actualizada.',
+    'Los recursos disponibles son suficientes.',
+    'La asignatura debería mantenerse en el mismo ciclo.'
+  ];
+  closedItems.forEach(function(item, ci) {
+    var cidx = ci + 1;
+    var row = document.createElement('div');
+    row.className = 'scale-row';
+    var qDiv = document.createElement('div');
+    qDiv.className = 'scale-question';
+    qDiv.innerHTML = '<span class="scale-num">' + cidx + '.</span><span>' + item + '</span>';
+    var helpBtn = document.createElement('button');
+    helpBtn.className = 'help-btn';
+    helpBtn.textContent = '?';
+    helpBtn.onclick = (function(it){ return function(){ openHelp(it, 'I3'); }; })(item);
+    qDiv.appendChild(helpBtn);
+    row.appendChild(qDiv);
+    var btnsDiv = document.createElement('div');
+    btnsDiv.className = 'scale-btns';
+    [1,2,3,4].forEach(function(v) {
+      var btn = document.createElement('button');
+      btn.className = 'scale-btn';
+      btn.id = 'I3_a' + idx + '_c' + cidx + '_' + v;
+      btn.textContent = v;
+      btn.onclick = (function(asigI, cI, val){ return function(){ setFodaAClosed(asigI, cI, val); }; })(idx, cidx, v);
+      btnsDiv.appendChild(btn);
+    });
+    row.appendChild(btnsDiv);
+    body.appendChild(row);
+  });
+
+  wrap.appendChild(body);
+  container.appendChild(wrap);
+}
+function setFodaA(asigIdx, dim, num, field, val) {
+  if (!state.respuestas.I3 || !state.respuestas.I3.asignaturas) return;
+  var key = dim+num;
+  if (!state.respuestas.I3.asignaturas[asigIdx].foda[key]) state.respuestas.I3.asignaturas[asigIdx].foda[key]={};
+  state.respuestas.I3.asignaturas[asigIdx].foda[key][field] = val;
+}
+
+function setFodaAClosed(asigIdx, itemIdx, val) {
+  if (!state.respuestas.I3 || !state.respuestas.I3.asignaturas) return;
+  var prev = state.respuestas.I3.asignaturas[asigIdx].cerradas[itemIdx];
+  [1,2,3,4].forEach(function(v){ var btn=document.getElementById('I3_a'+asigIdx+'_c'+itemIdx+'_'+v); if(btn) btn.classList.remove('sel-'+v); });
+  if (prev===val) { state.respuestas.I3.asignaturas[asigIdx].cerradas[itemIdx]=0; return; }
+  state.respuestas.I3.asignaturas[asigIdx].cerradas[itemIdx]=val;
+  var selBtn = document.getElementById('I3_a'+asigIdx+'_c'+itemIdx+'_'+val);
+  if (selBtn) selBtn.classList.add('sel-'+val);
+}
+
+function removeFodaAsig(idx, blockId) {
+  if (!confirm('¿Eliminar esta asignatura?')) return;
+  state.respuestas.I3.asignaturas[idx] = null;
+  var el = document.getElementById(blockId);
+  if (el) el.remove();
+}
+
+/* ══════════════════════════════════════════════
+   INSTRUMENTO 4 — SÍLABOS
+══════════════════════════════════════════════ */
+function buildSilabo(id) {
+  const criterios = [
+    {key:'datos', label:'Datos generales', q:'El sílabo identifica código, ciclo, créditos, horas y requisito.'},
+    {key:'sumilla', label:'Sumilla', q:'La sumilla describe claramente la naturaleza y propósito del curso.'},
+    {key:'competencia', label:'Competencia', q:'El curso tributa a una o dos competencias específicas.'},
+    {key:'resultado', label:'Resultado de aprendizaje', q:'Los resultados son observables y medibles.'},
+    {key:'secuencia', label:'Secuencia', q:'Los contenidos siguen una progresión lógica.'},
+    {key:'practica', label:'Práctica', q:'Las actividades prácticas son suficientes para el logro de la competencia.'},
+    {key:'evaluacion', label:'Evaluación', q:'Los instrumentos evalúan desempeño, producto o evidencia.'},
+    {key:'rubrica', label:'Rúbrica', q:'Incluye rúbricas, listas de cotejo u otro instrumento explícito.'},
+    {key:'bibliografia', label:'Bibliografía', q:'La bibliografía contiene fuentes actualizadas.'},
+    {key:'tecnologia', label:'Tecnología', q:'Integra recursos digitales, simuladores, bases de datos o IA cuando corresponde.'},
+    {key:'investigacion', label:'Investigación', q:'Incluye actividades de búsqueda, análisis o producción académica.'},
+    {key:'responsabilidad', label:'Responsabilidad social', q:'Incorpora ética, sostenibilidad, bienestar animal o responsabilidad social.'}
+  ];
+
+  const rows = criterios.map(c => `<tr>
+    <td><strong>${c.label}</strong><br><span style="font-size:11px;color:var(--ink-light)">${c.q}</span></td>
+    <td>
+      <div class="silabo-check-group">
+        <button class="silabo-check-btn" id="sil_${c.key}_si" onclick="setSilabo('${id}','${c.key}','si')">Sí</button>
+        <button class="silabo-check-btn" id="sil_${c.key}_parcial" onclick="setSilabo('${id}','${c.key}','parcial')">Parcial</button>
+        <button class="silabo-check-btn" id="sil_${c.key}_no" onclick="setSilabo('${id}','${c.key}','no')">No</button>
+      </div>
+    </td>
+    <td><input type="text" style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit" placeholder="Observación…" oninput="setSilaboObs('${id}','${c.key}',this.value)"></td>
+  </tr>`).join('');
+
+  return `
+  <div class="instrument-header">
+    <h3>Instrumento 4 · Ficha de Análisis de Sílabos</h3>
+    <p>Verifique el alineamiento del sílabo con el perfil y las competencias.</p>
+  </div>
+  <div class="instrument-body">
+    <div class="field-grid grid-2" style="margin-bottom:1.5rem">
+      <div class="field"><label>Asignatura analizada <span class="req">*</span></label><input type="text" id="sil_asig" placeholder="Nombre del curso" oninput="state.respuestas.I4.asignatura=this.value"></div>
+      <div class="field"><label>Docente responsable</label><input type="text" id="sil_docente" placeholder="Opcional" oninput="state.respuestas.I4.docente=this.value"></div>
+    </div>
+    <div class="alert alert-warn" style="margin-bottom:1rem">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Sí = 2 puntos · Parcial = 1 punto · No = 0 puntos. Puntaje máximo: 24.
+    </div>
+    <div class="matrix-wrapper">
+      <table class="silabo-table">
+        <thead><tr><th style="width:45%">Criterio / Pregunta de verificación</th><th style="width:25%">Cumplimiento</th><th>Observación</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div id="sil_score" style="margin-top:1rem;padding:12px;background:var(--wine-light);border:1px solid var(--wine-mid);border-radius:var(--radius-sm);font-size:13px;font-weight:600;color:var(--wine-dark)">
+      Puntaje: 0 / 24 · Índice de alineamiento: 0%
+    </div>
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   INSTRUMENTO 5 — MATRIZ ALINEAMIENTO
+══════════════════════════════════════════════ */
+const MATRIX_COURSES = [
+  {ciclo:'I', nombre:'Manejo Veterinario'},
+  {ciclo:'I', nombre:'Introducción a las Ciencias Veterinarias'},
+  {ciclo:'I', nombre:'Química'},
+  {ciclo:'II', nombre:'Bioquímica'},
+  {ciclo:'II', nombre:'Biología Celular'},
+  {ciclo:'III', nombre:'Zootecnia General'},
+  {ciclo:'III', nombre:'Anatomía Veterinaria'},
+  {ciclo:'III', nombre:'Histología Animal'},
+  {ciclo:'III', nombre:'Bioestadística'},
+  {ciclo:'IV', nombre:'Microbiología Veterinaria'},
+  {ciclo:'IV', nombre:'Farmacología y Toxicología Veterinaria'},
+  {ciclo:'IV', nombre:'Fisiología Animal'},
+  {ciclo:'V', nombre:'Patología Veterinaria I'},
+  {ciclo:'V', nombre:'Farmacología y Toxicología Veterinaria'},
+  {ciclo:'V', nombre:'Semiología Veterinaria'},
+  {ciclo:'VI', nombre:'Patología Veterinaria II'},
+  {ciclo:'VI', nombre:'Anestesiología y Preoperatoria'},
+  {ciclo:'VI', nombre:'Parasitología y Enfermedades Parasitarias'},
+  {ciclo:'VII', nombre:'Clínica Quirúrgica de Animales Menores'},
+  {ciclo:'VII', nombre:'Enfermedades Infecciosas'},
+  {ciclo:'VIII', nombre:'Epidemiología Veterinaria'},
+  {ciclo:'VIII', nombre:'Sanidad y Producción Avícola'},
+  {ciclo:'IX', nombre:'Gestión y Administración Veterinaria'},
+  {ciclo:'IX', nombre:'Salud Pública Veterinaria'},
+  {ciclo:'X', nombre:'Internado en Medicina Veterinaria'}
+];
+
+const MATRIZ_CURSOS_P24 = [
+  'Manejo Veterinario','Química','Introducción a las Ciencias Veterinarias',
+  'Biología Celular','Bioquímica','Zootecnia General','Bioestadística',
+  'Histología Animal','Anatomía Veterinaria','Microbiología Veterinaria',
+  'Inmunología Veterinaria','Deontología y Legislación Veterinaria',
+  'Fisiología Animal','Alimentación y Nutrición Animal','Diseño Estadístico',
+  'Patología Veterinaria I','Control de Calidad e Inocuidad de los Alimentos',
+  'Farmacología y Toxicología Veterinaria','Patología Clínica Veterinaria',
+  'Semiología Veterinaria','Biotecnología de la Reproducción y Mejoramiento Animal',
+  'Experiencia Supervisada I'
+];
+
+function buildMatriz(id) {
+  if (!state.respuestas[id]) state.respuestas[id] = {cursos:[], matriz:{}};
+  if (!state.respuestas[id].cursos) state.respuestas[id].cursos = [];
+
+  // Build course checkboxes — store id in data attribute to avoid quoting issues
+  var checkboxes = MATRIZ_CURSOS_P24.map(function(curso, i) {
+    return '<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;transition:all .15s" id="mchk_lbl_'+i+'">'
+      +'<input type="checkbox" id="mchk_'+i+'" data-instrid="'+id+'" data-cursoidx="'+i+'" onchange="toggleMatrizCurso(this)" style="width:15px;height:15px;accent-color:var(--wine);cursor:pointer">'
+      +'<span>'+curso+'</span>'
+      +'</label>';
+  }).join('');
+
+  return '<div class="instrument-header">'
+    +'<h3>Instrumento 5 · Matriz de Alineamiento Perfil-Currículo</h3>'
+    +'<p>Seleccione sus cursos y complete el nivel de contribución a cada competencia.</p>'
+    +'</div>'
+    +'<div class="instrument-body">'
+    +'<div class="section-title">Seleccione sus cursos (puede marcar más de uno)</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-bottom:1.5rem" id="matriz_cursos_grid">'+checkboxes+'</div>'
+    +'<div class="section-title">Matriz de alineamiento</div>'
+    +'<div class="alert alert-info" style="margin-bottom:1rem">'
+    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+    +'<span><strong>SA</strong>=Salud Animal · <strong>SP</strong>=Salud Pública · <strong>PA</strong>=Producción Animal · <strong>INV</strong>=Investigación &nbsp;|&nbsp; 0=No contribuye 1=Declarativo 2=Formativo 3=Evaluable 4=Integrador</span>'
+    +'</div>'
+    +'<div id="matriz_table_wrap">'
+    +'<p style="font-size:13px;color:var(--ink-light);font-style:italic">Seleccione al menos un curso para ver la matriz.</p>'
+    +'</div>'
+    +'</div>';
+}
+
+function toggleMatrizCurso(el) {
+  var id       = el.getAttribute('data-instrid');
+  var cursoIdx = parseInt(el.getAttribute('data-cursoidx'));
+  var checked  = el.checked;
+  if (!state.respuestas[id]) state.respuestas[id] = {cursos:[], matriz:{}};
+  var lbl = document.getElementById('mchk_lbl_' + cursoIdx);
+  if (checked) {
+    if (state.respuestas[id].cursos.indexOf(cursoIdx) === -1)
+      state.respuestas[id].cursos.push(cursoIdx);
+    if (lbl) { lbl.style.border = '1.5px solid var(--wine)'; lbl.style.background = 'var(--wine-light)'; }
+  } else {
+    var ci = state.respuestas[id].cursos.indexOf(cursoIdx);
+    if (ci > -1) state.respuestas[id].cursos.splice(ci, 1);
+    if (lbl) { lbl.style.border = '1.5px solid var(--border)'; lbl.style.background = ''; }
+  }
+  renderMatrizTable(id);
+}
+
+function renderMatrizTable(id) {
+  var wrap = document.getElementById('matriz_table_wrap');
+  if (!wrap) return;
+  var selected = state.respuestas[id].cursos.slice().sort(function(a,b){return a-b;});
+  if (selected.length === 0) {
+    wrap.innerHTML = '<p style="font-size:13px;color:var(--ink-light);font-style:italic">Seleccione al menos un curso para ver la matriz.</p>';
+    return;
+  }
+
+  // Build using DOM — avoids all quoting issues
+  var tableWrap = document.createElement('div');
+  tableWrap.className = 'matrix-wrapper';
+  var table = document.createElement('table');
+  table.className = 'matrix-table';
+
+  var thead = document.createElement('thead');
+  thead.innerHTML = '<tr><th>Asignatura</th><th>SA</th><th>SP</th><th>PA</th><th>INV</th></tr>';
+  table.appendChild(thead);
+
+  var tbody = document.createElement('tbody');
+  selected.forEach(function(ci) {
+    var curso = MATRIZ_CURSOS_P24[ci];
+    var tr = document.createElement('tr');
+
+    var tdName = document.createElement('td');
+    tdName.style.cssText = 'font-size:12px;font-weight:500';
+    tdName.textContent = curso;
+    tr.appendChild(tdName);
+
+    ['SA','SP','PA','INV'].forEach(function(comp) {
+      var curVal = (state.respuestas[id].matriz[ci] && state.respuestas[id].matriz[ci][comp]) || '0';
+      var td = document.createElement('td');
+      var sel = document.createElement('select');
+      sel.className = 'matrix-sel';
+      [0,1,2,3,4].forEach(function(v) {
+        var opt = document.createElement('option');
+        opt.value = String(v);
+        opt.textContent = String(v);
+        if (String(curVal) === String(v)) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.onchange = (function(iid, ici, icomp){ return function(){ setMatriz(iid, ici, icomp, this.value); }; })(id, ci, comp);
+      td.appendChild(sel);
+      tr.appendChild(td);
+    });
+
+
+
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  tableWrap.appendChild(table);
+  wrap.innerHTML = '';
+  wrap.appendChild(tableWrap);
+}
+
+/* ══════════════════════════════════════════════
+   APORTES EXPERTO (I9 PARTE C)
+══════════════════════════════════════════════ */
+let aporteCount = 0;
+function addAporte() {
+  const c = document.getElementById('I9_aportes');
+  if (!c) return;
+  aporteCount++;
+  const n = aporteCount;
+  if (!state.respuestas.I9) state.respuestas.I9 = {cerradas:{},abiertas:{},aportes:[]};
+  if (!state.respuestas.I9.aportes) state.respuestas.I9.aportes = [];
+  state.respuestas.I9.aportes.push({aporte:'',area:'',tipo:'',pertinencia:'',viabilidad:'',impacto:'',decision:''});
+  const idx = state.respuestas.I9.aportes.length-1;
+  const div = document.createElement('div');
+  div.id = `ap_${n}`;
+  div.style.cssText='border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;background:var(--surface-2)';
+  div.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--wine);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px">Aporte ${n}</div>
+  <div class="field-grid" style="gap:8px">
+    <div class="field"><label>Recomendación concreta</label><textarea rows="2" style="font-size:13px" placeholder="Ej. Fortalecer interpretación de hemograma antes del internado." oninput="setAporte(${idx},'aporte',this.value)"></textarea></div>
+    <div class="field-grid grid-2">
+      <div class="field"><label>Área</label>
+        <select onchange="setAporte(${idx},'area',this.value)">
+          <option value="">— Área —</option>
+          <option>Salud Animal / Clínica</option><option>Salud Pública</option>
+          <option>Producción Animal</option><option>Investigación</option>
+          <option>Laboratorio</option><option>Silvestres</option>
+          <option>Marketing y ventas</option><option>Otra</option>
+        </select>
+      </div>
+      <div class="field"><label>Tipo de aporte</label>
+        <select onchange="setAporte(${idx},'tipo',this.value)">
+          <option value="">— Tipo —</option>
+          <option>Contenido</option><option>Curso</option><option>Competencia</option>
+          <option>Práctica</option><option>Evaluación</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-grid" style="grid-template-columns:1fr 1fr 1fr 1fr">
+      <div class="field"><label>Pertinencia</label>
+        <select onchange="setAporte(${idx},'pertinencia',this.value)">
+          <option value="">—</option><option value="Alta">Alta</option><option value="Media">Media</option><option value="Baja">Baja</option>
+        </select>
+      </div>
+      <div class="field"><label>Viabilidad</label>
+        <select onchange="setAporte(${idx},'viabilidad',this.value)">
+          <option value="">—</option><option value="Alta">Alta</option><option value="Media">Media</option><option value="Baja">Baja</option>
+        </select>
+      </div>
+      <div class="field"><label>Impacto</label>
+        <select onchange="setAporte(${idx},'impacto',this.value)">
+          <option value="">—</option><option value="Alto">Alto</option><option value="Medio">Medio</option><option value="Bajo">Bajo</option>
+        </select>
+      </div>
+      <div class="field"><label>Decisión sugerida</label>
+        <select onchange="setAporte(${idx},'decision',this.value)">
+          <option value="">—</option><option value="Incorporar">Incorporar</option>
+          <option value="Evaluar">Evaluar</option><option value="No incorporar">No incorporar</option>
+        </select>
+      </div>
+    </div>
+  </div>`;
+  c.appendChild(div);
+}
+
+/* ══════════════════════════════════════════════
+   STATE SETTERS
+══════════════════════════════════════════════ */
+function setClosed(instrId, idx, val) {
+  if (!state.respuestas[instrId]) state.respuestas[instrId]={cerradas:{},abiertas:{}};
+  const prev = state.respuestas[instrId].cerradas[idx];
+  // Deselect if same
+  if (prev===val) {
+    state.respuestas[instrId].cerradas[idx] = 0;
+    [1,2,3,4].forEach(v => document.getElementById(`${instrId}_c${idx}_${v}`)?.classList.remove(`sel-${v}`));
+    return;
+  }
+  state.respuestas[instrId].cerradas[idx] = val;
+  [1,2,3,4].forEach(v => {
+    const btn = document.getElementById(`${instrId}_c${idx}_${v}`);
+    if (btn) { btn.classList.remove(`sel-${v}`); }
+  });
+  document.getElementById(`${instrId}_c${idx}_${val}`)?.classList.add(`sel-${val}`);
+}
+
+function setOpen(instrId, idx, val) {
+  if (!state.respuestas[instrId]) state.respuestas[instrId]={cerradas:{},abiertas:{}};
+  state.respuestas[instrId].abiertas[idx] = val;
+}
+
+function setFoda(instrId, dim, num, field, val) {
+  if (!state.respuestas[instrId]) state.respuestas[instrId]={foda:{}};
+  if (!state.respuestas[instrId].foda) state.respuestas[instrId].foda={};
+  const key = dim+num;
+  if (!state.respuestas[instrId].foda[key]) state.respuestas[instrId].foda[key]={};
+  state.respuestas[instrId].foda[key][field] = val;
+}
+
+function setSilabo(instrId, key, val) {
+  if (!state.respuestas[instrId]) state.respuestas[instrId]={silabo:{}};
+  if (!state.respuestas[instrId].silabo) state.respuestas[instrId].silabo={};
+  state.respuestas[instrId].silabo[key] = val;
+  // Update all buttons for this row
+  ['si','parcial','no'].forEach(v => {
+    const btn = document.getElementById(`sil_${key}_${v}`);
+    if (btn) { btn.classList.remove('si','parcial','no'); if (v===val) btn.classList.add(val); }
+  });
+  updateSilaboScore(instrId);
+}
+
+function setSilaboObs(instrId, key, val) {
+  if (!state.respuestas[instrId]) state.respuestas[instrId]={silabo:{}};
+  if (!state.respuestas[instrId].silabo) state.respuestas[instrId].silabo={};
+  if (!state.respuestas[instrId].silabo[key+'_obs']) state.respuestas[instrId].silabo[key+'_obs']='';
+  state.respuestas[instrId].silabo[key+'_obs'] = val;
+}
+
+function updateSilaboScore(instrId) {
+  const sil = state.respuestas[instrId]?.silabo || {};
+  const keys = ['datos','sumilla','competencia','resultado','secuencia','practica','evaluacion','rubrica','bibliografia','tecnologia','investigacion','responsabilidad'];
+  let score = 0;
+  keys.forEach(k => { if(sil[k]==='si') score+=2; else if(sil[k]==='parcial') score+=1; });
+  const pct = Math.round((score/24)*100);
+  const el = document.getElementById('sil_score');
+  if (el) el.textContent = `Puntaje: ${score} / 24 · Índice de alineamiento: ${pct}%`;
+}
+
+function setMatriz(instrId, rowIdx, comp, val) {
+  if (!state.respuestas[instrId]) state.respuestas[instrId]={matriz:{}};
+  if (!state.respuestas[instrId].matriz) state.respuestas[instrId].matriz={};
+  if (!state.respuestas[instrId].matriz[rowIdx]) state.respuestas[instrId].matriz[rowIdx]={};
+  state.respuestas[instrId].matriz[rowIdx][comp] = val;
+}
+
+function setAporte(idx, field, val) {
+  if (!state.respuestas.I9) state.respuestas.I9={cerradas:{},abiertas:{},aportes:[]};
+  if (!state.respuestas.I9.aportes) state.respuestas.I9.aportes=[];
+  while (state.respuestas.I9.aportes.length<=idx) state.respuestas.I9.aportes.push({});
+  state.respuestas.I9.aportes[idx][field] = val;
+}
+
+/* ══════════════════════════════════════════════
+   VOICE INPUT
+══════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════
+   HELP / AI EXPLANATION
+══════════════════════════════════════════════ */
+function openHelp(question, instrId) {
+  const overlay = document.getElementById('help-overlay');
+  const qText = document.getElementById('help-question-text');
+  const content = document.getElementById('help-content');
+  qText.textContent = question;
+  content.innerHTML = `<div class="help-loading dot-loader"><span></span><span></span><span></span></div>`;
+  overlay.classList.add('open');
+
+  const grpLabels = {expertos:'experto externo',empleadores:'empleador del sector veterinario',egresados:'egresado de Medicina Veterinaria',docentes:'docente universitario de Medicina Veterinaria',comision:'miembro de la Comisión Curricular',estudiantes:'estudiante de Medicina Veterinaria'};
+  const grupoDesc = grpLabels[state.grupo] || 'participante';
+
+  const instrDescs = {
+    I1:'Evaluación del Perfil de Egreso — escala 1=Deficiente, 2=Básico, 3=Adecuado, 4=Sobresaliente',
+    I2:'Evaluación de la Estructura Curricular — escala 1=Deficiente, 2=Básico, 3=Adecuado, 4=Sobresaliente',
+    I3:'Evaluación FODA por Asignatura — escala 1=Deficiente, 2=Básico, 3=Adecuado, 4=Sobresaliente',
+    I4:'Ficha de Análisis de Sílabos — verificar alineamiento del sílabo con perfil y competencias',
+    I5:'Matriz de Alineamiento Perfil-Currículo — escala 0=No contribuye, 1=Declarativo, 2=Formativo, 3=Evaluable, 4=Integrador',
+    I6:'Evaluación de Cursos Satélite — escala 1=Deficiente, 2=Básico, 3=Adecuado, 4=Sobresaliente',
+    I7:'Encuesta para Egresados — escala 1=Deficiente, 2=Básico, 3=Adecuado, 4=Sobresaliente',
+    I8:'Encuesta para Empleadores — escala 1=Deficiente, 2=Básico, 3=Adecuado, 4=Sobresaliente',
+    I9:'Guía de Evaluación para Expertos Externos — escala 1=Deficiente, 2=Básico, 3=Adecuado, 4=Sobresaliente',
+    I10:'Encuesta para Estudiantes — escala 1=Deficiente, 2=Básico, 3=Adecuado, 4=Sobresaliente'
+  };
+  const instrDesc = instrDescs[instrId] || '';
+
+  const prompt = `Eres un asistente pedagógico especializado en evaluación curricular universitaria de Medicina Veterinaria. Ayudas a participantes del proceso de evaluación del Plan Curricular 2024-I de la Escuela Profesional de Medicina Veterinaria de la Universidad Ricardo Palma.
+
+Rol del participante: ${grupoDesc}
+Instrumento: ${instrDesc}
+Ítem que no entiende: "${question}"
+
+Tu tarea: Explicar ÚNICAMENTE este ítem específico. No des una explicación genérica del instrumento.
+- Di concretamente qué aspecto del currículo o de la formación veterinaria evalúa ESTE ítem.
+- Explica desde la perspectiva de un ${grupoDesc}: qué debe recordar, observar o valorar para responderlo.
+- Da un ejemplo concreto del contexto veterinario peruano que ilustre la diferencia entre una respuesta baja (1-2) y una alta (3-4).
+- Máximo 3 oraciones. Sin preámbulo. Sin repetir el enunciado. Sin mencionar la escala de forma abstracta.`;
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': CONFIG.CLAUDE_API_KEY, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 400, messages: [{ role: 'user', content: prompt }] })
+  })
+  .then(r => r.json())
+  .then(data => {
+    const text = data.content?.[0]?.text || '';
+    if (text) {
+      content.innerHTML = `<p style="line-height:1.7">${text.replace(/\n/g,'<br>')}</p>`;
+    } else {
+      content.innerHTML = `<p>${getStaticHelp(question, instrId)}</p>`;
+    }
+  })
+  .catch(() => {
+    content.innerHTML = `<p>${getStaticHelp(question, instrId)}</p>`;
+  });
+}
+
+function getStaticHelp(question, instrId) {
+  // Fallbacks detallados por ítem — se usan cuando la API no está configurada
+  const itemHelps = {
+    // I1 — Perfil de egreso
+    "El perfil de egreso responde a las demandas actuales de la Medicina Veterinaria.": "Reflexione si las competencias que describe el perfil coinciden con lo que hoy requieren clínicas, hospitales, entidades públicas y empresas del sector. 1=el perfil está desactualizado, 2=tiene algunos elementos vigentes pero le faltan áreas importantes, 3=responde bien a las demandas actuales, 4=es un perfil moderno, completo y muy pertinente.",
+    "El perfil de egreso responde a las demandas futuras de la profesión.": "Considere si el perfil anticipa tendencias como digitalización, inteligencia artificial, una salud, bienestar animal y nuevas áreas de ejercicio profesional. 1=no contempla el futuro, 4=está claramente orientado a las tendencias emergentes de la profesión.",
+    "El perfil evidencia una formación ética, científica, técnica y humanística.": "Verifique si el perfil menciona explícitamente valores éticos, base científica, habilidades técnicas y formación humana. 1=solo menciona aspectos técnicos, 4=integra de forma equilibrada las cuatro dimensiones.",
+    "El perfil integra adecuadamente la salud animal.": "Evalúe si el perfil describe competencias concretas en diagnóstico, tratamiento, prevención y manejo de enfermedades en animales. 1=la salud animal está ausente o muy superficial, 4=está desarrollada con profundidad y especificidad.",
+    "El perfil integra adecuadamente la salud pública veterinaria y el enfoque Una Salud.": "Verifique si el perfil incluye zoonosis, inocuidad alimentaria, vigilancia epidemiológica y la conexión entre salud animal, humana y ambiental. 1=no lo menciona, 4=lo integra de forma explícita y articulada.",
+    "El perfil integra adecuadamente la producción animal.": "Evalúe si hay competencias en sanidad y manejo de bovinos, porcinos, aves, cuyes, acuicultura y otras especies productivas. 1=ausente o muy general, 4=incluye múltiples especies con enfoque sanitario y productivo.",
+    "El perfil integra adecuadamente la investigación científica y tecnológica.": "Considere si el perfil describe capacidad para formular problemas, aplicar metodología científica y producir conocimiento. 1=no contempla investigación, 4=la posiciona como competencia central con enfoque aplicado.",
+    "El perfil responde a las necesidades del mercado laboral.": "Piense en los empleadores que conoce: ¿el perfil prepara para lo que ellos buscan? 1=hay una brecha grande entre el perfil y el mercado real, 4=el perfil coincide claramente con las demandas laborales actuales.",
+    "El perfil favorece la empleabilidad del egresado.": "¿Un egresado con ese perfil tiene buenas posibilidades de insertarse laboralmente en distintos sectores? 1=el perfil no facilita la empleabilidad, 4=el perfil abre múltiples oportunidades laborales claras.",
+    "El perfil permite comparabilidad con programas nacionales o internacionales.": "¿Podría un egresado de la EPMV competir o continuar estudios en otra universidad nacional o extranjera con ese perfil? 1=el perfil es muy local y sin referentes, 4=está alineado con estándares reconocidos internacionalmente.",
+    "El perfil incorpora responsabilidad social, bienestar animal y sostenibilidad.": "¿El perfil menciona compromisos con la sociedad, el trato digno de los animales y el desarrollo sostenible? 1=no los incluye, 4=los integra de forma transversal y explícita.",
+    "El perfil está redactado de manera clara y comprensible.": "Léalo como si fuera un empleador o un estudiante nuevo: ¿entiende qué hace y qué sabe el egresado? 1=es confuso o muy técnico, 4=es claro, preciso y comprensible para cualquier lector.",
+    // I2 — Estructura curricular
+    "Las asignaturas están ordenadas de manera lógica entre ciclos.": "¿Los cursos van de lo general a lo específico, de lo básico a lo clínico, sin saltos abruptos? 1=el orden parece aleatorio o confuso, 4=la progresión es muy clara y cada ciclo construye sobre el anterior.",
+    "Los cursos básicos preparan adecuadamente para los cursos profesionales.": "¿Química, Biología Celular, Anatomía, etc. dan la base necesaria para Fisiología, Patología, Clínica? 1=los cursos básicos no articulan con los profesionales, 4=la transición es fluida y bien planificada.",
+    "Los cursos profesionales se articulan con los cursos especializados.": "¿Hay coherencia entre lo aprendido en ciclos medios y lo que se exige en ciclos avanzados? 1=hay desconexión evidente, 4=la articulación es clara y progresiva.",
+    "Los prerrequisitos son necesarios y pertinentes.": "¿Cada prerrequisito realmente es condición necesaria para cursar la asignatura siguiente? 1=los prerrequisitos son innecesarios o arbitrarios, 4=todos son justificados y pedagógicamente coherentes.",
+    "No existen prerrequisitos innecesarios o excesivamente restrictivos.": "¿Hay cursos que bloquean el avance del estudiante sin razón pedagógica válida? 1=hay muchos obstáculos innecesarios, 4=el estudiante puede avanzar con fluidez.",
+    "La carga académica por ciclo es razonable.": "¿La cantidad de créditos, horas y exigencias por ciclo es manejable para un estudiante regular? 1=la carga es excesiva o muy desigual entre ciclos, 4=la distribución es equilibrada y sostenible.",
+    "Existe equilibrio entre horas teóricas y prácticas.": "¿La carrera dedica tiempo suficiente a laboratorios, clínicas y prácticas, no solo a clases magistrales? 1=predomina la teoría sin suficiente práctica, 4=hay un balance bien logrado entre teoría y práctica.",
+    "Las asignaturas prácticas cuentan con tiempo suficiente para desarrollar competencias.": "¿Las horas de práctica permiten que el estudiante realmente aprenda a hacer, no solo a observar? 1=las prácticas son muy cortas o superficiales, 4=el tiempo práctico es suficiente para desarrollar competencias reales.",
+    "No se observan contenidos repetidos innecesariamente entre asignaturas.": "¿Hay temas que se repiten en varios cursos sin que esa repetición añada profundidad o perspectiva diferente? 1=hay mucha redundancia que desperdicia tiempo, 4=cada curso aporta contenido propio sin repeticiones innecesarias.",
+    "No se observan vacíos importantes en la formación.": "¿Hay áreas de la Medicina Veterinaria que el plan no cubre o cubre muy superficialmente? 1=hay vacíos importantes que afectan la formación, 4=el plan cubre todas las áreas esenciales de la profesión.",
+    "El número total de asignaturas es adecuado para el logro del perfil de egreso.": "¿58 asignaturas en 10 ciclos es suficiente, excesivo o insuficiente para alcanzar las competencias del perfil? 1=el número no es coherente con el perfil, 4=la cantidad es la adecuada para lograr el perfil propuesto.",
+    "Las asignaturas electivas permiten rutas formativas útiles.": "¿Los 10 cursos electivos ofrecen opciones de especialización reales y relevantes para el mercado? 1=los electivos no aportan valor diferencial, 4=permiten construir rutas formativas coherentes y útiles.",
+    "La estructura curricular facilita el tránsito hacia el internado.": "¿Al llegar al X ciclo, el estudiante tiene las competencias necesarias para iniciar el internado con seguridad? 1=hay una brecha grande entre lo aprendido y lo que exige el internado, 4=la preparación para el internado es sólida y progresiva.",
+    // I6 — Cursos satélite
+    "El curso permite observar claramente el nivel de competencia asignado.": "Un curso satélite es estratégico para evaluar cuánto ha avanzado el estudiante en una competencia. ¿Este curso realmente permite observar ese avance? 1=no es posible observar la competencia en este curso, 4=el curso es ideal para medir ese nivel de competencia.",
+    "El curso tiene actividades prácticas o aplicadas suficientes.": "¿El curso incluye trabajos, laboratorios, casos o ejercicios que evidencian la competencia en acción? 1=es principalmente teórico sin actividades que demuestren competencia, 4=tiene múltiples actividades aplicadas bien diseñadas.",
+    "El curso cuenta con evidencias evaluables del desempeño del estudiante.": "¿Hay productos concretos —informes, exámenes prácticos, rúbricas— que permitan medir el desempeño? 1=no hay evidencias claras, 4=las evidencias son explícitas, variadas y archivables.",
+    "El instrumento de evaluación usado es pertinente para la competencia.": "¿La forma de evaluar en este curso (examen, rúbrica, portafolio, caso clínico) es adecuada para medir esa competencia? 1=la evaluación no mide la competencia real, 4=el instrumento es muy pertinente y bien diseñado.",
+    "El curso se ubica en el ciclo adecuado para evaluar ese nivel.": "¿El ciclo en que está ubicado este curso corresponde al nivel de dominio esperado de la competencia? 1=está mal ubicado en la malla, 4=está en el ciclo justo para evaluar ese nivel de competencia.",
+    "El curso permite retroalimentar al estudiante antes del siguiente nivel.": "¿El estudiante recibe información sobre su desempeño en la competencia antes de pasar al siguiente nivel evaluativo? 1=no hay retroalimentación útil, 4=la retroalimentación es oportuna y orientada a la mejora.",
+    "El curso se articula con el curso satélite anterior.": "¿Este curso retoma y profundiza lo evaluado en el curso satélite previo de esa competencia? 1=no hay continuidad con el nivel anterior, 4=la articulación es clara y progresiva.",
+    "El curso se articula con el curso satélite posterior.": "¿Este curso prepara al estudiante para el nivel de competencia que evaluará el siguiente curso satélite? 1=no prepara para el nivel siguiente, 4=prepara de forma explícita y coherente.",
+    "La evidencia generada puede ser archivada para acreditación.": "¿Los productos y evaluaciones de este curso pueden guardarse como evidencia formal para procesos de acreditación? 1=no existe evidencia archivable, 4=la evidencia es formal, organizada y archivable.",
+    "El curso debe mantenerse como satélite de esta competencia.": "Considerando todo lo anterior, ¿este curso debe seguir siendo el punto de evaluación de esa competencia? 1=debe reemplazarse por otro más adecuado, 4=es el curso ideal para esa función y debe mantenerse.",
+    // I7 — Egresados
+    "La formación recibida me permitió desempeñarme adecuadamente en salud animal.": "Piense en su trabajo real: diagnóstico, tratamiento, cirugías, manejo clínico. ¿La carrera lo preparó bien para eso? 1=no me preparó suficientemente, 4=me dio una base muy sólida para la práctica clínica.",
+    "La formación recibida me permitió desempeñarme adecuadamente en salud pública.": "¿Está preparado para trabajar en inocuidad alimentaria, control de zoonosis, epidemiología o salud pública veterinaria? 1=la carrera no me preparó para esa área, 4=tengo competencias sólidas en salud pública veterinaria.",
+    "La formación recibida me permitió desempeñarme adecuadamente en producción animal.": "¿Puede trabajar en granjas, plantas avícolas, empresas pecuarias o acuícolas con los conocimientos de la carrera? 1=la formación en producción fue muy débil, 4=me preparó bien para el sector productivo.",
+    "La formación recibida fortaleció mi capacidad de investigación.": "¿Sabe formular un problema, aplicar metodología y analizar resultados gracias a lo aprendido en la carrera? 1=no desarrollé habilidades investigativas, 4=salí con competencias investigativas claras.",
+    "Los cursos básicos fueron útiles para comprender los cursos profesionales.": "¿Química, Anatomía, Fisiología, etc. le dieron la base necesaria para entender los cursos clínicos y de producción? 1=los básicos no aportaron a mi formación profesional, 4=fueron una base imprescindible.",
+    "Las prácticas preprofesionales fueron útiles para mi inserción laboral.": "¿Las experiencias supervisadas en clínicas, laboratorios o granjas le ayudaron a conseguir trabajo o adaptarse al campo? 1=las prácticas no me prepararon para el mercado, 4=fueron determinantes para mi inserción laboral.",
+    "El internado fortaleció mis competencias profesionales.": "¿El internado le permitió consolidar habilidades técnicas, tomar decisiones y trabajar en equipo de forma real? 1=el internado no aportó significativamente, 4=fue la experiencia más formadora de la carrera.",
+    "La carrera desarrolló adecuadamente mis habilidades clínicas.": "¿Sabe examinar un paciente, interpretar resultados y tomar decisiones clínicas gracias a la formación recibida? 1=las habilidades clínicas fueron insuficientes, 4=la formación clínica fue muy completa.",
+    "La carrera desarrolló adecuadamente mis habilidades comunicacionales.": "¿Puede comunicarse con propietarios, colegas, productores y equipos de trabajo de forma efectiva? 1=la carrera no desarrolló esta habilidad, 4=me preparó bien para comunicarme en contextos profesionales.",
+    "La carrera desarrolló adecuadamente mi criterio ético y profesional.": "¿Sabe cómo actuar frente a dilemas éticos, conflictos de interés o situaciones límite en su práctica? 1=la ética fue superficial en la carrera, 4=la formación ética fue sólida y aplicada.",
+    "La carrera me preparó para adaptarme al mercado laboral.": "¿Pudo insertarse en el mercado laboral con la formación recibida, sin sentir que le faltaban herramientas básicas? 1=me costó mucho adaptarme por vacíos de la carrera, 4=la carrera me preparó bien para el campo laboral.",
+    "La carrera debería fortalecer gestión, administración o emprendimiento veterinario.": "¿Siente que le faltaron herramientas para administrar una clínica, gestionar un negocio o emprender? 1=no lo necesito, 4=es una necesidad urgente que la carrera debería atender.",
+    "La carrera debería fortalecer competencias digitales o uso de IA.": "¿Considera que la carrera debería preparar más para el uso de software, telemedicina, registros digitales o inteligencia artificial? 1=no es necesario, 4=es imprescindible para el ejercicio profesional actual.",
+    "Recomendaría la carrera por la calidad de su formación.": "Considerando toda su experiencia como egresado: ¿recomendaría la carrera de Medicina Veterinaria de la URP por la calidad de su formación? 1=no la recomendaría por deficiencias importantes, 4=la recomendaría con total confianza.",
+    // I8 — Empleadores
+    "Demuestra conocimientos básicos adecuados.": "¿El estudiante o egresado de la EPMV muestra dominio de los fundamentos de la profesión desde el inicio? 1=los conocimientos básicos son claramente insuficientes, 4=llega con una base teórica sólida.",
+    "Aplica criterios adecuados de salud animal.": "¿Es capaz de identificar signos clínicos, proponer diagnósticos diferenciales y tomar decisiones de tratamiento? 1=tiene dificultades para aplicar criterios clínicos, 4=aplica criterios clínicos con seguridad y fundamento.",
+    "Reconoce problemas relacionados con salud pública o zoonosis.": "¿Identifica riesgos de transmisión de enfermedades entre animales y humanos, o problemas de inocuidad? 1=no tiene conciencia de salud pública, 4=reconoce y actúa adecuadamente ante estos problemas.",
+    "Comprende aspectos básicos de producción animal cuando corresponde.": "Si trabaja en el sector productivo, ¿entiende indicadores productivos, bioseguridad y manejo de especies? 1=carece de conocimientos productivos, 4=maneja bien los aspectos básicos de producción.",
+    "Interpreta información clínica, productiva o laboratorial con criterio.": "¿Puede leer un hemograma, un informe de producción o un resultado de laboratorio y sacar conclusiones correctas? 1=tiene dificultades para interpretar información técnica, 4=interpreta con criterio y toma decisiones basadas en evidencia.",
+    "Muestra responsabilidad y puntualidad.": "¿Cumple con sus horarios, compromisos y obligaciones sin necesidad de supervisión constante? 1=hay problemas frecuentes de responsabilidad, 4=es muy responsable y puntual de forma consistente.",
+    "Se comunica adecuadamente con el equipo de trabajo.": "¿Interactúa bien con veterinarios, técnicos, enfermeros y personal de apoyo? 1=tiene dificultades para comunicarse con el equipo, 4=se integra y comunica excelentemente.",
+    "Se comunica adecuadamente con propietarios, usuarios o productores.": "¿Explica diagnósticos, tratamientos y recomendaciones de forma clara y accesible para personas no especializadas? 1=tiene dificultades para comunicarse con clientes, 4=comunica con claridad, empatía y profesionalismo.",
+    "Aplica principios de bioseguridad.": "¿Usa EPP correctamente, maneja residuos de forma adecuada y sigue protocolos de bioseguridad? 1=no aplica bioseguridad con consistencia, 4=aplica rigurosamente todos los principios de bioseguridad.",
+    "Aplica principios de bienestar animal.": "¿Maneja a los animales con respeto, minimiza el estrés y aplica las 5 libertades del bienestar animal? 1=no muestra conciencia de bienestar animal, 4=integra el bienestar animal en todas sus acciones.",
+    "Muestra capacidad para aprender en el campo laboral.": "¿Se adapta rápidamente, hace preguntas pertinentes y mejora con la experiencia? 1=aprende muy lentamente o con resistencia, 4=aprende con rapidez y proactividad.",
+    "Maneja registros, formatos o información digital básica.": "¿Puede completar fichas clínicas, usar software básico o manejar información en formatos digitales? 1=tiene dificultades con registros y herramientas digitales, 4=maneja eficientemente la información y los registros.",
+    "Resuelve problemas con criterio inicial adecuado.": "Ante una situación nueva o un problema inesperado, ¿actúa con lógica y criterio antes de pedir ayuda? 1=se bloquea ante problemas no rutinarios, 4=resuelve con criterio y toma iniciativas pertinentes.",
+    "Su desempeño general es satisfactorio.": "Considerando todos los aspectos anteriores, ¿el desempeño general del estudiante o egresado de la EPMV cubre sus expectativas como empleador? 1=el desempeño general es insatisfactorio, 4=supera las expectativas de manera consistente.",
+    // I9 — Expertos
+    "El Plan 24 responde a las demandas actuales de su área de especialidad.": "Desde su expertise, ¿los contenidos y competencias del plan reflejan lo que hoy se requiere en su área? 1=el plan está desactualizado respecto a su especialidad, 4=responde plenamente a las exigencias actuales del área.",
+    "Las competencias específicas son pertinentes para su área.": "Las 4 competencias del plan son Salud Animal, Salud Pública, Producción Animal e Investigación. ¿Son las correctas para su especialidad? 1=las competencias no cubren lo esencial de su área, 4=son muy pertinentes y completas.",
+    "Los cursos relacionados con su área están bien ubicados en la malla.": "¿Los cursos de su especialidad están en el ciclo correcto, con los prerrequisitos adecuados y la carga apropiada? 1=están mal ubicados o articulados, 4=están perfectamente posicionados en la malla.",
+    "Los contenidos son actuales y suficientes.": "¿Los temas cubiertos en los cursos de su área están al día con la literatura, tecnología y práctica actual? 1=los contenidos están desactualizados o son insuficientes, 4=son completos, actuales y pertinentes.",
+    "Las prácticas son suficientes para desarrollar desempeño profesional.": "¿Las horas prácticas y las experiencias preprofesionales preparan al estudiante para desempeñarse en su área? 1=las prácticas son insuficientes para el desempeño esperado, 4=la formación práctica es sólida y suficiente.",
+    "El plan prepara adecuadamente para el internado.": "Al llegar al internado, ¿el estudiante debería tener la base necesaria para desenvolverse en contextos reales de su especialidad? 1=el plan no prepara bien para el internado en esa área, 4=la preparación previa al internado es excelente.",
+    "El plan desarrolla criterio clínico, productivo, sanitario o investigativo según corresponda.": "¿El plan forma profesionales capaces de razonar y tomar decisiones en su área, no solo de ejecutar procedimientos? 1=el plan no desarrolla criterio profesional, 4=forma profesionales con sólido criterio en el área.",
+    "El plan incorpora adecuadamente bienestar animal y ética profesional.": "¿Hay suficiente énfasis en el trato digno de los animales, la ética en la práctica y la responsabilidad profesional? 1=estos temas son marginales en el plan, 4=están integrados de forma transversal y profunda.",
+    "El plan incorpora adecuadamente tecnología, digitalización o IA.": "¿El plan prepara al estudiante para usar herramientas tecnológicas actuales, registros digitales, telemedicina o IA aplicada? 1=el plan ignora la transformación digital, 4=integra la tecnología de forma relevante y actualizada.",
+    "El plan responde a tendencias futuras de la profesión.": "Mirando los próximos 10 años de su especialidad: ¿el plan prepara a los egresados para lo que viene? 1=el plan no anticipa las tendencias futuras, 4=está claramente orientado hacia el futuro de la profesión.",
+    // I10 — Estudiantes
+    "Comprendo el propósito del Plan Curricular 24.": "¿Sabes para qué existe cada etapa de la carrera y cómo se relacionan entre sí los cursos? 1=no entiendo la lógica del plan, 4=tengo muy claro el propósito de cada curso y del plan en general.",
+    "Los cursos del ciclo tienen relación entre sí.": "¿Los cursos que llevas en el mismo ciclo se complementan o parecen independientes y desconectados? 1=los cursos no tienen relación entre sí, 4=se articulan muy bien y se refuerzan mutuamente.",
+    "Los cursos previos me preparan para los cursos posteriores.": "¿Lo que aprendes en un ciclo te sirve realmente para entender los cursos del siguiente? 1=hay una desconexión clara entre ciclos, 4=los cursos anteriores son una base sólida para los siguientes.",
+    "La carga académica semanal es manejable.": "¿Puedes cumplir con todas las tareas, lecturas, prácticas y evaluaciones semanales sin sacrificar tu bienestar? 1=la carga es excesiva e inmanejable, 4=la carga es razonable y permite aprender bien.",
+    "Las prácticas ayudan a comprender la teoría.": "¿Las horas de laboratorio, clínica o campo te ayudan a entender mejor lo que aprendes en clases teóricas? 1=las prácticas no refuerzan la teoría, 4=las prácticas hacen que la teoría tenga sentido.",
+    "Las evaluaciones miden lo trabajado en clase y práctica.": "¿Los exámenes y trabajos evalúan lo que realmente se desarrolló en clase y en las prácticas? 1=las evaluaciones no coinciden con lo trabajado, 4=las evaluaciones son coherentes con lo aprendido.",
+    "Las evaluaciones miden habilidades y no solo memoria.": "¿Te piden analizar, resolver casos, tomar decisiones o solo memorizar y repetir conceptos? 1=todo se reduce a memorizar, 4=las evaluaciones miden comprensión, criterio y habilidades reales.",
+    "Los sílabos explican claramente qué se espera del estudiante.": "¿Al leer el sílabo sabes exactamente qué debes aprender, cómo serás evaluado y qué recursos tienes? 1=los sílabos son confusos o incompletos, 4=son claros y me permiten planificar bien mi estudio.",
+    "Los laboratorios, equipos o recursos son suficientes.": "¿Hay suficientes equipos, reactivos, animales, espacios y materiales para que todos los estudiantes practiquen adecuadamente? 1=los recursos son claramente insuficientes, 4=los recursos son adecuados para aprender bien.",
+    "El plan permite desarrollar progresivamente competencias veterinarias.": "¿Sientes que con cada ciclo que pasa sabes y puedes hacer más cosas como futuro veterinario? 1=no percibo un avance claro en mis competencias, 4=siento un progreso real y creciente en mi formación.",
+    "El uso de recursos digitales favorece mi aprendizaje.": "¿Las plataformas, videos, bases de datos y herramientas digitales que usan los docentes te ayudan a aprender mejor? 1=los recursos digitales no aportan a mi aprendizaje, 4=los recursos digitales enriquecen mucho mi formación.",
+    "Me siento adecuadamente preparado para ciclos superiores o prácticas.": "¿Sientes que lo aprendido hasta ahora te da la base suficiente para afrontar los ciclos más avanzados o las prácticas preprofesionales? 1=me siento con muchos vacíos para lo que viene, 4=me siento bien preparado para el siguiente nivel."
+  };
+
+  if (itemHelps[question]) return itemHelps[question];
+
+  // Fallback genérico por instrumento si el ítem no está en el mapa
+  const generic = {
+    I1: "Evalúe qué tan bien el perfil de egreso refleja este aspecto. 1=ausente o muy débil, 2=existe pero insuficiente, 3=funciona aceptablemente, 4=es una fortaleza clara.",
+    I2: "Evalúe este aspecto de la organización del plan de estudios. 1=presenta problemas importantes, 2=hay avances pero insuficientes, 3=funciona aceptablemente, 4=está muy bien resuelto.",
+    I3: "Evalúe este aspecto de la asignatura en el contexto del FODA. 1=deficiente, 2=básico, 3=adecuado, 4=sobresaliente.",
+    I6: "Evalúe si este curso satélite cumple este criterio. 1=no cumple, 2=cumple parcialmente, 3=cumple bien, 4=cumple de forma sobresaliente.",
+    I7: "Reflexione sobre su experiencia real como egresado para responder este ítem. 1=no me preparó, 2=preparación insuficiente, 3=preparación adecuada, 4=preparación sobresaliente.",
+    I8: "Evalúe el desempeño observable del estudiante o egresado en este aspecto. 1=deficiente, 2=básico, 3=adecuado, 4=sobresaliente.",
+    I9: "Desde su especialidad, valore este aspecto del Plan 24. 1=no cumple, 2=cumple parcialmente, 3=cumple bien, 4=cumple plenamente.",
+    I10: "Evalúa este aspecto basándote en tu experiencia real en la carrera. 1=muy mal, 2=insuficiente, 3=bien, 4=muy bien."
+  };
+  // Si el ítem exacto no está en el diccionario, construir respuesta específica con el texto del ítem
+  const base = generic[instrId] || "Evalúe este aspecto del Plan Curricular 24 de la EPMV según su experiencia.";
+  // Extraer palabras clave del ítem para personalizar mínimamente
+  const q = question.toLowerCase();
+  if (q.includes('investig')) return "Este ítem evalúa específicamente la dimensión investigativa: si la formación desarrolló capacidad para formular problemas, aplicar metodología y producir conocimiento. 1=no se desarrolló esa capacidad, 4=es una fortaleza clara.";
+  if (q.includes('practic') || q.includes('laborator')) return "Este ítem evalúa la formación práctica concreta: si las actividades prácticas son suficientes en cantidad, calidad y pertinencia para desarrollar la competencia indicada. 1=las prácticas son insuficientes, 4=son sólidas y bien diseñadas.";
+  if (q.includes('sílabo') || q.includes('silabo')) return "Este ítem verifica si el sílabo cumple este requisito de alineamiento. Revise el documento del sílabo y responda según lo que realmente encuentra, no lo que debería haber.";
+  if (q.includes('biosegur')) return "Evalúe si el estudiante o egresado aplica correctamente los protocolos de bioseguridad: uso de EPP, manejo de residuos, prevención de contagios. 1=no los aplica, 4=los aplica de forma rigurosa y consistente.";
+  if (q.includes('bienestar')) return "Evalúe si el manejo de los animales respeta su bienestar: minimiza el estrés, evita el dolor innecesario y aplica las 5 libertades. 1=no muestra conciencia de bienestar animal, 4=lo integra en toda su práctica.";
+  if (q.includes('digital') || q.includes('ia') || q.includes('tecnolog')) return "Este ítem evalúa la preparación para el ejercicio profesional en entornos digitales: uso de registros electrónicos, telemedicina, bases de datos o inteligencia artificial. 1=no tiene preparación digital, 4=domina herramientas digitales del contexto veterinario.";
+  return base;
+}
+
+function closeHelp(e) {
+  if (e && e.target !== document.getElementById('help-overlay')) return;
+  document.getElementById('help-overlay').classList.remove('open');
+}
+
+function escQ(s) { return s.replace(/'/g, "\'").replace(/"/g, '&quot;'); }
+
+const FODA_CLOSED_ITEMS = [
+  "La asignatura contribuye claramente al perfil de egreso.",
+  "La sumilla está actualizada.",
+  "Los contenidos son pertinentes para el ciclo en que se dicta.",
+  "La asignatura se articula con cursos previos.",
+  "La asignatura se articula con cursos posteriores.",
+  "Las prácticas permiten desarrollar competencias observables.",
+  "Los instrumentos de evaluación miden competencias y no solo memoria.",
+  "La bibliografía est\u00e1 actualizada.",
+  "Los recursos disponibles son suficientes.",
+  "La asignatura deber\u00eda mantenerse en el mismo ciclo."
+];
+function openHelpI3(ci) { openHelp(FODA_CLOSED_ITEMS[ci], 'I3'); }
+
+/* ══════════════════════════════════════════════
+   STEP 2 → 3
+══════════════════════════════════════════════ */
+function next2() {
+  // Basic validation: instrumento 1 closed items should be answered for groups that have it
+  fillReview();
+  goStep(3);
+}
+
+function fillReview() {
+  const grpLabels = {expertos:'Expertos',empleadores:'Empleadores',egresados:'Egresados',docentes_p24:'Docentes Plan 24',docentes_p52:'Docentes Plan 52',docente_satelite:'Docente Curso Satélite',comision:'Comisión Curricular',estudiantes:'Estudiantes'};
+  document.getElementById('rv-nombre').textContent = state.nombre;
+  document.getElementById('rv-grupo').textContent = grpLabels[state.grupo]||state.grupo;
+  document.getElementById('rv-correo').textContent = state.correo||'—';
+  document.getElementById('rv-inst').textContent = state.institucion||'—';
+  const espRow = document.getElementById('rv-esp-row');
+  if (state.especialidad) {
+    espRow.style.display = 'grid';
+    document.getElementById('rv-esp').textContent = state.especialidad;
+  } else {
+    espRow.style.display = 'none';
+  }
+
+  const instrNames = {I1:'Instrumento 1 – Perfil de egreso',I2:'Instrumento 2 – Estructura curricular',I3:'Instrumento 3 – FODA por asignatura',I4:'Instrumento 4 – Análisis de sílabos',I5:'Instrumento 5 – Matriz alineamiento',I6:'Instrumento 6 – Cursos satélite',I7:'Instrumento 7 – Encuesta egresados',I8:'Instrumento 8 – Encuesta empleadores',I9:'Instrumento 9 – Guía expertos',I10:'Instrumento 10 – Encuesta estudiantes'};
+  const instrMap = {expertos:['I1','I2','I9'],empleadores:['I8','I1'],egresados:['I7','I1'],docentes_p24:['I1','I2','I3','I5'],docentes_p52:['I1','I2'],docente_satelite:['I6'],comision:['I4'],estudiantes:['I10']};
+  const instrs = instrMap[state.grupo]||[];
+  const rvEl = document.getElementById('rv-instruments');
+  rvEl.innerHTML = instrs.map(id => {
+    const r = state.respuestas[id]||{};
+    const cerradas = Object.values(r.cerradas||{}).filter(v=>v>0).length;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light)">
+      <span style="color:var(--success);font-size:16px">✓</span>
+      <span>${instrNames[id]}</span>
+      ${cerradas>0?`<span style="margin-left:auto;font-size:11px;color:var(--ink-light)">${cerradas} ítem(s) cerrado(s) respondido(s)</span>`:''}
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════
+   ENVÍO
+══════════════════════════════════════════════ */
+async function sendData() {
+  const btn = document.getElementById('btn-send');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="dot-loader"><span></span><span></span><span></span></span> Enviando…`;
+
+  const payload = {
+    nombre: state.nombre,
+    grupo: state.grupo,
+    especialidad: state.especialidad,
+    correo: state.correo,
+    institucion: state.institucion,
+    ciclo: state.ciclo,
+    fecha: new Date().toISOString(),
+    respuestas: state.respuestas
+  };
+
+  // Calculate indicators before sending
+  payload.indicadores = calcularIndicadores(state.grupo, state.respuestas);
+
+  // Usamos iframe + form GET para evitar bloqueo CORS desde archivos locales
+  try {
+    const jsonStr = JSON.stringify(payload);
+    const iframeName = 'submit_frame_' + Date.now();
+
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.name = iframeName;
+    document.body.appendChild(iframe);
+
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = CONFIG.SHEETS_URL;
+    form.target = iframeName;
+    form.style.display = 'none';
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'payload';
+    input.value = jsonStr;
+    form.appendChild(input);
+
+    document.body.appendChild(form);
+    form.submit();
+
+    setTimeout(() => {
+      try { document.body.removeChild(iframe); document.body.removeChild(form); } catch(e){}
+    }, 4000);
+
+    showSuccess();
+  } catch(err) {
+    console.error('Error al enviar:', err);
+    showSuccess();
+  }
+}
+
+function showSuccess() {
+  document.getElementById('sc-nombre').textContent = state.nombre;
+  const grpLabels = {expertos:'Expertos',empleadores:'Empleadores',egresados:'Egresados',docentes:'Docentes',comision:'Comisión Curricular',estudiantes:'Estudiantes'};
+  document.getElementById('sc-grupo').textContent = grpLabels[state.grupo]||state.grupo;
+  document.getElementById('sc-fecha').textContent = new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'});
+  goStep(4);
+}
+
+/* ══════════════════════════════════════════════
+   CÁLCULO DE INDICADORES
+   Fórmula base: Promedio de ítems / 4 × 100
+══════════════════════════════════════════════ */
+function avg(obj, keys) {
+  const vals = keys.map(k => Number(obj[k]||0)).filter(v=>v>0);
+  if (!vals.length) return 0;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+
+function toIdx(avgVal) { return Math.round((avgVal/4)*100); }
+
+function calcularIndicadores(grupo, resp) {
+  const ind = {};
+
+  // Instrumento 1
+  if (resp.I1?.cerradas) {
+    const c = resp.I1.cerradas;
+    ind.I1 = {
+      pertinencia_perfil: toIdx(avg(c,[1,2,8,9])),
+      coherencia_competencial: toIdx(avg(c,[4,5,6,7])),
+      formacion_integral: toIdx(avg(c,[3,11])),
+      claridad_perfil: toIdx(avg(c,[12])),
+      indice_global: toIdx(avg(c,[1,2,3,4,5,6,7,8,9,10,11,12])),
+    };
+    ind.I1.brecha_perfil = 100 - ind.I1.indice_global;
+  }
+
+  // Instrumento 2
+  if (resp.I2?.cerradas) {
+    const c = resp.I2.cerradas;
+    ind.I2 = {
+      secuencialidad: toIdx(avg(c,[1,2,3])),
+      fluidez_curricular: toIdx(avg(c,[4,5,13])),
+      carga_academica: toIdx(avg(c,[6,7,8])),
+      coherencia_estructural: toIdx(avg(c,[9,10,11])),
+      flexibilidad: toIdx(avg(c,[12])),
+    };
+  }
+
+  // Instrumento 6
+  if (resp.I6?.cerradas) {
+    const c = resp.I6.cerradas;
+    ind.I6 = {
+      pertinencia_satelite: toIdx(avg(c,[1,4,5,10])),
+      evidencia_evaluable: toIdx(avg(c,[2,3,9])),
+      progresion: toIdx(avg(c,[6,7,8])),
+      decision: (() => {
+        const g = toIdx(avg(c,[1,2,3,4,5,6,7,8,9,10]));
+        if (g>=85) return 'Mantener';
+        if (g>=70) return 'Mantener con ajustes';
+        if (g>=50) return 'Revisar';
+        return 'Reemplazar/Rediseñar';
+      })()
+    };
+  }
+
+  // Instrumento 7
+  if (resp.I7?.cerradas) {
+    const c = resp.I7.cerradas;
+    ind.I7 = {
+      utilidad_profesional: toIdx(avg(c,[1,2,3,4,5,6,7,8,9,10,11])),
+      insercion_practica: toIdx(avg(c,[6,7])),
+      brecha_investigacion: 100 - toIdx(avg(c,[4])),
+      necesidad_gestion_digital: toIdx(avg(c,[12,13])),
+      recomendacion_carrera: toIdx(avg(c,[14]))
+    };
+  }
+
+  // Instrumento 8
+  if (resp.I8?.cerradas) {
+    const c = resp.I8.cerradas;
+    ind.I8 = {
+      satisfaccion_empleador: toIdx(avg(c,[1,2,3,4,5,6,7,8,9,10,11,12,13,14])),
+      desempeno_tecnico: toIdx(avg(c,[1,2,3,4,5])),
+      desempeno_profesional: toIdx(avg(c,[6,7,8,9,10,11,12,13])),
+    };
+  }
+
+  // Instrumento 9
+  if (resp.I9?.cerradas) {
+    const c = resp.I9.cerradas;
+    ind.I9 = {
+      pertinencia_experta: toIdx(avg(c,[1,2,4,10])),
+      suficiencia_practica: toIdx(avg(c,[5,6])),
+      actualizacion_profesional: toIdx(avg(c,[4,9,10])),
+    };
+  }
+
+  // Instrumento 10
+  if (resp.I10?.cerradas) {
+    const c = resp.I10.cerradas;
+    ind.I10 = {
+      satisfaccion_estudiantil: toIdx(avg(c,[1,2,3,4,5,6,7,8,9,10,11,12])),
+      articulacion_percibida: toIdx(avg(c,[2,3])),
+      carga_adecuada: toIdx(avg(c,[4])),
+      evaluacion_competencias: toIdx(avg(c,[6,7])),
+      recursos: toIdx(avg(c,[9,11])),
+    };
+  }
+
+  return ind;
+}
+
+
+/* ══════════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════════ */
+var dashPrevStep = 1;
+var dashData     = [];   // all parsed rows from sheets
+var dashGrupo    = '';   // currently selected group key
+var dashChart    = null; // single active chart
+
+/* ── Definición de grupos e indicadores disponibles ── */
+var DASH_GRUPOS = [
+  {key:'expertos',         label:'Expertos',            icon:'🔬', color:'#4a6741'},
+  {key:'empleadores',      label:'Empleadores',         icon:'🏥', color:'#8a9e3a'},
+  {key:'egresados',        label:'Egresados',           icon:'🎓', color:'#2d6a4f'},
+  {key:'docentes_p24',     label:'Docentes Plan 24',    icon:'📗', color:'#1e6091'},
+  {key:'docentes_p52',     label:'Docentes Plan 52',    icon:'📘', color:'#2e86ab'},
+  {key:'docente_satelite', label:'Docente Satélite',    icon:'🛰️', color:'#6c3d91'},
+  {key:'comision',         label:'Comisión Curricular', icon:'⚙️', color:'#92400e'},
+  {key:'estudiantes',      label:'Estudiantes',         icon:'📖', color:'#b45309'}
+];
+
+var DASH_INDICADORES = {
+  expertos: [
+    {id:'I9_pertinencia',   instr:'I9', key:'pertinencia_experta',     label:'Pertinencia del Plan (I9)',      desc:'Qué tan pertinente considera el experto el Plan 24 para su área.'},
+    {id:'I9_practica',      instr:'I9', key:'suficiencia_practica',     label:'Suficiencia práctica (I9)',      desc:'Nivel de práctica y formación aplicada del plan.'},
+    {id:'I9_actualizacion', instr:'I9', key:'actualizacion_profesional',label:'Actualización profesional (I9)', desc:'Qué tan actualizado está el plan respecto a tendencias del sector.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global Perfil (I1)',      desc:'Valoración global del perfil de egreso.'},
+    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    desc:'Adecuación del perfil a demandas actuales y futuras.'},
+    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            desc:'Orden lógico y progresivo de las asignaturas.'},
+    {id:'I6_pertinencia',   instr:'I6', key:'pertinencia_satelite',     label:'Cursos satélite (I6)',           desc:'Pertinencia de los cursos satélite para evaluar competencias.'},
+    {id:'I9_abierta',       instr:'I9', key:'_abierta',                 label:'Opiniones abiertas (I9)',        desc:'Recomendaciones concretas de los expertos.'}
+  ],
+  empleadores: [
+    {id:'I8_satisfaccion',  instr:'I8', key:'satisfaccion_empleador',   label:'Satisfacción general (I8)',      desc:'Nivel de satisfacción del empleador con egresados/practicantes.'},
+    {id:'I8_tecnico',       instr:'I8', key:'desempeno_tecnico',        label:'Desempeño técnico (I8)',         desc:'Conocimientos y criterio técnico aplicado en el trabajo.'},
+    {id:'I8_profesional',   instr:'I8', key:'desempeno_profesional',    label:'Desempeño profesional (I8)',     desc:'Actitudes, comunicación y responsabilidad profesional.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Valoración del perfil (I1)',     desc:'Cómo valoran el perfil de egreso los empleadores.'},
+    {id:'I8_abierta',       instr:'I8', key:'_abierta',                 label:'Opiniones abiertas (I8)',        desc:'Fortalezas, debilidades y competencias que piden los empleadores.'}
+  ],
+  egresados: [
+    {id:'I7_utilidad',      instr:'I7', key:'utilidad_profesional',     label:'Utilidad profesional (I7)',      desc:'Qué tan útil fue la formación para el ejercicio profesional.'},
+    {id:'I7_insercion',     instr:'I7', key:'insercion_practica',       label:'Inserción práctica (I7)',        desc:'Utilidad del internado y prácticas para el trabajo.'},
+    {id:'I7_brecha_inv',    instr:'I7', key:'brecha_investigacion',     label:'Brecha en investigación (I7)',   desc:'Brecha en competencias de investigación según egresados.'},
+    {id:'I7_digital',       instr:'I7', key:'necesidad_gestion_digital',label:'Gestión y digital (I7)',         desc:'Necesidad de fortalecer gestión, emprendimiento y tecnología.'},
+    {id:'I7_recomendacion', instr:'I7', key:'recomendacion_carrera',    label:'Recomendarían la carrera (I7)', desc:'Porcentaje que recomendaría la carrera.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Valoración del perfil (I1)',     desc:'Cómo valoran el perfil los egresados.'},
+    {id:'I7_abierta',       instr:'I7', key:'_abierta',                 label:'Opiniones abiertas (I7)',        desc:'Qué cursos fueron útiles, qué mejorar, qué exige el mercado.'}
+  ],
+  docentes_p24: [
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global Perfil (I1)',      desc:'Valoración del perfil de egreso por docentes Plan 24.'},
+    {id:'I1_coherencia',    instr:'I1', key:'coherencia_competencial',  label:'Coherencia competencial (I1)',   desc:'Qué tan bien articula el perfil las 4 competencias.'},
+    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            desc:'Orden y progresión lógica de asignaturas.'},
+    {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           desc:'Equilibrio entre carga teórica y práctica.'},
+    {id:'I2_coherencia',    instr:'I2', key:'coherencia_estructural',   label:'Coherencia estructural (I2)',    desc:'Coherencia interna del plan de estudios.'},
+    {id:'I6_pertinencia',   instr:'I6', key:'pertinencia_satelite',     label:'Cursos satélite (I6)',           desc:'Pertinencia y diseño de cursos satélite.'},
+    {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        desc:'Aspectos sólidos, mejoras y competencias a fortalecer.'}
+  ],
+  docentes_p52: [
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global Perfil (I1)',      desc:'Valoración del perfil de egreso por docentes Plan 52.'},
+    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    desc:'Adecuación del perfil a demandas profesionales.'},
+    {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           desc:'Percepción sobre el equilibrio de carga académica.'},
+    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            desc:'Progresión lógica de asignaturas del plan.'},
+    {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        desc:'Comentarios sobre el perfil y estructura del plan.'}
+  ],
+  docente_satelite: [
+    {id:'I6_pertinencia',   instr:'I6', key:'pertinencia_satelite',     label:'Pertinencia satélite (I6)',      desc:'Adecuación del curso para evaluar la competencia asignada.'},
+    {id:'I6_evidencia',     instr:'I6', key:'evidencia_evaluable',      label:'Evidencia evaluable (I6)',       desc:'Calidad y suficiencia de las evidencias generadas.'},
+    {id:'I6_progresion',    instr:'I6', key:'progresion',               label:'Progresión (I6)',               desc:'Articulación con cursos satélite previos y posteriores.'},
+    {id:'I6_decision',      instr:'I6', key:'decision',                 label:'Decisión sobre el curso (I6)',  desc:'Mantener, revisar o reemplazar el curso como satélite.'},
+    {id:'I6_abierta',       instr:'I6', key:'_abierta',                 label:'Opiniones abiertas (I6)',        desc:'Ajustes recomendados para mejorar la evaluación por competencia.'}
+  ],
+  comision: [
+    {id:'I4_alineamiento',  instr:'I4', key:'_silabo',                  label:'Alineamiento de sílabos (I4)',  desc:'Índice de alineamiento de los sílabos al perfil y competencias.'},
+    {id:'I4_abierta',       instr:'I4', key:'_abierta',                 label:'Observaciones de sílabos (I4)', desc:'Observaciones por criterio en la ficha de análisis.'}
+  ],
+  estudiantes: [
+    {id:'I10_satisfaccion', instr:'I10',key:'satisfaccion_estudiantil', label:'Satisfacción estudiantil (I10)',desc:'Percepción global de los estudiantes sobre el plan.'},
+    {id:'I10_articulacion', instr:'I10',key:'articulacion_percibida',   label:'Articulación de cursos (I10)', desc:'Percepción de articulación y secuencia entre cursos.'},
+    {id:'I10_carga',        instr:'I10',key:'carga_adecuada',           label:'Carga académica (I10)',         desc:'Percepción estudiantil sobre la carga semanal.'},
+    {id:'I10_evaluacion',   instr:'I10',key:'evaluacion_competencias',  label:'Evaluación por competencias (I10)',desc:'Si las evaluaciones miden habilidades reales.'},
+    {id:'I10_recursos',     instr:'I10',key:'recursos',                 label:'Recursos disponibles (I10)',    desc:'Laboratorios, equipos y recursos digitales.'},
+    {id:'I10_abierta',      instr:'I10',key:'_abierta',                 label:'Opiniones abiertas (I10)',       desc:'Cursos destacados, dificultades y propuestas de mejora.'}
+  ]
+};
+
+var OPEN_QUESTIONS = {
+  I1:  ['¿Qué aspecto del perfil considera más sólido?','¿Qué aspecto debería actualizarse?','¿Qué competencia debería incorporarse o fortalecerse?'],
+  I6:  ['¿Qué ajuste recomienda para mejorar la evaluación de esta competencia?'],
+  I7:  ['¿Qué curso fue más útil para su desempeño?','¿Qué área debería reforzarse?','¿Qué competencia exige el mercado que no fue suficientemente desarrollada?'],
+  I8:  ['¿Qué fortaleza observa en los egresados/practicantes?','¿Qué debilidad debería corregirse?','¿Qué competencia considera indispensable para los próximos años?'],
+  I9:  ['¿Qué fortaleza principal identifica en el Plan 24?','¿Qué brecha principal identifica?','¿Qué curso debería reforzarse, incorporarse o reubicarse?','¿Qué recomendación concreta propone desde su especialidad?'],
+  I10: ['¿Qué curso está mejor articulado con su formación?','¿Qué curso presenta mayor dificultad y por qué?','¿Qué mejora concreta propondría?']
+};
+
+/* ── Open / Close ── */
+function openDashboard() {
+  var pwd = prompt('Ingrese la contraseña para acceder al Dashboard:');
+  if (pwd === null) return;
+  if (pwd !== 'EPMVcurricular') {
+    alert('Contraseña incorrecta.');
+    return;
+  }
+  dashPrevStep = state.step || 1;
+  document.getElementById('page5').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  loadDashboard();
+}
+function closeDashboard() {
+  document.getElementById('page5').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+/* ── Load data from Sheets ── */
+function loadDashboard() {
+  document.getElementById('dash-loading').style.display = 'block';
+  document.getElementById('dash-content').style.display = 'none';
+  document.getElementById('dash-error').style.display   = 'none';
+  if (dashChart) { try { dashChart.destroy(); } catch(e){} dashChart = null; }
+
+  var cbName = '_dashCb_' + Date.now();
+  var scriptTag = document.createElement('script');
+  var timeout = setTimeout(function() {
+    try { document.body.removeChild(scriptTag); } catch(e){}
+    delete window[cbName];
+    showDashError('Tiempo agotado. Verifica que el Apps Script esté publicado.');
+  }, 12000);
+
+  window[cbName] = function(data) {
+    clearTimeout(timeout);
+    try { document.body.removeChild(scriptTag); } catch(e){}
+    delete window[cbName];
+    if (data && data.ok) {
+      dashData = parseRows(data.rows || []);
+      document.getElementById('dash-loading').style.display = 'none';
+      document.getElementById('dash-content').style.display = 'block';
+      renderGrupoSelector();
+    } else {
+      showDashError(data ? (data.error || 'Sin datos') : 'Sin respuesta');
+    }
+  };
+  scriptTag.onerror = function() {
+    clearTimeout(timeout);
+    try { document.body.removeChild(scriptTag); } catch(e){}
+    delete window[cbName];
+    showDashError('No se pudo conectar. Verifica la URL y los permisos del Apps Script.');
+  };
+  scriptTag.src = CONFIG.SHEETS_URL + '?action=read&callback=' + cbName;
+  document.body.appendChild(scriptTag);
+}
+
+function parseRows(rows) {
+  return rows.map(function(r) {
+    var ind = r['Indicadores (JSON)'];
+    var res = r['Respuestas (JSON)'];
+    if (typeof ind === 'string') { try { ind = JSON.parse(ind); } catch(e){ ind = {}; } }
+    if (typeof res === 'string') { try { res = JSON.parse(res); } catch(e){ res = {}; } }
+    return { grupo: r['Grupo']||'', nombre: r['Nombre']||'', fecha: r['Fecha']||'',
+             esp: r['Especialidad']||'', ind: ind||{}, res: res||{} };
+  });
+}
+
+function showDashError(msg) {
+  document.getElementById('dash-loading').style.display = 'none';
+  document.getElementById('dash-error').style.display   = 'block';
+  document.getElementById('dash-error-msg').textContent  = msg;
+}
+
+/* ── STEP 1: Selector de grupo ── */
+function renderGrupoSelector() {
+  dashGrupo = '';
+  document.getElementById('dash-step1').style.display = 'block';
+  document.getElementById('dash-step2').style.display = 'none';
+  document.getElementById('dash-step3').style.display = 'none';
+
+  var countByGrupo = {};
+  dashData.forEach(function(r){ countByGrupo[r.grupo] = (countByGrupo[r.grupo]||0)+1; });
+  var total = dashData.length;
+  document.getElementById('dash-total-badge').textContent = total + ' respuesta' + (total!==1?'s':'');
+
+  var grid = document.getElementById('dash-grupo-grid');
+  grid.innerHTML = '';
+  DASH_GRUPOS.forEach(function(g) {
+    var n = countByGrupo[g.key] || 0;
+    var card = document.createElement('div');
+    card.style.cssText = 'border:1.5px solid var(--border);border-radius:var(--radius);padding:1rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface)';
+    card.innerHTML = '<div style="font-size:22px;margin-bottom:6px">'+g.icon+'</div>'
+      +'<div style="font-size:12px;font-weight:600;color:var(--ink-mid);margin-bottom:4px">'+g.label+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:'+g.color+'">'+n+' resp.</div>';
+    card.onmouseover = function(){ this.style.borderColor=g.color; this.style.background='var(--wine-light)'; };
+    card.onmouseout  = function(){ this.style.borderColor='var(--border)'; this.style.background='var(--surface)'; };
+    card.onclick = function(){ selectDashGrupo(g); };
+    grid.appendChild(card);
+  });
+}
+
+/* ── STEP 2: Selector de indicador ── */
+function selectDashGrupo(g) {
+  dashGrupo = g.key;
+  document.getElementById('dash-step1').style.display = 'none';
+  document.getElementById('dash-step2').style.display = 'block';
+  document.getElementById('dash-step3').style.display = 'none';
+  document.getElementById('dash-grupo-label').textContent = g.icon + ' ' + g.label;
+
+  var indicadores = DASH_INDICADORES[g.key] || [];
+  var grid = document.getElementById('dash-indicador-grid');
+  grid.innerHTML = '';
+  indicadores.forEach(function(ind) {
+    var card = document.createElement('div');
+    var isAbierta = ind.key === '_abierta' || ind.key === '_silabo';
+    card.style.cssText = 'border:1.5px solid var(--border);border-radius:var(--radius);padding:.875rem 1rem;cursor:pointer;transition:all .2s;background:var(--surface)';
+    card.innerHTML = '<div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px">'+ind.label+'</div>'
+      +'<div style="font-size:11px;color:var(--ink-light);line-height:1.4">'+ind.desc+'</div>'
+      +(isAbierta ? '<div style="margin-top:6px;font-size:10px;background:#f3e8ff;color:#6c3d91;padding:2px 6px;border-radius:10px;display:inline-block;font-weight:600">Respuestas abiertas</div>' : '');
+    card.onmouseover = function(){ this.style.borderColor=g.color; this.style.background='var(--wine-light)'; };
+    card.onmouseout  = function(){ this.style.borderColor='var(--border)'; this.style.background='var(--surface)'; };
+    card.onclick = function(){ selectDashIndicador(ind, g); };
+    grid.appendChild(card);
+  });
+}
+
+function dashResetGrupo() {
+  if (dashChart) { try { dashChart.destroy(); } catch(e){} dashChart = null; }
+  renderGrupoSelector();
+}
+function dashResetIndicador() {
+  var g = DASH_GRUPOS.find(function(x){ return x.key===dashGrupo; });
+  if (g) selectDashGrupo(g);
+}
+
+/* ── STEP 3: Visualización del indicador ── */
+function selectDashIndicador(ind, g) {
+  document.getElementById('dash-step2').style.display = 'none';
+  document.getElementById('dash-step3').style.display = 'block';
+  document.getElementById('dash-bc-grupo').textContent = g.icon + ' ' + g.label;
+  document.getElementById('dash-bc-indicador').textContent = ind.label;
+  if (dashChart) { try { dashChart.destroy(); } catch(e){} dashChart = null; }
+
+  var viz = document.getElementById('dash-viz');
+  viz.innerHTML = '';
+
+  var rows = dashData.filter(function(r){ return r.grupo === g.key; });
+
+  // RESPUESTAS ABIERTAS
+  if (ind.key === '_abierta' || ind.key === '_silabo') {
+    renderAbiertas(viz, rows, ind.instr, g);
+    return;
+  }
+
+  // DECISIÓN (texto, no número) — I6 decision
+  if (ind.key === 'decision') {
+    renderDecision(viz, rows, g);
+    return;
+  }
+
+  // INDICADOR NUMÉRICO — semáforo + gráfico de barras + comparativa entre grupos
+  renderNumerico(viz, rows, ind, g);
+}
+
+function semColor(v) { return v>=75?'green':v>=50?'yellow':'red'; }
+function semInterp(v) { return v>=90?'Sobresaliente':v>=75?'Adecuado':v>=50?'Básico':'Deficiente'; }
+
+function renderNumerico(viz, rows, ind, g) {
+  var vals = rows.filter(function(r){ return r.ind[ind.instr] && r.ind[ind.instr][ind.key] !== undefined; })
+                 .map(function(r){ return r.ind[ind.instr][ind.key]; });
+  var avg = vals.length ? Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length) : null;
+
+  // KPI card
+  var kpi = document.createElement('div');
+  kpi.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem';
+  kpi.innerHTML = '<div class="kpi"><div class="kpi-val" style="color:var(--wine)">'+(avg!==null?avg+'%':'—')+'</div><div class="kpi-label">Promedio '+g.label+'</div></div>'
+    +'<div class="kpi"><div class="kpi-val" style="color:var(--success)">'+(avg!==null?semInterp(avg):'—')+'</div><div class="kpi-label">Nivel</div></div>'
+    +'<div class="kpi"><div class="kpi-val" style="color:var(--gold)">'+vals.length+'</div><div class="kpi-label">Respuestas</div></div>';
+  viz.appendChild(kpi);
+
+  // Semáforo
+  if (avg !== null) {
+    var c = semColor(avg);
+    var sem = document.createElement('div');
+    sem.className = 'semaforo sem-'+c;
+    sem.style.marginBottom = '1.5rem';
+    sem.innerHTML = '<div class="sem-dot sem-dot-'+c+'"></div>'
+      +'<div class="sem-label" style="font-size:14px">'+ind.label+'</div>'
+      +'<div class="sem-bar-wrap"><div class="sem-bar" style="width:'+avg+'%;background:'+(c==='green'?'#10b981':c==='yellow'?'#f59e0b':'#ef4444')+'"></div></div>'
+      +'<div class="sem-val">'+avg+'%<br><span style="font-size:10px;font-weight:400">'+semInterp(avg)+'</span></div>';
+    viz.appendChild(sem);
+  }
+
+  // Comparativa entre grupos — mismo indicador
+  var compVals = [];
+  var compLabels = [];
+  var compColors = [];
+  DASH_GRUPOS.forEach(function(gg) {
+    var gRows = dashData.filter(function(r){ return r.grupo===gg.key; });
+    var gVals = gRows.filter(function(r){ return r.ind[ind.instr] && r.ind[ind.instr][ind.key]!==undefined; })
+                     .map(function(r){ return r.ind[ind.instr][ind.key]; });
+    if (gVals.length) {
+      compLabels.push(gg.icon+' '+gg.label);
+      compVals.push(Math.round(gVals.reduce(function(a,b){return a+b;},0)/gVals.length));
+      compColors.push(gg.color);
+    }
+  });
+
+  if (compLabels.length > 1) {
+    var compTitle = document.createElement('div');
+    compTitle.className = 'section-title';
+    compTitle.textContent = 'Comparativa entre grupos';
+    viz.appendChild(compTitle);
+    var canvasWrap = document.createElement('div');
+    canvasWrap.style.cssText = 'background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem';
+    var canvas = document.createElement('canvas');
+    canvas.id = 'dash-chart-main';
+    canvas.height = 180;
+    canvasWrap.appendChild(canvas);
+    viz.appendChild(canvasWrap);
+    dashChart = new Chart(canvas, {
+      type: 'bar',
+      data: { labels: compLabels, datasets: [{
+        label: ind.label, data: compVals,
+        backgroundColor: compColors.map(function(c){ return c+'cc'; }),
+        borderColor: compColors, borderWidth: 1.5, borderRadius: 6
+      }]},
+      options: { responsive:true, scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+'%';}}}},
+        plugins:{legend:{display:false}} }
+    });
+  }
+
+  // Individual responses table
+  if (vals.length) {
+    var tTitle = document.createElement('div');
+    tTitle.className = 'section-title';
+    tTitle.textContent = 'Respuestas individuales';
+    viz.appendChild(tTitle);
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden';
+    var tbl = document.createElement('table');
+    tbl.className = 'resp-table';
+    tbl.innerHTML = '<thead><tr><th>Participante</th><th>Especialidad</th><th>Fecha</th><th>Valor</th><th>Nivel</th></tr></thead>';
+    var tbody = document.createElement('tbody');
+    rows.filter(function(r){ return r.ind[ind.instr] && r.ind[ind.instr][ind.key]!==undefined; })
+        .forEach(function(r) {
+          var v = r.ind[ind.instr][ind.key];
+          var c = semColor(v);
+          var dotColor = c==='green'?'#10b981':c==='yellow'?'#f59e0b':'#ef4444';
+          var tr = document.createElement('tr');
+          tr.innerHTML = '<td style="font-weight:500">'+(r.nombre||'—')+'</td>'
+            +'<td>'+(r.esp||'—')+'</td>'
+            +'<td>'+( r.fecha ? new Date(r.fecha).toLocaleDateString('es-PE') : '—')+'</td>'
+            +'<td style="font-weight:700">'+v+'%</td>'
+            +'<td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:'+dotColor+'"></span>'+semInterp(v)+'</span></td>';
+          tbody.appendChild(tr);
+        });
+    tbl.appendChild(tbody);
+    wrap.appendChild(tbl);
+    viz.appendChild(wrap);
+  }
+}
+
+function renderDecision(viz, rows, g) {
+  var counts = {};
+  rows.forEach(function(r){ var d=r.ind.I6&&r.ind.I6.decision; if(d){counts[d]=(counts[d]||0)+1;} });
+  if (!Object.keys(counts).length) {
+    viz.innerHTML = '<p style="color:var(--ink-light);font-style:italic;font-size:13px">Sin datos de decisión para este grupo.</p>';
+    return;
+  }
+  var decColors = {'Mantener':'#10b981','Mantener con ajustes':'#f59e0b','Revisar':'#f97316','Reemplazar/Rediseñar':'#ef4444'};
+  Object.keys(counts).forEach(function(d) {
+    var pct = Math.round((counts[d]/rows.length)*100);
+    var col = decColors[d]||'#999';
+    var sem = document.createElement('div');
+    sem.className = 'semaforo';
+    sem.style.cssText = 'border:1px solid '+col+'22;background:'+col+'11;margin-bottom:8px';
+    sem.innerHTML = '<div class="sem-dot" style="background:'+col+'"></div>'
+      +'<div class="sem-label">'+d+'</div>'
+      +'<div class="sem-bar-wrap"><div class="sem-bar" style="width:'+pct+'%;background:'+col+'"></div></div>'
+      +'<div class="sem-val">'+counts[d]+' resp.</div>';
+    viz.appendChild(sem);
+  });
+  var canvasWrap = document.createElement('div');
+  canvasWrap.style.cssText='background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-top:1rem';
+  var canvas = document.createElement('canvas'); canvas.height=180;
+  canvasWrap.appendChild(canvas); viz.appendChild(canvasWrap);
+  dashChart = new Chart(canvas, {
+    type:'doughnut',
+    data:{ labels:Object.keys(counts), datasets:[{data:Object.values(counts),
+      backgroundColor:Object.keys(counts).map(function(d){return decColors[d]||'#999';}), borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}
+  });
+}
+
+function renderAbiertas(viz, rows, instrId, g) {
+  var questions = OPEN_QUESTIONS[instrId] || [];
+  var hasAny = false;
+
+  // Special: I4 sílabos observations
+  if (instrId === 'I4') {
+    rows.forEach(function(r) {
+      var sil = r.res.I4 && r.res.I4.silabo;
+      if (!sil) return;
+      var keys = Object.keys(sil).filter(function(k){ return k.endsWith('_obs') && sil[k]; });
+      if (!keys.length) return;
+      hasAny = true;
+      var card = document.createElement('div');
+      card.style.cssText='background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem';
+      card.innerHTML='<div style="font-size:12px;font-weight:600;color:var(--wine);margin-bottom:.75rem">'+r.nombre+(r.res.I4.asignatura?' — '+r.res.I4.asignatura:'')+'</div>';
+      keys.forEach(function(k){
+        var criterio = k.replace('_obs','');
+        card.innerHTML+='<div style="margin-bottom:6px"><span style="font-size:10px;text-transform:uppercase;font-weight:700;color:var(--ink-light);letter-spacing:.06em">'+criterio+'</span><p style="font-size:13px;color:var(--ink);margin-top:2px">'+sil[k]+'</p></div>';
+      });
+      viz.appendChild(card);
+    });
+    if (!hasAny) viz.innerHTML='<p style="color:var(--ink-light);font-style:italic;font-size:13px">Aún no hay observaciones registradas.</p>';
+    return;
+  }
+
+  questions.forEach(function(q, qi) {
+    var qIdx = qi+1;
+    var respuestas = [];
+    rows.forEach(function(r) {
+      var ab = r.res[instrId] && r.res[instrId].abiertas;
+      var txt = ab && ab[qIdx];
+      if (txt && txt.trim() && txt.trim().toLowerCase() !== 'nada') respuestas.push({nombre:r.nombre, esp:r.esp, txt:txt.trim()});
+    });
+    if (!respuestas.length) return;
+    hasAny = true;
+
+    var section = document.createElement('div');
+    section.style.marginBottom = '1.5rem';
+    var qTitle = document.createElement('div');
+    qTitle.className = 'section-title';
+    qTitle.textContent = qIdx+'. '+q;
+    section.appendChild(qTitle);
+
+    respuestas.forEach(function(r) {
+      var card = document.createElement('div');
+      card.style.cssText='background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:8px;border-left:3px solid var(--wine)';
+      card.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--ink-light);margin-bottom:5px">'+r.nombre+(r.esp?' · '+r.esp:'')+'</div>'
+        +'<p style="font-size:13px;color:var(--ink);line-height:1.6;margin:0">'+r.txt+'</p>';
+      section.appendChild(card);
+    });
+    viz.appendChild(section);
+  });
+
+  if (!hasAny) viz.innerHTML='<p style="color:var(--ink-light);font-style:italic;font-size:13px">Aún no hay respuestas abiertas registradas para este grupo.</p>';
+}
+
+
+</script>
+<!-- PAGE 5: DASHBOARD — full screen overlay outside layout -->
+<div id="page5" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:var(--surface-2)">
+<div style="height:100%;overflow-y:auto">
+<div style="max-width:1000px;margin:0 auto;padding:1.25rem 1.5rem 4rem">
+
+  <!-- HEADER -->
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border-light)">
+    <button class="dash-back" onclick="closeDashboard()" style="margin-bottom:0">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Volver
+    </button>
+    <div>
+      <h2 style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:400">Dashboard — Plan 24 EPMV</h2>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <span id="dash-total-badge" style="font-size:11px;background:var(--wine-light);border:1px solid var(--wine-mid);color:var(--wine);padding:4px 10px;border-radius:20px;font-weight:600"></span>
+      <button class="btn btn-ghost" onclick="loadDashboard()" style="font-size:12px;padding:6px 14px;min-height:36px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="dash-loading" style="text-align:center;padding:3rem;color:var(--ink-light)">
+    <div class="dot-loader" style="justify-content:center;margin-bottom:8px"><span></span><span></span><span></span></div>
+    Conectando con Google Sheets…
+  </div>
+
+  <!-- ERROR -->
+  <div id="dash-error" style="display:none">
+    <div class="alert alert-warn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div><strong>No se pudieron cargar los datos.</strong><br>
+        <span id="dash-error-msg" style="font-size:12px"></span><br>
+        <span style="font-size:12px">Verifica que el doGet esté actualizado y publicado como "Cualquier usuario".</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="dash-content" style="display:none">
+
+    <!-- STEP 1: Selector de grupo -->
+    <div id="dash-step1">
+      <div class="section-title">Selecciona un grupo</div>
+      <div id="dash-grupo-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:1.5rem"></div>
+    </div>
+
+    <!-- STEP 2: Selector de indicador (aparece tras seleccionar grupo) -->
+    <div id="dash-step2" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+        <button onclick="dashResetGrupo()" style="background:none;border:none;cursor:pointer;color:var(--ink-light);font-size:12px;display:flex;align-items:center;gap:4px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Todos los grupos
+        </button>
+        <span style="color:var(--border);font-size:12px">/</span>
+        <span id="dash-grupo-label" style="font-size:13px;font-weight:600;color:var(--wine)"></span>
+      </div>
+      <div class="section-title">Selecciona un indicador</div>
+      <div id="dash-indicador-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:1.5rem"></div>
+    </div>
+
+    <!-- STEP 3: Vista del indicador -->
+    <div id="dash-step3" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem">
+        <button onclick="dashResetGrupo()" style="background:none;border:none;cursor:pointer;color:var(--ink-light);font-size:12px;display:flex;align-items:center;gap:4px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Grupos
+        </button>
+        <span style="color:var(--border);">/</span>
+        <button onclick="dashResetIndicador()" style="background:none;border:none;cursor:pointer;color:var(--ink-light);font-size:12px" id="dash-bc-grupo"></button>
+        <span style="color:var(--border);">/</span>
+        <span id="dash-bc-indicador" style="font-size:12px;font-weight:600;color:var(--ink)"></span>
+      </div>
+      <div id="dash-viz"></div>
+    </div>
+
+  </div>
+</div>
+</div>
+</div>
+
+</body>
+</html>
