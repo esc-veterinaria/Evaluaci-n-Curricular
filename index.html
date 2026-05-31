@@ -1216,11 +1216,72 @@ function addFodaAsignatura() {
   fodaCount++;
   var n = fodaCount;
 
+  // Dimensiones con criterios diferenciados según corrección metodológica
   var dims = [
-    {key:'F',label:'Fortalezas',cls:'foda-q-F'},
-    {key:'O',label:'Oportunidades',cls:'foda-q-O'},
-    {key:'D',label:'Debilidades',cls:'foda-q-D'},
-    {key:'A',label:'Amenazas',cls:'foda-q-A'}
+    {key:'F', label:'Fortalezas',   cls:'foda-q-F', tipo:'F',
+     criterios:[
+       {field:'relevancia',      opts:['Relevancia','1-Baja','2-Moderada','3-Alta','4-Muy alta']},
+       {field:'evidencia',       opts:['Evidencia','1-Débil','2-Parcial','3-Clara','4-Sólida']},
+       {field:'sostenibilidad',  opts:['Sostenibilidad','1-Difícil','2-Parcial','3-Sostenible','4-Muy sostenible']}
+     ],
+     formula:'Relevancia + Evidencia + Sostenibilidad',
+     resultado:'Prioridad de fortalecimiento',
+     rangos:[
+       {min:11,max:12,cat:'Fortaleza estratégica',  color:'#10b981'},
+       {min:9, max:10,cat:'Fortaleza consolidada',  color:'#34d399'},
+       {min:7, max:8, cat:'Fortaleza útil',         color:'#fbbf24'},
+       {min:5, max:6, cat:'Fortaleza débil',        color:'#f97316'},
+       {min:3, max:4, cat:'No verificable',         color:'#ef4444'}
+     ]
+    },
+    {key:'O', label:'Oportunidades', cls:'foda-q-O', tipo:'O',
+     criterios:[
+       {field:'pertinencia',     opts:['Pertinencia','1-Baja','2-Parcial','3-Alta','4-Muy alta']},
+       {field:'viabilidad',      opts:['Viabilidad','1-Difícil','2-Parcial','3-Viable','4-Muy viable']},
+       {field:'impacto',         opts:['Impacto potencial','1-Bajo','2-Moderado','3-Alto','4-Muy alto']}
+     ],
+     formula:'Pertinencia + Viabilidad + Impacto potencial',
+     resultado:'Prioridad de aprovechamiento',
+     rangos:[
+       {min:11,max:12,cat:'Oportunidad estratégica',color:'#10b981'},
+       {min:9, max:10,cat:'Oportunidad alta',       color:'#34d399'},
+       {min:7, max:8, cat:'Oportunidad media',      color:'#fbbf24'},
+       {min:5, max:6, cat:'Oportunidad baja',       color:'#f97316'},
+       {min:3, max:4, cat:'No prioritaria',         color:'#ef4444'}
+     ]
+    },
+    {key:'D', label:'Debilidades',   cls:'foda-q-D', tipo:'DA',
+     criterios:[
+       {field:'impacto',         opts:['Impacto','1-Bajo','2-Moderado','3-Alto','4-Muy alto']},
+       {field:'urgencia',        opts:['Urgencia','1-No urgente','2-Poco urgente','3-Urgente','4-Muy urgente']},
+       {field:'viabilidad',      opts:['Viabilidad de solución','1-Difícil','2-Parcial','3-Viable','4-Muy viable']}
+     ],
+     formula:'Impacto + Urgencia + Viabilidad de solución',
+     resultado:'Prioridad de intervención',
+     rangos:[
+       {min:11,max:12,cat:'Prioridad crítica', color:'#ef4444'},
+       {min:9, max:10,cat:'Prioridad alta',    color:'#f97316'},
+       {min:7, max:8, cat:'Prioridad media',   color:'#fbbf24'},
+       {min:5, max:6, cat:'Prioridad baja',    color:'#34d399'},
+       {min:3, max:4, cat:'Prioridad mínima',  color:'#10b981'}
+     ]
+    },
+    {key:'A', label:'Amenazas',      cls:'foda-q-A', tipo:'DA',
+     criterios:[
+       {field:'impacto',         opts:['Impacto','1-Bajo','2-Moderado','3-Alto','4-Muy alto']},
+       {field:'urgencia',        opts:['Urgencia','1-No urgente','2-Poco urgente','3-Urgente','4-Muy urgente']},
+       {field:'viabilidad',      opts:['Viabilidad de solución','1-Difícil','2-Parcial','3-Viable','4-Muy viable']}
+     ],
+     formula:'Impacto + Urgencia + Viabilidad de solución',
+     resultado:'Prioridad de intervención',
+     rangos:[
+       {min:11,max:12,cat:'Prioridad crítica', color:'#ef4444'},
+       {min:9, max:10,cat:'Prioridad alta',    color:'#f97316'},
+       {min:7, max:8, cat:'Prioridad media',   color:'#fbbf24'},
+       {min:5, max:6, cat:'Prioridad baja',    color:'#34d399'},
+       {min:3, max:4, cat:'Prioridad mínima',  color:'#10b981'}
+     ]
+    }
   ];
 
   var wrap = document.createElement('div');
@@ -1240,97 +1301,145 @@ function addFodaAsignatura() {
   }
   wrap.appendChild(header);
 
-  // Body
   var body = document.createElement('div');
   body.style.padding = '1.25rem';
 
-  // Fields: asignatura + ciclo
-  var fieldsHtml = '<div class="field-grid grid-2" style="margin-bottom:1.25rem">'
-    + '<div class="field"><label>Asignatura <span class="req">*</span></label>'
-    + '<input type="text" placeholder="Nombre de la asignatura"></div>'
-    + '<div class="field"><label>Ciclo</label>'
-    + '<input type="text" placeholder="Ej. III"></div>'
-    + '</div>';
-  body.innerHTML = fieldsHtml;
+  // Datos de la asignatura — selector de curso con ciclo agrupado
+  var FODA_CURSOS = [
+    {ciclo:'I',   nombre:'Manejo Veterinario'},
+    {ciclo:'I',   nombre:'Química'},
+    {ciclo:'I',   nombre:'Introducción a las Ciencias Veterinarias'},
+    {ciclo:'II',  nombre:'Biología Celular'},
+    {ciclo:'II',  nombre:'Bioquímica'},
+    {ciclo:'III', nombre:'Zootecnia General'},
+    {ciclo:'III', nombre:'Bioestadística'},
+    {ciclo:'III', nombre:'Histología Animal'},
+    {ciclo:'III', nombre:'Anatomía Veterinaria'},
+    {ciclo:'IV',  nombre:'Microbiología Veterinaria'},
+    {ciclo:'IV',  nombre:'Inmunología Veterinaria'},
+    {ciclo:'IV',  nombre:'Deontología y Legislación Veterinaria'},
+    {ciclo:'IV',  nombre:'Fisiología Animal'},
+    {ciclo:'IV',  nombre:'Alimentación y Nutrición Animal'},
+    {ciclo:'IV',  nombre:'Diseño Estadístico'},
+    {ciclo:'V',   nombre:'Patología Veterinaria I'},
+    {ciclo:'V',   nombre:'Control de Calidad e Inocuidad de los Alimentos'},
+    {ciclo:'V',   nombre:'Farmacología y Toxicología Veterinaria'},
+    {ciclo:'V',   nombre:'Patología Clínica Veterinaria'},
+    {ciclo:'V',   nombre:'Semiología Veterinaria'},
+    {ciclo:'V',   nombre:'Biotecnología de la Reproducción y Mejoramiento Animal'},
+    {ciclo:'V',   nombre:'Experiencia Supervisada I'}
+  ];
 
-  // Bind inputs to state
-  var inputs = body.querySelectorAll('input');
-  inputs[0].oninput = (function(i){ return function(){ state.respuestas.I3.asignaturas[i].asignatura = this.value; }; })(idx);
-  inputs[1].oninput = (function(i){ return function(){ state.respuestas.I3.asignaturas[i].ciclo = this.value; }; })(idx);
+  // Build select with optgroups by ciclo
+  var selHtml = '<div class="field" style="margin-bottom:1.25rem"><label>Asignatura <span class="req">*</span></label>'
+    + '<select id="foda_curso_sel_'+n+'"><option value="">— Seleccione asignatura —</option>';
+  var currentCiclo = '';
+  FODA_CURSOS.forEach(function(c) {
+    if (c.ciclo !== currentCiclo) {
+      if (currentCiclo !== '') selHtml += '</optgroup>';
+      selHtml += '<optgroup label="Ciclo ' + c.ciclo + '">';
+      currentCiclo = c.ciclo;
+    }
+    selHtml += '<option value="'+c.nombre+'|'+c.ciclo+'">'+c.nombre+'</option>';
+  });
+  selHtml += '</optgroup></select></div>';
+  body.innerHTML = selHtml;
 
-  // FODA grid title
-  var t1 = document.createElement('div');
-  t1.className = 'section-title';
-  t1.textContent = 'Matriz FODA';
-  body.appendChild(t1);
+  var sel = body.querySelector('select');
+  sel.onchange = (function(i){ return function(){
+    var parts = this.value.split('|');
+    state.respuestas.I3.asignaturas[i].asignatura = parts[0] || '';
+    state.respuestas.I3.asignaturas[i].ciclo = parts[1] || '';
+  }; })(idx);
 
-  // Info alert
-  var alert = document.createElement('div');
-  alert.className = 'alert alert-info';
-  alert.style.marginBottom = '1rem';
-  alert.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Impacto + Urgencia + Viabilidad = Prioridad';
-  body.appendChild(alert);
+  // Nota metodológica
+  var nota = document.createElement('div');
+  nota.className = 'alert alert-info';
+  nota.style.marginBottom = '1.25rem';
+  nota.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+    + '<span><strong>Criterios diferenciados por dimensión:</strong> Fortalezas → Relevancia+Evidencia+Sostenibilidad · Oportunidades → Pertinencia+Viabilidad+Impacto · Debilidades y Amenazas → Impacto+Urgencia+Viabilidad de solución</span>';
+  body.appendChild(nota);
 
-  // FODA grid
-  var grid = document.createElement('div');
-  grid.className = 'foda-grid';
+  // Construir cuadrantes FODA
   dims.forEach(function(d) {
-    var quad = document.createElement('div');
-    quad.className = 'foda-quadrant';
-    var qHeader = document.createElement('div');
-    qHeader.className = 'foda-q-header ' + d.cls;
-    qHeader.textContent = d.label;
-    quad.appendChild(qHeader);
-    var qBody = document.createElement('div');
-    qBody.className = 'foda-q-body';
+    var secTitle = document.createElement('div');
+    secTitle.className = 'section-title';
+    secTitle.textContent = d.label + ' — ' + d.formula;
+    body.appendChild(secTitle);
+
+    // Tabla de entradas
     for (var ei = 1; ei <= 2; ei++) {
       var entry = document.createElement('div');
-      entry.className = 'foda-entry';
+      entry.style.cssText = 'border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:1rem;margin-bottom:10px;background:var(--surface-2)';
+
+      // Textarea para hallazgo
+      var taLabel = document.createElement('div');
+      taLabel.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-light);margin-bottom:6px';
+      taLabel.textContent = d.label.slice(0,-1) + ' ' + ei;
+      entry.appendChild(taLabel);
+
       var ta = document.createElement('textarea');
       ta.rows = 2;
-      ta.placeholder = d.label.slice(0,-1) + ' ' + ei + '…';
-      ta.style.marginBottom = '6px';
+      ta.placeholder = 'Describa el hallazgo…';
+      ta.style.cssText = 'width:100%;margin-bottom:10px;font-size:13px';
       ta.oninput = (function(asigI, dk, en){ return function(){ setFodaA(asigI, dk, en, 'hallazgo', this.value); }; })(idx, d.key, ei);
       entry.appendChild(ta);
-      var prow = document.createElement('div');
-      prow.className = 'foda-priority-row';
-      [
-        {field:'impacto', opts:['Impacto','1-Bajo','2-Moderado','3-Alto','4-Muy alto']},
-        {field:'urgencia', opts:['Urgencia','1-No urgente','2-Poco','3-Urgente','4-Muy urgente']},
-        {field:'viabilidad', opts:['Viabilidad','1-Difícil','2-Parcial','3-Viable','4-Muy viable']}
-      ].forEach(function(sel) {
+
+      // Selectores de criterios
+      var selRow = document.createElement('div');
+      selRow.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px';
+      d.criterios.forEach(function(crit) {
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;flex-direction:column;gap:3px';
+
+        // Label + help button row
+        var labelRow = document.createElement('div');
+        labelRow.style.cssText = 'display:flex;align-items:center;gap:4px';
+        var lbl = document.createElement('span');
+        lbl.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-light)';
+        lbl.textContent = crit.opts[0];
+        labelRow.appendChild(lbl);
+        var hBtn = document.createElement('button');
+        hBtn.className = 'help-btn';
+        hBtn.textContent = '?';
+        hBtn.title = 'Explicar este criterio';
+        hBtn.onclick = (function(dk, critName){ return function(){ openFodaCriterioHelp(dk, critName); }; })(d.key, crit.field);
+        labelRow.appendChild(hBtn);
+        wrap.appendChild(labelRow);
+
         var s = document.createElement('select');
         s.className = 'foda-mini-select';
-        sel.opts.forEach(function(opt, oi) {
+        crit.opts.forEach(function(opt, oi) {
           var o = document.createElement('option');
           o.value = oi === 0 ? '' : String(oi);
           o.textContent = opt;
           s.appendChild(o);
         });
-        s.onchange = (function(asigI, dk, en, fld){ return function(){ setFodaA(asigI, dk, en, fld, this.value); }; })(idx, d.key, ei, sel.field);
-        prow.appendChild(s);
+        s.onchange = (function(asigI, dk, en, fld){
+          return function(){ setFodaA(asigI, dk, en, fld, this.value); };
+        })(idx, d.key, ei, crit.field);
+        wrap.appendChild(s);
+        selRow.appendChild(wrap);
       });
-      entry.appendChild(prow);
-      qBody.appendChild(entry);
-    }
-    quad.appendChild(qBody);
-    grid.appendChild(quad);
-  });
-  body.appendChild(grid);
+      entry.appendChild(selRow);
 
-  // Closed questions title
+
+
+      body.appendChild(entry);
+    }
+  });
+
+  // Preguntas cerradas
   var t2 = document.createElement('div');
   t2.className = 'section-title';
   t2.style.marginTop = '1.5rem';
-  t2.textContent = 'Preguntas cerradas';
+  t2.textContent = 'Preguntas cerradas complementarias';
   body.appendChild(t2);
 
-  // Scale legend
   var leg = document.createElement('div');
   leg.innerHTML = SCALE_LEGEND;
   body.appendChild(leg);
 
-  // Scale rows
   var closedItems = [
     'La asignatura contribuye claramente al perfil de egreso.',
     'La sumilla está actualizada.',
@@ -1373,11 +1482,87 @@ function addFodaAsignatura() {
   wrap.appendChild(body);
   container.appendChild(wrap);
 }
+
+function calcFodaPriority(asigIdx, dim, num, entryEl, rangos, resultado) {
+  var foda = state.respuestas.I3.asignaturas[asigIdx].foda;
+  var key = dim + num;
+  var entry = foda[key] || {};
+
+  // Get the three criteria values based on dimension type
+  var v1, v2, v3;
+  if (dim === 'F') {
+    v1 = parseInt(entry.relevancia||0);
+    v2 = parseInt(entry.evidencia||0);
+    v3 = parseInt(entry.sostenibilidad||0);
+  } else if (dim === 'O') {
+    v1 = parseInt(entry.pertinencia||0);
+    v2 = parseInt(entry.viabilidad||0);
+    v3 = parseInt(entry.impacto||0);
+  } else {
+    v1 = parseInt(entry.impacto||0);
+    v2 = parseInt(entry.urgencia||0);
+    v3 = parseInt(entry.viabilidad||0);
+  }
+
+  if (!v1 || !v2 || !v3) return;
+  var total = v1 + v2 + v3;
+
+  // Save total
+  if (!state.respuestas.I3.asignaturas[asigIdx].foda[key]) state.respuestas.I3.asignaturas[asigIdx].foda[key] = {};
+  state.respuestas.I3.asignaturas[asigIdx].foda[key].total = total;
+
+  var cat = rangos[rangos.length-1].cat;
+  var color = rangos[rangos.length-1].color;
+  for (var i = 0; i < rangos.length; i++) {
+    if (total >= rangos[i].min && total <= rangos[i].max) {
+      cat = rangos[i].cat; color = rangos[i].color; break;
+    }
+  }
+
+  var prioDiv = document.getElementById('foda_prio_' + asigIdx + '_' + dim + '_' + num);
+  if (prioDiv) {
+    prioDiv.style.display = 'block';
+    prioDiv.style.background = color + '22';
+    prioDiv.style.border = '1px solid ' + color;
+    prioDiv.style.color = color;
+    prioDiv.textContent = resultado + ': ' + total + '/12 — ' + cat;
+  }
+}
+
 function setFodaA(asigIdx, dim, num, field, val) {
   if (!state.respuestas.I3 || !state.respuestas.I3.asignaturas) return;
-  var key = dim+num;
-  if (!state.respuestas.I3.asignaturas[asigIdx].foda[key]) state.respuestas.I3.asignaturas[asigIdx].foda[key]={};
+  var key = dim + num;
+  if (!state.respuestas.I3.asignaturas[asigIdx].foda[key]) state.respuestas.I3.asignaturas[asigIdx].foda[key] = {};
   state.respuestas.I3.asignaturas[asigIdx].foda[key][field] = val;
+}
+
+var FODA_CRITERIO_HELP = {
+  F: {
+    relevancia:     'Relevancia (Fortalezas): ¿Qué tan importante es esta fortaleza para el logro de competencias? Una fortaleza relevante es aquella que contribuye directamente al desarrollo de las competencias específicas de la asignatura.',
+    evidencia:      'Evidencia (Fortalezas): ¿Qué tan comprobable es esta fortaleza? Una fortaleza con evidencia sólida puede demostrarse con documentos, resultados de evaluación u otros registros verificables.',
+    sostenibilidad: 'Sostenibilidad (Fortalezas): ¿Qué tan posible es mantener esta fortaleza en el tiempo? Considera recursos disponibles, compromiso docente y condiciones institucionales.'
+  },
+  O: {
+    pertinencia:  'Pertinencia (Oportunidades): ¿La oportunidad se relaciona con la mejora curricular de la asignatura? Una oportunidad pertinente tiene relación directa con los objetivos formativos del curso.',
+    viabilidad:   'Viabilidad (Oportunidades): ¿Puede aprovecharse esta oportunidad con los recursos disponibles o ajustes razonables? Considera tiempo, presupuesto y capacidad institucional.',
+    impacto:      'Impacto potencial (Oportunidades): ¿Cuánto podría mejorar el curso o el logro de competencias si se aprovecha esta oportunidad?'
+  },
+  D: {
+    impacto:    'Impacto (Debilidades): ¿Cuánto afecta esta debilidad el logro de competencias? Una debilidad de alto impacto limita significativamente el desempeño esperado de los estudiantes.',
+    urgencia:   'Urgencia (Debilidades): ¿Qué tan pronto debe atenderse esta debilidad? Considera si la debilidad afecta el ciclo actual o puede postergarse.',
+    viabilidad: 'Viabilidad de solución (Debilidades): ¿Qué tan posible es implementar una solución? Considera los recursos y condiciones necesarias para resolver el problema.'
+  },
+  A: {
+    impacto:    'Impacto (Amenazas): ¿Cuánto podría afectar esta amenaza el desarrollo de la asignatura? Una amenaza de alto impacto puede comprometer seriamente el logro de competencias.',
+    urgencia:   'Urgencia (Amenazas): ¿Con qué rapidez debe tomarse una acción preventiva ante esta amenaza?',
+    viabilidad: 'Viabilidad de solución (Amenazas): ¿Qué tan factible es mitigar o prevenir esta amenaza con los recursos disponibles?'
+  }
+};
+
+function openFodaCriterioHelp(dim, field) {
+  var texto = (FODA_CRITERIO_HELP[dim] && FODA_CRITERIO_HELP[dim][field])
+    || 'Evalúe este criterio del 1 al 4 según el nivel que corresponda.';
+  openHelp(texto, 'I3');
 }
 
 function setFodaAClosed(asigIdx, itemIdx, val) {
@@ -1396,6 +1581,7 @@ function removeFodaAsig(idx, blockId) {
   var el = document.getElementById(blockId);
   if (el) el.remove();
 }
+
 
 /* ══════════════════════════════════════════════
    INSTRUMENTO 4 — SÍLABOS
@@ -1797,7 +1983,8 @@ Tu tarea: Explicar ÚNICAMENTE este ítem específico. No des una explicación g
     if (text) {
       content.innerHTML = `<p style="line-height:1.7">${text.replace(/\n/g,'<br>')}</p>`;
     } else {
-      content.innerHTML = `<p>${getStaticHelp(question, instrId)}</p>`;
+      var helpText = getStaticHelp(question, instrId);
+      content.innerHTML = helpText ? '<p>' + helpText + '</p>' : '';
     }
   })
   .catch(() => {
@@ -1908,7 +2095,7 @@ function getStaticHelp(question, instrId) {
   const generic = {
     I1: "Evalúe qué tan bien el perfil de egreso refleja este aspecto. 1=ausente o muy débil, 2=existe pero insuficiente, 3=funciona aceptablemente, 4=es una fortaleza clara.",
     I2: "Evalúe este aspecto de la organización del plan de estudios. 1=presenta problemas importantes, 2=hay avances pero insuficientes, 3=funciona aceptablemente, 4=está muy bien resuelto.",
-    I3: "Evalúe este aspecto de la asignatura en el contexto del FODA. 1=deficiente, 2=básico, 3=adecuado, 4=sobresaliente.",
+    I3: "",
     I6: "Evalúe si este curso satélite cumple este criterio. 1=no cumple, 2=cumple parcialmente, 3=cumple bien, 4=cumple de forma sobresaliente.",
     I7: "Reflexione sobre su experiencia real como egresado para responder este ítem. 1=no me preparó, 2=preparación insuficiente, 3=preparación adecuada, 4=preparación sobresaliente.",
     I8: "Evalúe el desempeño observable del estudiante o egresado en este aspecto. 1=deficiente, 2=básico, 3=adecuado, 4=sobresaliente.",
@@ -1916,7 +2103,7 @@ function getStaticHelp(question, instrId) {
     I10: "Evalúa este aspecto basándote en tu experiencia real en la carrera. 1=muy mal, 2=insuficiente, 3=bien, 4=muy bien."
   };
   // Si el ítem exacto no está en el diccionario, construir respuesta específica con el texto del ítem
-  const base = generic[instrId] || "Evalúe este aspecto del Plan Curricular 24 de la EPMV según su experiencia.";
+  const base = generic[instrId] !== undefined ? generic[instrId] : "Evalúe este aspecto del Plan Curricular 24 de la EPMV según su experiencia.";
   // Extraer palabras clave del ítem para personalizar mínimamente
   const q = question.toLowerCase();
   if (q.includes('investig')) return "Este ítem evalúa específicamente la dimensión investigativa: si la formación desarrolló capacidad para formular problemas, aplicar metodología y producir conocimiento. 1=no se desarrolló esa capacidad, 4=es una fortaleza clara.";
@@ -1924,7 +2111,6 @@ function getStaticHelp(question, instrId) {
   if (q.includes('sílabo') || q.includes('silabo')) return "Este ítem verifica si el sílabo cumple este requisito de alineamiento. Revise el documento del sílabo y responda según lo que realmente encuentra, no lo que debería haber.";
   if (q.includes('biosegur')) return "Evalúe si el estudiante o egresado aplica correctamente los protocolos de bioseguridad: uso de EPP, manejo de residuos, prevención de contagios. 1=no los aplica, 4=los aplica de forma rigurosa y consistente.";
   if (q.includes('bienestar')) return "Evalúe si el manejo de los animales respeta su bienestar: minimiza el estrés, evita el dolor innecesario y aplica las 5 libertades. 1=no muestra conciencia de bienestar animal, 4=lo integra en toda su práctica.";
-  if (q.includes('digital') || q.includes('ia') || q.includes('tecnolog')) return "Este ítem evalúa la preparación para el ejercicio profesional en entornos digitales: uso de registros electrónicos, telemedicina, bases de datos o inteligencia artificial. 1=no tiene preparación digital, 4=domina herramientas digitales del contexto veterinario.";
   return base;
 }
 
