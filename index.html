@@ -2324,21 +2324,26 @@ function parseCSV(text) {
 }
 
 function onDashDataLoaded(rows) {
-  dashData = parseRows(rows);
-  document.getElementById('dash-loading').style.display = 'none';
-  document.getElementById('dash-content').style.display = 'block';
-  renderGrupoSelector();
-}
-
-function parseRows(rows) {
-  return rows.map(function(r) {
+  // rows ya vienen con claves de columna como strings
+  dashData = rows.map(function(r) {
     var ind = r['Indicadores (JSON)'];
     var res = r['Respuestas (JSON)'];
     if (typeof ind === 'string') { try { ind = JSON.parse(ind); } catch(e){ ind = {}; } }
     if (typeof res === 'string') { try { res = JSON.parse(res); } catch(e){ res = {}; } }
-    return { grupo: r['Grupo']||'', nombre: r['Nombre']||'', fecha: r['Fecha']||'',
-             esp: r['Especialidad']||'', ind: ind||{}, res: res||{} };
-  });
+    // Normalizar claves — el CSV puede tener mayúsculas/minúsculas variadas
+    return {
+      grupo:  r['Grupo']  || r['grupo']  || '',
+      nombre: r['Nombre'] || r['nombre'] || '',
+      fecha:  r['Fecha']  || r['fecha']  || '',
+      esp:    r['Especialidad'] || r['especialidad'] || '',
+      ind:    (typeof ind === 'object' && ind !== null) ? ind : {},
+      res:    (typeof res === 'object' && res !== null) ? res : {}
+    };
+  }).filter(function(r){ return r.grupo !== ''; });
+
+  document.getElementById('dash-loading').style.display = 'none';
+  document.getElementById('dash-content').style.display = 'block';
+  renderGrupoSelector();
 }
 
 function showDashError(msg) {
