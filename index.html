@@ -2009,24 +2009,38 @@ async function sendData() {
   // Calculate indicators before sending
   payload.indicadores = calcularIndicadores(state.grupo, state.respuestas);
 
-  // Envío via fetch POST — más confiable que form GET para payloads grandes
+  // Envío via GET con payload codificado
   try {
     const jsonStr = JSON.stringify(payload);
-
-    // Intentar fetch POST primero
-    fetch(CONFIG.SHEETS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {'Content-Type': 'application/json'},
-      body: jsonStr
-    }).catch(function(){});
-
-    // También enviar via GET como respaldo (con encoding correcto)
     const encoded = encodeURIComponent(jsonStr);
-    const img = new Image();
-    img.src = CONFIG.SHEETS_URL + '?payload=' + encoded;
+    const url = CONFIG.SHEETS_URL + '?payload=' + encoded;
 
-    setTimeout(showSuccess, 800);
+    // Usar iframe para evitar CORS — mismo método que funciona en pruebas manuales
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.name = 'send_' + Date.now();
+    document.body.appendChild(iframe);
+
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = CONFIG.SHEETS_URL;
+    form.target = iframe.name;
+    form.style.display = 'none';
+
+    const inp = document.createElement('input');
+    inp.type = 'hidden';
+    inp.name = 'payload';
+    inp.value = jsonStr;
+    form.appendChild(inp);
+
+    document.body.appendChild(form);
+    form.submit();
+
+    setTimeout(function(){
+      try { document.body.removeChild(iframe); document.body.removeChild(form); } catch(e){}
+    }, 5000);
+
+    setTimeout(showSuccess, 1000);
   } catch(err) {
     console.error('Error al enviar:', err);
     showSuccess();
