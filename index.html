@@ -2009,36 +2009,24 @@ async function sendData() {
   // Calculate indicators before sending
   payload.indicadores = calcularIndicadores(state.grupo, state.respuestas);
 
-  // Usamos iframe + form GET para evitar bloqueo CORS desde archivos locales
+  // Envío via fetch POST — más confiable que form GET para payloads grandes
   try {
     const jsonStr = JSON.stringify(payload);
-    const iframeName = 'submit_frame_' + Date.now();
 
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.name = iframeName;
-    document.body.appendChild(iframe);
+    // Intentar fetch POST primero
+    fetch(CONFIG.SHEETS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: jsonStr
+    }).catch(function(){});
 
-    const form = document.createElement('form');
-    form.method = 'GET';
-    form.action = CONFIG.SHEETS_URL;
-    form.target = iframeName;
-    form.style.display = 'none';
+    // También enviar via GET como respaldo (con encoding correcto)
+    const encoded = encodeURIComponent(jsonStr);
+    const img = new Image();
+    img.src = CONFIG.SHEETS_URL + '?payload=' + encoded;
 
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'payload';
-    input.value = jsonStr;
-    form.appendChild(input);
-
-    document.body.appendChild(form);
-    form.submit();
-
-    setTimeout(() => {
-      try { document.body.removeChild(iframe); document.body.removeChild(form); } catch(e){}
-    }, 4000);
-
-    showSuccess();
+    setTimeout(showSuccess, 800);
   } catch(err) {
     console.error('Error al enviar:', err);
     showSuccess();
