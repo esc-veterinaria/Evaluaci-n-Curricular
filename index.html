@@ -2366,80 +2366,112 @@ var DASH_GRUPOS = [
   {key:'estudiantes',      label:'Estudiantes',         icon:'📖', color:'#b45309'}
 ];
 
+// Rangos de interpretación según el documento
+var RANGOS = {
+  general:      [{min:90,cat:'Sobresaliente',color:'#10b981'},{min:80,cat:'Alto',color:'#34d399'},{min:70,cat:'Adecuado',color:'#fbbf24'},{min:60,cat:'En proceso',color:'#f97316'},{min:50,cat:'Bajo',color:'#ef4444'},{min:0,cat:'Crítico',color:'#dc2626'}],
+  pertinencia:  [{min:90,cat:'Muy alta pertinencia',color:'#10b981'},{min:80,cat:'Alta pertinencia',color:'#34d399'},{min:70,cat:'Pertinencia aceptable',color:'#fbbf24'},{min:60,cat:'Pertinencia limitada',color:'#f97316'},{min:50,cat:'Baja pertinencia',color:'#ef4444'},{min:0,cat:'No pertinente / crítico',color:'#dc2626'}],
+  coherencia:   [{min:90,cat:'Coherencia plena',color:'#10b981'},{min:80,cat:'Coherencia alta',color:'#34d399'},{min:70,cat:'Coherencia aceptable',color:'#fbbf24'},{min:60,cat:'Coherencia parcial',color:'#f97316'},{min:50,cat:'Coherencia débil',color:'#ef4444'},{min:0,cat:'Incoherencia crítica',color:'#dc2626'}],
+  satisfaccion: [{min:90,cat:'Satisfacción muy alta',color:'#10b981'},{min:80,cat:'Satisfacción alta',color:'#34d399'},{min:70,cat:'Satisfacción aceptable',color:'#fbbf24'},{min:60,cat:'Satisfacción moderada',color:'#f97316'},{min:50,cat:'Satisfacción baja',color:'#ef4444'},{min:0,cat:'Satisfacción crítica',color:'#dc2626'}],
+  brecha:       [{min:0,max:10,cat:'Brecha mínima',color:'#10b981'},{min:11,max:20,cat:'Brecha baja',color:'#34d399'},{min:21,max:30,cat:'Brecha moderada',color:'#fbbf24'},{min:31,max:40,cat:'Brecha alta',color:'#f97316'},{min:41,max:50,cat:'Brecha muy alta',color:'#ef4444'},{min:51,max:100,cat:'Brecha crítica',color:'#dc2626'}]
+};
+
+function getRango(val, tipo, esBrecha) {
+  if (esBrecha) {
+    for (var i=0;i<RANGOS.brecha.length;i++) { if (val>=RANGOS.brecha[i].min && val<=RANGOS.brecha[i].max) return RANGOS.brecha[i]; }
+    return RANGOS.brecha[RANGOS.brecha.length-1];
+  }
+  var scale = RANGOS[tipo] || RANGOS.general;
+  for (var j=0;j<scale.length;j++) { if (val>=scale[j].min) return scale[j]; }
+  return scale[scale.length-1];
+}
+
 var DASH_INDICADORES = {
   expertos: [
-    {id:'I9_pertinencia',   instr:'I9', key:'pertinencia_experta',     label:'Pertinencia del Plan (I9)',      desc:'Qué tan pertinente considera el experto el Plan 24 para su área.'},
-    {id:'I9_practica',      instr:'I9', key:'suficiencia_practica',     label:'Suficiencia práctica (I9)',      desc:'Nivel de práctica y formación aplicada del plan.'},
-    {id:'I9_actualizacion', instr:'I9', key:'actualizacion_profesional',label:'Actualización profesional (I9)', desc:'Qué tan actualizado está el plan respecto a tendencias del sector.'},
-    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global Perfil (I1)',      desc:'Valoración global del perfil de egreso.'},
-    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    desc:'Adecuación del perfil a demandas actuales y futuras.'},
-    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            desc:'Orden lógico y progresivo de las asignaturas.'},
-    {id:'I6_pertinencia',   instr:'I6', key:'pertinencia_satelite',     label:'Cursos satélite (I6)',           desc:'Pertinencia de los cursos satélite para evaluar competencias.'},
-    {id:'I9_abierta',       instr:'I9', key:'_abierta',                 label:'Opiniones abiertas (I9)',        desc:'Recomendaciones concretas de los expertos.'}
+    // I1 Perfil de egreso
+    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Mide si el perfil responde a la profesión y al mercado laboral.'},
+    {id:'I1_coherencia',    instr:'I1', key:'coherencia_competencial',  label:'Coherencia competencial (I1)',   rango:'coherencia',  formula:'Prom. ítems 4,5,6,7 / 4 × 100', desc:'Mide si las competencias específicas están representadas en el perfil.'},
+    {id:'I1_integral',      instr:'I1', key:'formacion_integral',       label:'Formación integral (I1)',        rango:'general',     formula:'Prom. ítems 3 y 11 / 4 × 100', desc:'Mide ética, humanismo, bienestar animal y responsabilidad social.'},
+    {id:'I1_claridad',      instr:'I1', key:'claridad_perfil',          label:'Claridad del perfil (I1)',       rango:'general',     formula:'Ítem 12 / 4 × 100', desc:'Mide si el perfil se entiende con facilidad.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil de egreso.'},
+    {id:'I1_brecha',        instr:'I1', key:'brecha_perfil',            label:'Brecha del perfil (I1)',         rango:'brecha',      formula:'100 − índice global', desc:'Mide cuánto falta mejorar el perfil. A menor brecha, mejor resultado.', esBrecha:true},
+    // I2 Estructura curricular
+    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            rango:'coherencia',  formula:'Prom. ítems 1,2,3 / 4 × 100', desc:'Mide si los cursos siguen una progresión lógica entre ciclos.'},
+    {id:'I2_fluidez',       instr:'I2', key:'fluidez_curricular',       label:'Fluidez curricular (I2)',        rango:'general',     formula:'Prom. ítems 4,5,13 / 4 × 100', desc:'Mide si el estudiante puede avanzar sin obstáculos innecesarios.'},
+    {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           rango:'general',     formula:'Prom. ítems 6,7,8 / 4 × 100', desc:'Mide equilibrio entre créditos, horas teóricas y prácticas.'},
+    {id:'I2_coherencia',    instr:'I2', key:'coherencia_estructural',   label:'Coherencia estructural (I2)',    rango:'coherencia',  formula:'Prom. ítems 9,10,11 / 4 × 100', desc:'Mide ausencia de vacíos, duplicidades o sobrecarga curricular.'},
+    {id:'I2_flexibilidad',  instr:'I2', key:'flexibilidad',             label:'Flexibilidad curricular (I2)',   rango:'general',     formula:'Ítem 12 / 4 × 100', desc:'Mide utilidad de las electivas y rutas formativas disponibles.'},
+    // I9 Expertos
+    {id:'I9_pertinencia',   instr:'I9', key:'pertinencia_experta',      label:'Pertinencia experta (I9)',       rango:'pertinencia', formula:'Prom. ítems 1,2,4,10 / 4 × 100', desc:'Mide vigencia profesional del plan desde la mirada del experto.'},
+    {id:'I9_practica',      instr:'I9', key:'suficiencia_practica',     label:'Suficiencia práctica (I9)',      rango:'general',     formula:'Prom. ítems 5 y 6 / 4 × 100', desc:'Mide si la formación práctica es suficiente para el internado.'},
+    {id:'I9_actualizacion', instr:'I9', key:'actualizacion_profesional',label:'Actualización profesional (I9)', rango:'general',    formula:'Prom. ítems 4,9,10 / 4 × 100', desc:'Mide actualidad disciplinar, tecnológica y prospectiva del plan.'},
+    {id:'I9_abierta',       instr:'I9', key:'_abierta',                 label:'Opiniones abiertas (I9)',        rango:null,          formula:'', desc:'Fortalezas, brechas y recomendaciones de los expertos.'},
+    {id:'I9_aportes',       instr:'I9', key:'_aportes',                 label:'Aportes Parte C (I9)',           rango:null,          formula:'', desc:'Lista de aportes clasificados por área, tipo y decisión sugerida.'}
   ],
   empleadores: [
-    {id:'I8_satisfaccion',  instr:'I8', key:'satisfaccion_empleador',   label:'Satisfacción general (I8)',      desc:'Nivel de satisfacción del empleador con egresados/practicantes.'},
-    {id:'I8_tecnico',       instr:'I8', key:'desempeno_tecnico',        label:'Desempeño técnico (I8)',         desc:'Conocimientos y criterio técnico aplicado en el trabajo.'},
-    {id:'I8_profesional',   instr:'I8', key:'desempeno_profesional',    label:'Desempeño profesional (I8)',     desc:'Actitudes, comunicación y responsabilidad profesional.'},
-    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Valoración del perfil (I1)',     desc:'Cómo valoran el perfil de egreso los empleadores.'},
-    {id:'I8_abierta',       instr:'I8', key:'_abierta',                 label:'Opiniones abiertas (I8)',        desc:'Fortalezas, debilidades y competencias que piden los empleadores.'}
+    {id:'I8_satisfaccion',  instr:'I8', key:'satisfaccion_empleador',   label:'Satisfacción del empleador (I8)',rango:'satisfaccion',formula:'Prom. todos los ítems / 4 × 100', desc:'Mide valoración global del desempeño de estudiantes y egresados.'},
+    {id:'I8_tecnico',       instr:'I8', key:'desempeno_tecnico',        label:'Desempeño técnico (I8)',         rango:'general',     formula:'Prom. ítems 1–5 / 4 × 100', desc:'Mide conocimientos y aplicación técnica veterinaria.'},
+    {id:'I8_profesional',   instr:'I8', key:'desempeno_profesional',    label:'Desempeño profesional (I8)',     rango:'satisfaccion',formula:'Prom. ítems 6–13 / 4 × 100', desc:'Mide responsabilidad, comunicación, bioseguridad y adaptación.'},
+    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Valoración del perfil (I1)',     rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Cómo valoran el perfil de egreso los empleadores.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil por parte de los empleadores.'},
+    {id:'I8_abierta',       instr:'I8', key:'_abierta',                 label:'Opiniones abiertas (I8)',        rango:null,          formula:'', desc:'Fortalezas, debilidades y competencias que demandan los empleadores.'}
   ],
   egresados: [
-    {id:'I7_utilidad',      instr:'I7', key:'utilidad_profesional',     label:'Utilidad profesional (I7)',      desc:'Qué tan útil fue la formación para el ejercicio profesional.'},
-    {id:'I7_insercion',     instr:'I7', key:'insercion_practica',       label:'Inserción práctica (I7)',        desc:'Utilidad del internado y prácticas para el trabajo.'},
-    {id:'I7_brecha_inv',    instr:'I7', key:'brecha_investigacion',     label:'Brecha en investigación (I7)',   desc:'Brecha en competencias de investigación según egresados.'},
-    {id:'I7_digital',       instr:'I7', key:'necesidad_gestion_digital',label:'Gestión y digital (I7)',         desc:'Necesidad de fortalecer gestión, emprendimiento y tecnología.'},
-    {id:'I7_recomendacion', instr:'I7', key:'recomendacion_carrera',    label:'Recomendarían la carrera (I7)', desc:'Porcentaje que recomendaría la carrera.'},
-    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Valoración del perfil (I1)',     desc:'Cómo valoran el perfil los egresados.'},
-    {id:'I7_abierta',       instr:'I7', key:'_abierta',                 label:'Opiniones abiertas (I7)',        desc:'Qué cursos fueron útiles, qué mejorar, qué exige el mercado.'}
+    {id:'I7_utilidad',      instr:'I7', key:'utilidad_profesional',     label:'Utilidad profesional (I7)',      rango:'satisfaccion',formula:'Prom. ítems 1–11 / 4 × 100', desc:'Mide utilidad de la formación en el ejercicio profesional real.'},
+    {id:'I7_insercion',     instr:'I7', key:'insercion_practica',       label:'Inserción práctica (I7)',        rango:'general',     formula:'Prom. ítems 6 y 7 / 4 × 100', desc:'Mide utilidad de prácticas preprofesionales e internado.'},
+    {id:'I7_brecha_inv',    instr:'I7', key:'brecha_investigacion',     label:'Brecha en investigación (I7)',   rango:'brecha',      formula:'100 − ítem 4 convertido a %', desc:'Mide necesidad de fortalecer investigación. A menor brecha, mejor.', esBrecha:true},
+    {id:'I7_digital',       instr:'I7', key:'necesidad_gestion_digital',label:'Necesidad gestión/digital (I7)',rango:'general',     formula:'Prom. ítems 12 y 13 / 4 × 100', desc:'Valor alto indica demanda de fortalecer gestión, emprendimiento o IA.'},
+    {id:'I7_recomendacion', instr:'I7', key:'recomendacion_carrera',    label:'Recomendación de carrera (I7)', rango:'satisfaccion',formula:'Ítem 14 / 4 × 100', desc:'Mide satisfacción global: si recomendarían la carrera.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Valoración del perfil (I1)',     rango:'general',     formula:'Prom. general / 4 × 100', desc:'Cómo valoran el perfil de egreso los egresados.'},
+    {id:'I7_abierta',       instr:'I7', key:'_abierta',                 label:'Opiniones abiertas (I7)',        rango:null,          formula:'', desc:'Cursos útiles, áreas a reforzar y competencias que exige el mercado.'}
   ],
   docentes_p24: [
-    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global Perfil (I1)',      desc:'Valoración del perfil de egreso por docentes Plan 24.'},
-    {id:'I1_coherencia',    instr:'I1', key:'coherencia_competencial',  label:'Coherencia competencial (I1)',   desc:'Qué tan bien articula el perfil las 4 competencias.'},
-    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            desc:'Orden y progresión lógica de asignaturas.'},
-    {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           desc:'Equilibrio entre carga teórica y práctica.'},
-    {id:'I2_coherencia',    instr:'I2', key:'coherencia_estructural',   label:'Coherencia estructural (I2)',    desc:'Coherencia interna del plan de estudios.'},
-    {id:'I6_pertinencia',   instr:'I6', key:'pertinencia_satelite',     label:'Cursos satélite (I6)',           desc:'Pertinencia y diseño de cursos satélite.'},
-    {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        desc:'Aspectos sólidos, mejoras y competencias a fortalecer.'}
+    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Valoración del perfil de egreso por docentes Plan 24.'},
+    {id:'I1_coherencia',    instr:'I1', key:'coherencia_competencial',  label:'Coherencia competencial (I1)',   rango:'coherencia',  formula:'Prom. ítems 4,5,6,7 / 4 × 100', desc:'Articulación del perfil con las 4 competencias específicas.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil por docentes Plan 24.'},
+    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            rango:'coherencia',  formula:'Prom. ítems 1,2,3 / 4 × 100', desc:'Orden y progresión lógica de asignaturas.'},
+    {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           rango:'general',     formula:'Prom. ítems 6,7,8 / 4 × 100', desc:'Equilibrio entre carga teórica y práctica por ciclo.'},
+    {id:'I2_coherencia',    instr:'I2', key:'coherencia_estructural',   label:'Coherencia estructural (I2)',    rango:'coherencia',  formula:'Prom. ítems 9,10,11 / 4 × 100', desc:'Coherencia interna del plan: vacíos, duplicidades y adecuación.'},
+    {id:'I3_foda',          instr:'I3', key:'_abierta',                 label:'Hallazgos FODA por asignatura (I3)', rango:null,      formula:'', desc:'Hallazgos, puntajes de prioridad y categorías por cuadrante y asignatura.'},
+    {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        rango:null,          formula:'', desc:'Aspectos sólidos, mejoras y competencias a fortalecer en el perfil.'}
   ],
   docentes_p52: [
-    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global Perfil (I1)',      desc:'Valoración del perfil de egreso por docentes Plan 52.'},
-    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    desc:'Adecuación del perfil a demandas profesionales.'},
-    {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           desc:'Percepción sobre el equilibrio de carga académica.'},
-    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            desc:'Progresión lógica de asignaturas del plan.'},
-    {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        desc:'Comentarios sobre el perfil y estructura del plan.'}
+    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Valoración del perfil de egreso por docentes Plan 52.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil por docentes Plan 52.'},
+    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            rango:'coherencia',  formula:'Prom. ítems 1,2,3 / 4 × 100', desc:'Orden y progresión lógica de asignaturas en el plan.'},
+    {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           rango:'general',     formula:'Prom. ítems 6,7,8 / 4 × 100', desc:'Percepción sobre equilibrio de carga académica.'},
+    {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        rango:null,          formula:'', desc:'Comentarios sobre el perfil y estructura del plan.'}
   ],
   docente_satelite: [
-    {id:'I6_pertinencia',   instr:'I6', key:'pertinencia_satelite',     label:'Pertinencia satélite (I6)',      desc:'Adecuación del curso para evaluar la competencia asignada.'},
-    {id:'I6_evidencia',     instr:'I6', key:'evidencia_evaluable',      label:'Evidencia evaluable (I6)',       desc:'Calidad y suficiencia de las evidencias generadas.'},
-    {id:'I6_progresion',    instr:'I6', key:'progresion',               label:'Progresión (I6)',               desc:'Articulación con cursos satélite previos y posteriores.'},
-    {id:'I6_decision',      instr:'I6', key:'decision',                 label:'Decisión sobre el curso (I6)',  desc:'Mantener, revisar o reemplazar el curso como satélite.'},
-    {id:'I6_abierta',       instr:'I6', key:'_abierta',                 label:'Opiniones abiertas (I6)',        desc:'Ajustes recomendados para mejorar la evaluación por competencia.'}
+    {id:'I6_pertinencia',   instr:'I6', key:'pertinencia_satelite',     label:'Pertinencia satélite (I6)',      rango:'pertinencia', formula:'Prom. ítems 1,4,5,10 / 4 × 100', desc:'Mide si el curso es adecuado para evaluar el nivel de competencia.'},
+    {id:'I6_evidencia',     instr:'I6', key:'evidencia_evaluable',      label:'Evidencia evaluable (I6)',       rango:'general',     formula:'Prom. ítems 2,3,9 / 4 × 100', desc:'Mide si el curso genera evidencias útiles para evaluación y acreditación.'},
+    {id:'I6_progresion',    instr:'I6', key:'progresion',               label:'Progresión (I6)',               rango:'coherencia',  formula:'Prom. ítems 6,7,8 / 4 × 100', desc:'Mide articulación con cursos satélite previos y posteriores.'},
+    {id:'I6_decision',      instr:'I6', key:'decision',                 label:'Decisión sobre el curso (I6)',  rango:null,          formula:'Resultado global: 85-100 mantener; 70-84 ajustes; 50-69 revisar; <50 reemplazar', desc:'Define si el curso debe mantenerse, ajustarse, revisarse o reemplazarse.'},
+    {id:'I6_abierta',       instr:'I6', key:'_abierta',                 label:'Ajustes recomendados (I6)',     rango:null,          formula:'', desc:'Recomendaciones para mejorar la evaluación de competencia en este curso.'}
   ],
   comision: [
-    {id:'I4_alineamiento',  instr:'I4', key:'_silabo',                  label:'Alineamiento de sílabos (I4)',  desc:'Índice de alineamiento de los sílabos al perfil y competencias.'},
-    {id:'I4_abierta',       instr:'I4', key:'_abierta',                 label:'Observaciones de sílabos (I4)', desc:'Observaciones por criterio en la ficha de análisis.'}
+    {id:'I4_alineamiento',  instr:'I4', key:'_silabo',                  label:'Alineamiento de sílabos (I4)',  rango:null,          formula:'Puntaje obtenido / 24 × 100', desc:'Mide coherencia global del sílabo con el perfil y las competencias.'},
+    {id:'I4_abierta',       instr:'I4', key:'_abierta',                 label:'Observaciones de sílabos (I4)',rango:null,          formula:'', desc:'Observaciones por criterio en la ficha de análisis de sílabos.'}
   ],
   estudiantes: [
-    {id:'I10_satisfaccion', instr:'I10',key:'satisfaccion_estudiantil', label:'Satisfacción estudiantil (I10)',desc:'Percepción global de los estudiantes sobre el plan.'},
-    {id:'I10_articulacion', instr:'I10',key:'articulacion_percibida',   label:'Articulación de cursos (I10)', desc:'Percepción de articulación y secuencia entre cursos.'},
-    {id:'I10_carga',        instr:'I10',key:'carga_adecuada',           label:'Carga académica (I10)',         desc:'Percepción estudiantil sobre la carga semanal.'},
-    {id:'I10_evaluacion',   instr:'I10',key:'evaluacion_competencias',  label:'Evaluación por competencias (I10)',desc:'Si las evaluaciones miden habilidades reales.'},
-    {id:'I10_recursos',     instr:'I10',key:'recursos',                 label:'Recursos disponibles (I10)',    desc:'Laboratorios, equipos y recursos digitales.'},
-    {id:'I10_abierta',      instr:'I10',key:'_abierta',                 label:'Opiniones abiertas (I10)',       desc:'Cursos destacados, dificultades y propuestas de mejora.'}
+    {id:'I10_satisfaccion', instr:'I10',key:'satisfaccion_estudiantil', label:'Satisfacción estudiantil (I10)',rango:'satisfaccion',formula:'Prom. general / 4 × 100', desc:'Mide percepción global del estudiante sobre el Plan 24.'},
+    {id:'I10_articulacion', instr:'I10',key:'articulacion_percibida',   label:'Articulación de cursos (I10)', rango:'coherencia',  formula:'Prom. ítems 2 y 3 / 4 × 100', desc:'Mide relación percibida entre cursos del ciclo y entre ciclos.'},
+    {id:'I10_carga',        instr:'I10',key:'carga_adecuada',           label:'Carga académica (I10)',         rango:'general',     formula:'Ítem 4 / 4 × 100', desc:'Mide si la carga semanal es percibida como manejable.'},
+    {id:'I10_evaluacion',   instr:'I10',key:'evaluacion_competencias',  label:'Evaluación por competencias (I10)',rango:'general',  formula:'Prom. ítems 6 y 7 / 4 × 100', desc:'Mide si las evaluaciones son coherentes con las competencias.'},
+    {id:'I10_recursos',     instr:'I10',key:'recursos',                 label:'Recursos disponibles (I10)',    rango:'general',     formula:'Prom. ítems 9 y 11 / 4 × 100', desc:'Mide suficiencia de laboratorios, equipos y recursos digitales.'},
+    {id:'I10_abierta',      instr:'I10',key:'_abierta',                 label:'Opiniones abiertas (I10)',      rango:null,          formula:'', desc:'Cursos destacados, dificultades percibidas y propuestas de mejora.'}
   ]
 };
 
 var OPEN_QUESTIONS = {
-  I1:  ['¿Qué aspecto del perfil considera más sólido?','¿Qué aspecto debería actualizarse?','¿Qué competencia debería incorporarse o fortalecerse?'],
-  I6:  ['¿Qué ajuste recomienda para mejorar la evaluación de esta competencia?'],
-  I7:  ['¿Qué curso fue más útil para su desempeño?','¿Qué área debería reforzarse?','¿Qué competencia exige el mercado que no fue suficientemente desarrollada?'],
-  I8:  ['¿Qué fortaleza observa en los egresados/practicantes?','¿Qué debilidad debería corregirse?','¿Qué competencia considera indispensable para los próximos años?'],
-  I9:  ['¿Qué fortaleza principal identifica en el Plan 24?','¿Qué brecha principal identifica?','¿Qué curso debería reforzarse, incorporarse o reubicarse?','¿Qué recomendación concreta propone desde su especialidad?'],
+  I1:  ['¿Qué aspecto del perfil considera más sólido?','¿Qué aspecto debería actualizarse o reforzarse?','¿Qué competencia debería incorporarse, precisarse o fortalecerse?'],
+  I6:  ['¿Qué ajuste recomienda para mejorar la evaluación de esta competencia en este curso?'],
+  I7:  ['¿Qué curso fue más útil para su desempeño profesional?','¿Qué curso o área debería reforzarse?','¿Qué competencia exige actualmente el mercado laboral y no fue suficientemente desarrollada?'],
+  I8:  ['¿Qué fortaleza observa en los estudiantes o egresados de la EPMV?','¿Qué debilidad debería corregirse desde el currículo?','¿Qué competencia considera indispensable para los próximos años?'],
+  I9:  ['¿Qué fortaleza principal identifica en el Plan 24?','¿Qué brecha principal identifica en el Plan 24?','¿Qué curso debería reforzarse, incorporarse, fusionarse o reubicarse?','¿Qué recomendación concreta propone desde su especialidad?'],
   I10: ['¿Qué curso está mejor articulado con su formación?','¿Qué curso presenta mayor dificultad y por qué?','¿Qué mejora concreta propondría?']
 };
 
-/* ── Open / Close ── */
+
 function openDashboard() {
   var pwd = prompt('Ingrese la contraseña para acceder al Dashboard:');
   if (pwd === null) return;
@@ -2633,6 +2665,12 @@ function selectDashIndicador(ind, g) {
     return;
   }
 
+  // APORTES I9 Parte C
+  if (ind.key === '_aportes') {
+    renderI9Aportes(viz, rows);
+    return;
+  }
+
   // DECISIÓN (texto, no número) — I6 decision
   if (ind.key === 'decision') {
     renderDecision(viz, rows, g);
@@ -2650,32 +2688,81 @@ function renderNumerico(viz, rows, ind, g) {
   var vals = rows.filter(function(r){ return r.ind[ind.instr] && r.ind[ind.instr][ind.key] !== undefined; })
                  .map(function(r){ return r.ind[ind.instr][ind.key]; });
   var avg = vals.length ? Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length) : null;
+  var rango = avg !== null ? getRango(avg, ind.rango, ind.esBrecha) : null;
 
-  // KPI card
+  // Formula box
+  if (ind.formula) {
+    var formulaBox = document.createElement('div');
+    formulaBox.style.cssText = 'background:var(--gold-light);border:1px solid var(--gold);border-radius:var(--radius-sm);padding:8px 14px;margin-bottom:1.25rem;font-size:12px;color:var(--ink-mid)';
+    formulaBox.innerHTML = '<strong>Fórmula:</strong> ' + ind.formula;
+    viz.appendChild(formulaBox);
+  }
+
+  // KPIs
   var kpi = document.createElement('div');
-  kpi.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem';
-  kpi.innerHTML = '<div class="kpi"><div class="kpi-val" style="color:var(--wine)">'+(avg!==null?avg+'%':'—')+'</div><div class="kpi-label">Promedio '+g.label+'</div></div>'
-    +'<div class="kpi"><div class="kpi-val" style="color:var(--success)">'+(avg!==null?semInterp(avg):'—')+'</div><div class="kpi-label">Nivel</div></div>'
+  kpi.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem';
+  kpi.innerHTML = '<div class="kpi"><div class="kpi-val" style="color:'+(rango?rango.color:'var(--wine)')+'">'+(avg!==null?avg+'%':'—')+'</div><div class="kpi-label">Promedio '+g.label+'</div></div>'
+    +'<div class="kpi"><div class="kpi-val" style="font-size:14px;color:'+(rango?rango.color:'var(--success)')+'">'+(rango?rango.cat:'—')+'</div><div class="kpi-label">Interpretación</div></div>'
     +'<div class="kpi"><div class="kpi-val" style="color:var(--gold)">'+vals.length+'</div><div class="kpi-label">Respuestas</div></div>';
   viz.appendChild(kpi);
 
-  // Semáforo
-  if (avg !== null) {
-    var c = semColor(avg);
+  // Semáforo principal
+  if (avg !== null && rango) {
     var sem = document.createElement('div');
-    sem.className = 'semaforo sem-'+c;
-    sem.style.marginBottom = '1.5rem';
-    sem.innerHTML = '<div class="sem-dot sem-dot-'+c+'"></div>'
+    sem.className = 'semaforo';
+    sem.style.cssText = 'border:1px solid '+rango.color+'44;background:'+rango.color+'11;margin-bottom:1rem';
+    sem.innerHTML = '<div class="sem-dot" style="background:'+rango.color+'"></div>'
       +'<div class="sem-label" style="font-size:14px">'+ind.label+'</div>'
-      +'<div class="sem-bar-wrap"><div class="sem-bar" style="width:'+avg+'%;background:'+(c==='green'?'#10b981':c==='yellow'?'#f59e0b':'#ef4444')+'"></div></div>'
-      +'<div class="sem-val">'+avg+'%<br><span style="font-size:10px;font-weight:400">'+semInterp(avg)+'</span></div>';
+      +'<div class="sem-bar-wrap"><div class="sem-bar" style="width:'+avg+'%;background:'+rango.color+'"></div></div>'
+      +'<div class="sem-val">'+avg+'%<br><span style="font-size:10px;font-weight:400">'+rango.cat+'</span></div>';
     viz.appendChild(sem);
   }
 
-  // Comparativa entre grupos — mismo indicador
-  var compVals = [];
-  var compLabels = [];
-  var compColors = [];
+  // Tabla de rangos de interpretación
+  var rangoTipoLabel = {general:'Escala general positiva',pertinencia:'Escala de pertinencia',coherencia:'Escala de coherencia curricular',satisfaccion:'Escala de satisfacción',brecha:'Escala de brecha (inversa)'};
+  if (ind.rango && RANGOS[ind.rango]) {
+    var tTitle = document.createElement('div');
+    tTitle.className = 'section-title';
+    tTitle.style.marginBottom = '.75rem';
+    tTitle.textContent = rangoTipoLabel[ind.rango] || 'Valores referenciales';
+    viz.appendChild(tTitle);
+
+    var tblWrap = document.createElement('div');
+    tblWrap.style.cssText = 'background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem';
+    var tbl = document.createElement('table');
+    tbl.style.cssText = 'width:100%;border-collapse:collapse;font-size:12px';
+    var thead = document.createElement('thead');
+    thead.innerHTML = '<tr style="background:var(--wine-dark);color:#fff"><th style="padding:7px 10px;text-align:left;font-size:10px;letter-spacing:.04em;text-transform:uppercase">Rango</th><th style="padding:7px 10px;text-align:left;font-size:10px;letter-spacing:.04em;text-transform:uppercase">Categoría</th><th style="padding:7px 10px;text-align:left;font-size:10px;letter-spacing:.04em;text-transform:uppercase">Acción recomendada</th></tr>';
+    tbl.appendChild(thead);
+    var tbody = document.createElement('tbody');
+    var ACCIONES = {
+      general:     ['Mantener, documentar como buena práctica','Mantener con ajustes menores','Implementar mejoras puntuales','Diseñar acciones de mejora prioritaria','Rediseñar parcialmente','Reformulación prioritaria'],
+      pertinencia: ['Mantener como fortaleza','Mantener y mejorar detalles','Revisar contenidos o redacción','Ajustar con prioridad media-alta','Rediseñar parcialmente','Reformular o reemplazar'],
+      coherencia:  ['Mantener como modelo de referencia','Mantener y optimizar','Revisar articulaciones puntuales','Intervenir cursos o tramos específicos','Rediseñar parcialmente la secuencia','Reformulación prioritaria'],
+      satisfaccion:['Mantener y usar como evidencia','Mantener con mejora continua','Analizar comentarios abiertos','Implementar acciones correctivas','Revisar causas y diseñar plan de mejora','Intervención prioritaria'],
+      brecha:      ['Mantener y monitorear','Mejora menor','Incorporar al plan de mejora','Priorizar intervención','Rediseño parcial urgente','Reformulación prioritaria']
+    };
+    var escalaBrechas = [{rango:'0-10%'},{rango:'11-20%'},{rango:'21-30%'},{rango:'31-40%'},{rango:'41-50%'},{rango:'>50%'}];
+    var escalaGeneral = [{rango:'90-100%'},{rango:'80-89%'},{rango:'70-79%'},{rango:'60-69%'},{rango:'50-59%'},{rango:'<50%'}];
+    var rangosDisplay = ind.esBrecha ? escalaBrechas : escalaGeneral;
+    var acciones = ACCIONES[ind.rango] || ACCIONES.general;
+    (RANGOS[ind.rango]||[]).forEach(function(r, ri) {
+      var tr = document.createElement('tr');
+      var isCurrentRange = rango && r.cat === rango.cat;
+      tr.style.background = isCurrentRange ? r.color+'22' : (ri%2===0?'var(--surface)':'var(--surface-2)');
+      tr.innerHTML = '<td style="padding:6px 10px;border-bottom:1px solid var(--border-light);font-weight:'+(isCurrentRange?'700':'400')+'">'
+        +(rangosDisplay[ri]?rangosDisplay[ri].rango:'—')+'</td>'
+        +'<td style="padding:6px 10px;border-bottom:1px solid var(--border-light);color:'+r.color+';font-weight:700">'+r.cat+'</td>'
+        +'<td style="padding:6px 10px;border-bottom:1px solid var(--border-light);font-size:11px;color:var(--ink-mid)">'+(acciones[ri]||'—')+'</td>';
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    tblWrap.appendChild(tbl);
+    viz.appendChild(tblWrap);
+  }
+
+  // Comparativa entre grupos
+  var compVals=[], compLabels=[], compColors=[];
   DASH_GRUPOS.forEach(function(gg) {
     var gRows = dashData.filter(function(r){ return r.grupo===gg.key; });
     var gVals = gRows.filter(function(r){ return r.ind[ind.instr] && r.ind[ind.instr][ind.key]!==undefined; })
@@ -2686,61 +2773,56 @@ function renderNumerico(viz, rows, ind, g) {
       compColors.push(gg.color);
     }
   });
-
   if (compLabels.length > 1) {
     var compTitle = document.createElement('div');
     compTitle.className = 'section-title';
     compTitle.textContent = 'Comparativa entre grupos';
     viz.appendChild(compTitle);
     var canvasWrap = document.createElement('div');
-    canvasWrap.style.cssText = 'background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem';
+    canvasWrap.style.cssText='background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem';
     var canvas = document.createElement('canvas');
-    canvas.id = 'dash-chart-main';
-    canvas.height = 180;
-    canvasWrap.appendChild(canvas);
-    viz.appendChild(canvasWrap);
+    canvas.id='dash-chart-main'; canvas.height=180;
+    canvasWrap.appendChild(canvas); viz.appendChild(canvasWrap);
     dashChart = new Chart(canvas, {
-      type: 'bar',
-      data: { labels: compLabels, datasets: [{
-        label: ind.label, data: compVals,
-        backgroundColor: compColors.map(function(c){ return c+'cc'; }),
-        borderColor: compColors, borderWidth: 1.5, borderRadius: 6
-      }]},
-      options: { responsive:true, scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+'%';}}}},
-        plugins:{legend:{display:false}} }
+      type:'bar',
+      data:{labels:compLabels,datasets:[{label:ind.label,data:compVals,
+        backgroundColor:compColors.map(function(c){return c+'cc';}),
+        borderColor:compColors,borderWidth:1.5,borderRadius:6}]},
+      options:{responsive:true,scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+'%';}}}},
+        plugins:{legend:{display:false}}}
     });
   }
 
-  // Individual responses table
+  // Respuestas individuales
   if (vals.length) {
-    var tTitle = document.createElement('div');
-    tTitle.className = 'section-title';
-    tTitle.textContent = 'Respuestas individuales';
-    viz.appendChild(tTitle);
+    var tTitle2 = document.createElement('div');
+    tTitle2.className = 'section-title';
+    tTitle2.textContent = 'Respuestas individuales';
+    viz.appendChild(tTitle2);
     var wrap = document.createElement('div');
-    wrap.style.cssText = 'background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden';
-    var tbl = document.createElement('table');
-    tbl.className = 'resp-table';
-    tbl.innerHTML = '<thead><tr><th>Participante</th><th>Especialidad</th><th>Fecha</th><th>Valor</th><th>Nivel</th></tr></thead>';
-    var tbody = document.createElement('tbody');
-    rows.filter(function(r){ return r.ind[ind.instr] && r.ind[ind.instr][ind.key]!==undefined; })
-        .forEach(function(r) {
-          var v = r.ind[ind.instr][ind.key];
-          var c = semColor(v);
-          var dotColor = c==='green'?'#10b981':c==='yellow'?'#f59e0b':'#ef4444';
-          var tr = document.createElement('tr');
-          tr.innerHTML = '<td style="font-weight:500">'+(r.nombre||'—')+'</td>'
+    wrap.style.cssText='background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden';
+    var tbl2 = document.createElement('table');
+    tbl2.className='resp-table';
+    tbl2.innerHTML='<thead><tr><th>Participante</th><th>Especialidad</th><th>Fecha</th><th>Valor</th><th>Interpretación</th></tr></thead>';
+    var tbody2=document.createElement('tbody');
+    rows.filter(function(r){return r.ind[ind.instr]&&r.ind[ind.instr][ind.key]!==undefined;})
+        .forEach(function(r){
+          var v=r.ind[ind.instr][ind.key];
+          var rng=getRango(v,ind.rango,ind.esBrecha);
+          var tr=document.createElement('tr');
+          tr.innerHTML='<td style="font-weight:500">'+(r.nombre||'—')+'</td>'
             +'<td>'+(r.esp||'—')+'</td>'
-            +'<td>'+( r.fecha ? new Date(r.fecha).toLocaleDateString('es-PE') : '—')+'</td>'
-            +'<td style="font-weight:700">'+v+'%</td>'
-            +'<td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:'+dotColor+'"></span>'+semInterp(v)+'</span></td>';
-          tbody.appendChild(tr);
+            +'<td>'+(r.fecha?new Date(r.fecha).toLocaleDateString('es-PE'):'—')+'</td>'
+            +'<td style="font-weight:700;color:'+rng.color+'">'+v+'%</td>'
+            +'<td><span style="font-size:11px;font-weight:600;color:'+rng.color+'">'+rng.cat+'</span></td>';
+          tbody2.appendChild(tr);
         });
-    tbl.appendChild(tbody);
-    wrap.appendChild(tbl);
+    tbl2.appendChild(tbody2);
+    wrap.appendChild(tbl2);
     viz.appendChild(wrap);
   }
 }
+
 
 function renderDecision(viz, rows, g) {
   var counts = {};
@@ -2775,10 +2857,97 @@ function renderDecision(viz, rows, g) {
 }
 
 function renderAbiertas(viz, rows, instrId, g) {
-  var questions = OPEN_QUESTIONS[instrId] || [];
   var hasAny = false;
 
-  // Special: I4 sílabos observations
+  // ── I3: FODA hallazgos + puntajes por asignatura ──
+  if (instrId === 'I3') {
+    var FODA_DIMS = [
+      {key:'F', label:'Fortalezas',    rangos:[{min:11,max:12,cat:'Fortaleza estratégica'},{min:9,max:10,cat:'Fortaleza consolidada'},{min:7,max:8,cat:'Fortaleza útil'},{min:5,max:6,cat:'Fortaleza débil'},{min:3,max:4,cat:'No verificable'}]},
+      {key:'O', label:'Oportunidades', rangos:[{min:11,max:12,cat:'Oportunidad estratégica'},{min:9,max:10,cat:'Oportunidad alta'},{min:7,max:8,cat:'Oportunidad media'},{min:5,max:6,cat:'Oportunidad baja'},{min:3,max:4,cat:'No prioritaria'}]},
+      {key:'D', label:'Debilidades',   rangos:[{min:11,max:12,cat:'Prioridad crítica'},{min:9,max:10,cat:'Prioridad alta'},{min:7,max:8,cat:'Prioridad media'},{min:5,max:6,cat:'Prioridad baja'},{min:3,max:4,cat:'Prioridad mínima'}]},
+      {key:'A', label:'Amenazas',      rangos:[{min:11,max:12,cat:'Prioridad crítica'},{min:9,max:10,cat:'Prioridad alta'},{min:7,max:8,cat:'Prioridad media'},{min:5,max:6,cat:'Prioridad baja'},{min:3,max:4,cat:'Prioridad mínima'}]}
+    ];
+    function getFodaCat(dim, total) {
+      var d = FODA_DIMS.find(function(x){return x.key===dim;});
+      if (!d) return '';
+      for (var i=0;i<d.rangos.length;i++) { if (total>=d.rangos[i].min && total<=d.rangos[i].max) return d.rangos[i].cat; }
+      return '';
+    }
+    function getFodaTotal(entry, dim) {
+      if (!entry) return 0;
+      if (dim==='F') return (parseInt(entry.relevancia)||0)+(parseInt(entry.evidencia)||0)+(parseInt(entry.sostenibilidad)||0);
+      if (dim==='O') return (parseInt(entry.pertinencia)||0)+(parseInt(entry.viabilidad)||0)+(parseInt(entry.impacto)||0);
+      return (parseInt(entry.impacto)||0)+(parseInt(entry.urgencia)||0)+(parseInt(entry.viabilidad)||0);
+    }
+    var semColors = {'estratégica':'#10b981','consolidada':'#34d399','alta':'#34d399','útil':'#fbbf24','media':'#fbbf24','baja':'#f97316','crítica':'#ef4444','mínima':'#6b7280','verificable':'#6b7280','prioritaria':'#f97316'};
+    function getSemColor(cat) {
+      var lower = cat.toLowerCase();
+      for (var k in semColors) { if (lower.includes(k)) return semColors[k]; }
+      return '#6b7280';
+    }
+
+    rows.forEach(function(r) {
+      var asigs = r.res.I3 && r.res.I3.asignaturas;
+      if (!asigs) return;
+      asigs.forEach(function(asig) {
+        if (!asig || !asig.asignatura) return;
+        hasAny = true;
+        var card = document.createElement('div');
+        card.style.cssText = 'background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem';
+
+        // Header
+        card.innerHTML = '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border-light)">'
+          +'<span style="font-family:DM Serif Display,serif;font-size:16px">'+asig.asignatura+'</span>'
+          +(asig.ciclo?'<span style="font-size:11px;font-weight:700;color:var(--wine)">Ciclo '+asig.ciclo+'</span>':'')
+          +'<span style="margin-left:auto;font-size:11px;color:var(--ink-light)">'+r.nombre+'</span>'
+          +'</div>';
+
+        // FODA hallazgos + puntajes
+        var foda = asig.foda || {};
+        FODA_DIMS.forEach(function(dim) {
+          var entries = [foda[dim.key+'1'], foda[dim.key+'2']].filter(Boolean).filter(function(e){return e.hallazgo;});
+          if (!entries.length) return;
+
+          var dimDiv = document.createElement('div');
+          dimDiv.style.marginBottom = '10px';
+
+          var dimHeader = document.createElement('div');
+          dimHeader.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-light);margin-bottom:6px';
+          dimHeader.textContent = dim.label;
+          dimDiv.appendChild(dimHeader);
+
+          entries.forEach(function(e, ei) {
+            var total = getFodaTotal(e, dim.key);
+            var cat = total > 0 ? getFodaCat(dim.key, total) : '';
+            var color = cat ? getSemColor(cat) : 'var(--border)';
+
+            var row = document.createElement('div');
+            row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;background:var(--surface-2);margin-bottom:5px;border-left:3px solid '+color;
+
+            var textPart = '<p style="font-size:13px;color:var(--ink);line-height:1.5;margin:0;flex:1">'+e.hallazgo+'</p>';
+            var scorePart = total > 0
+              ? '<div style="flex-shrink:0;text-align:right"><div style="font-size:16px;font-weight:700;color:'+color+'">'+total+'/12</div>'
+                +'<div style="font-size:10px;color:'+color+';font-weight:600;white-space:nowrap">'+cat+'</div></div>'
+              : '';
+            row.innerHTML = textPart + scorePart;
+            dimDiv.appendChild(row);
+          });
+          card.appendChild(dimDiv);
+        });
+        viz.appendChild(card);
+      });
+    });
+    if (!hasAny) viz.innerHTML='<p style="color:var(--ink-light);font-style:italic;font-size:13px">Aún no hay hallazgos FODA registrados.</p>';
+    return;
+  }
+
+  // ── I9 Parte C: aportes ──
+  if (instrId === 'I9' && g && (g.key === 'expertos')) {
+    // Check if this is the aportes view — handled separately in renderI9Aportes
+    // This path is for abiertas (preguntas abiertas)
+  }
+
+  // ── I4: observaciones de sílabos ──
   if (instrId === 'I4') {
     rows.forEach(function(r) {
       var sil = r.res.I4 && r.res.I4.silabo;
@@ -2799,6 +2968,8 @@ function renderAbiertas(viz, rows, instrId, g) {
     return;
   }
 
+  // ── Preguntas abiertas estándar ──
+  var questions = OPEN_QUESTIONS[instrId] || [];
   questions.forEach(function(q, qi) {
     var qIdx = qi+1;
     var respuestas = [];
@@ -2809,14 +2980,12 @@ function renderAbiertas(viz, rows, instrId, g) {
     });
     if (!respuestas.length) return;
     hasAny = true;
-
     var section = document.createElement('div');
     section.style.marginBottom = '1.5rem';
     var qTitle = document.createElement('div');
     qTitle.className = 'section-title';
     qTitle.textContent = qIdx+'. '+q;
     section.appendChild(qTitle);
-
     respuestas.forEach(function(r) {
       var card = document.createElement('div');
       card.style.cssText='background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:8px;border-left:3px solid var(--wine)';
@@ -2826,8 +2995,41 @@ function renderAbiertas(viz, rows, instrId, g) {
     });
     viz.appendChild(section);
   });
-
   if (!hasAny) viz.innerHTML='<p style="color:var(--ink-light);font-style:italic;font-size:13px">Aún no hay respuestas abiertas registradas para este grupo.</p>';
+}
+
+function renderI9Aportes(viz, rows) {
+  var hasAny = false;
+  var decColors = {'Incorporar':'#10b981','Evaluar':'#f59e0b','No incorporar':'#ef4444'};
+
+  rows.forEach(function(r) {
+    var aportes = r.res.I9 && r.res.I9.aportes;
+    if (!aportes) return;
+    var validos = aportes.filter(function(a){ return a && a.aporte && a.aporte.trim(); });
+    if (!validos.length) return;
+    hasAny = true;
+
+    var expertCard = document.createElement('div');
+    expertCard.style.cssText = 'background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem';
+    expertCard.innerHTML = '<div style="font-size:12px;font-weight:600;color:var(--wine);margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid var(--border-light)">'
+      +r.nombre+(r.esp?' <span style="font-weight:400;color:var(--ink-light)">· '+r.esp+'</span>':'')
+      +'</div>';
+
+    validos.forEach(function(a, ai) {
+      var decColor = decColors[a.decision] || '#6b7280';
+      var aDiv = document.createElement('div');
+      aDiv.style.cssText = 'padding:10px 12px;border-radius:6px;background:var(--surface-2);margin-bottom:8px;border-left:3px solid '+decColor;
+      aDiv.innerHTML = '<p style="font-size:13px;color:var(--ink);line-height:1.5;margin:0 0 8px">'+(ai+1)+'. '+a.aporte+'</p>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
+        +(a.area?'<span style="font-size:10px;font-weight:600;background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:10px">'+a.area+'</span>':'')
+        +(a.tipo?'<span style="font-size:10px;font-weight:600;background:#f3e8ff;color:#7c3aed;padding:2px 8px;border-radius:10px">'+a.tipo+'</span>':'')
+        +(a.decision?'<span style="font-size:10px;font-weight:700;background:'+decColor+'22;color:'+decColor+';padding:2px 8px;border-radius:10px;border:1px solid '+decColor+'44">'+a.decision+'</span>':'')
+        +'</div>';
+      expertCard.appendChild(aDiv);
+    });
+    viz.appendChild(expertCard);
+  });
+  if (!hasAny) viz.innerHTML = '<p style="color:var(--ink-light);font-style:italic;font-size:13px">Aún no hay aportes registrados.</p>';
 }
 
 
