@@ -859,12 +859,36 @@ body {
 #page-tutorial .mobile-group-pill.done {opacity:.6;}
 
 @media(max-width:680px){
-#page-tutorial .phone-wrap {display:none;}
 #page-tutorial .sidebar {display:none;}
 #page-tutorial .mobile-group-bar {display:block;}
-#page-tutorial .step-viewer {padding:1rem;flex-direction:column;}
-#page-tutorial .step-info {overflow-y:auto;}
-#page-tutorial .step-actions {flex-wrap:wrap;gap:8px;}
+/* Stack phone above text on mobile */
+#page-tutorial .step-viewer {
+  padding:.75rem;
+  flex-direction:column;
+  gap:.75rem;
+  overflow-y:auto;
+}
+/* Phone frame: smaller and centered */
+#page-tutorial .phone-wrap {
+  display:flex;
+  width:100%;
+  max-width:220px;
+  margin:0 auto;
+  flex-shrink:0;
+}
+#page-tutorial .phone-frame {
+  aspect-ratio:9/16;
+}
+/* Step info below phone */
+#page-tutorial .step-info {
+  flex:1;
+  overflow-y:visible;
+  min-height:0;
+}
+#page-tutorial .step-title {font-size:16px;}
+#page-tutorial .step-desc {font-size:12px;}
+#page-tutorial .step-tip {font-size:11px;padding:8px 12px;}
+#page-tutorial .step-actions {flex-wrap:wrap;gap:8px;padding-top:.75rem;}
 #page-tutorial .layout {flex-direction:column;}
 #page-tutorial .main {flex:1;overflow:hidden;display:flex;flex-direction:column;}
 }
