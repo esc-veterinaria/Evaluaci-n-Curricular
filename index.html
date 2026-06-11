@@ -3234,27 +3234,36 @@ function buildPDF(title, sections) {
       y += 20;
     }
     else if (sec.type === 'semaforo') {
-      checkPage(12);
+      checkPage(14);
       var colorMap = {green:[16,185,129], yellow:[245,158,11], red:[239,68,68]};
       var col = colorMap[sec.color] || [120,120,120];
+      // White background first
+      doc.setFillColor(255,255,255);
+      doc.setDrawColor(255,255,255);
+      doc.rect(margin, y, contentW, 12, 'F');
+      // Color left bar
       doc.setFillColor(col[0], col[1], col[2]);
-      doc.rect(margin, y, 3, 9, 'F');
-      doc.setFillColor(248,250,246);
+      doc.rect(margin, y, 3, 11, 'F');
+      // Border only (no fill) on main row
+      doc.setFillColor(255,255,255);
       doc.setDrawColor(col[0],col[1],col[2]);
-      doc.setLineWidth(0.3);
-      doc.rect(margin+3, y, contentW-3, 9, 'FD');
+      doc.setLineWidth(0.5);
+      doc.rect(margin+3, y, contentW-3, 11, 'D');
+      // Label
       doc.setFontSize(9);
-      doc.setTextColor(30,30,30);
+      doc.setTextColor(20,20,20);
       doc.setFont('helvetica','bold');
-      doc.text(sec.label, margin+6, y+4.5);
+      doc.text(sec.label, margin+6, y+5);
+      // Value + category
       doc.setFont('helvetica','normal');
-      doc.setFontSize(8);
+      doc.setFontSize(8.5);
       doc.setTextColor(col[0],col[1],col[2]);
-      doc.text(sec.val + '% — ' + sec.cat, pageW-margin-2, y+4.5, {align:'right'});
+      doc.text(sec.val + '% — ' + sec.cat, pageW-margin-3, y+5, {align:'right'});
+      // Action
       doc.setFontSize(7.5);
-      doc.setTextColor(80,90,70);
-      doc.text('Acción: ' + sec.accion, margin+6, y+8);
-      y += 12;
+      doc.setTextColor(80,80,80);
+      doc.text('Acción recomendada: ' + sec.accion, margin+6, y+9.5);
+      y += 14;
     }
     else if (sec.type === 'table') {
       checkPage(14);
@@ -3325,7 +3334,7 @@ function buildPDF(title, sections) {
       doc.setTextColor(74,103,65);
       doc.setFont('helvetica','bold');
       doc.text(sec.nombre + (sec.esp ? ' · ' + sec.esp : ''), margin+4, y+3.5);
-      y += 5;
+      y += 8;
       // text
       doc.setFontSize(8.5);
       doc.setTextColor(0,0,0);
