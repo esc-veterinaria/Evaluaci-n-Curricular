@@ -550,6 +550,7 @@ body {
   display:flex;align-items:center;gap:1rem;flex-shrink:0;
 }
 #page-tutorial .topbar-logo {font-family:'DM Serif Display',serif;font-size:15px;font-weight:400;letter-spacing:.01em;}
+#tut-mobile-back {display:none;}
 #page-tutorial .topbar-sub {font-size:11px;color:rgba(255,255,255,.55);letter-spacing:.04em;text-transform:uppercase;}
 #page-tutorial .topbar-badge {
   margin-left:auto;
@@ -859,38 +860,62 @@ body {
 #page-tutorial .mobile-group-pill.done {opacity:.6;}
 
 @media(max-width:680px){
+/* Hide desktop sidebar */
 #page-tutorial .sidebar {display:none;}
 #page-tutorial .mobile-group-bar {display:block;}
-/* Stack phone above text on mobile */
+
+/* Topbar: compact on mobile, show only logo + back button */
+#page-tutorial .topbar {
+  padding:0 .875rem;height:48px;gap:.5rem;
+}
+#tut-mobile-back {display:inline-flex !important;}
+#page-tutorial .topbar-logo {font-size:13px;}
+#page-tutorial .topbar-sub {display:none;}
+#page-tutorial .topbar-badge {display:none;}
+/* Move progress bar below topbar */
+#page-tutorial .progress-bar-wrap {
+  display:none;
+}
+
+/* Add back-button inside topbar for mobile */
+#page-tutorial .topbar::before {
+  content: none;
+}
+
+/* Stack layout vertically */
+#page-tutorial .layout {flex-direction:column;}
+#page-tutorial .main {flex:1;overflow:hidden;display:flex;flex-direction:column;}
+
+/* Step viewer: column, scrollable */
 #page-tutorial .step-viewer {
   padding:.75rem;
   flex-direction:column;
   gap:.75rem;
   overflow-y:auto;
 }
-/* Phone frame: smaller and centered */
+
+/* Phone: visible, smaller, centered */
 #page-tutorial .phone-wrap {
   display:flex;
   width:100%;
-  max-width:220px;
+  max-width:200px;
   margin:0 auto;
   flex-shrink:0;
 }
-#page-tutorial .phone-frame {
-  aspect-ratio:9/16;
-}
-/* Step info below phone */
-#page-tutorial .step-info {
-  flex:1;
-  overflow-y:visible;
-  min-height:0;
-}
-#page-tutorial .step-title {font-size:16px;}
+#page-tutorial .phone-frame {aspect-ratio:9/16;}
+
+/* Step info */
+#page-tutorial .step-info {flex:1;overflow-y:visible;min-height:0;}
+#page-tutorial .step-title {font-size:15px;}
 #page-tutorial .step-desc {font-size:12px;}
-#page-tutorial .step-tip {font-size:11px;padding:8px 12px;}
-#page-tutorial .step-actions {flex-wrap:wrap;gap:8px;padding-top:.75rem;}
-#page-tutorial .layout {flex-direction:column;}
-#page-tutorial .main {flex:1;overflow:hidden;display:flex;flex-direction:column;}
+#page-tutorial .step-tip {font-size:11px;padding:8px 12px;margin-top:.5rem;}
+
+/* Bottom navigation */
+#page-tutorial .step-actions {
+  flex-wrap:wrap;gap:8px;padding-top:.5rem;
+  border-top:1px solid var(--border);
+}
+#page-tutorial .btn-nav {font-size:12px;padding:8px 16px;}
 }
 
 </style>
@@ -3236,6 +3261,10 @@ function closeTutorial() {
 <div id="page-tutorial">
 <!-- TOP BAR -->
 <div class="topbar">
+  <button onclick="closeTutorial()" style="display:none;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;padding:5px 10px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0" id="tut-mobile-back">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    Volver
+  </button>
   <div>
     <div class="topbar-logo">Universidad Ricardo Palma · EPMV</div>
     <div class="topbar-sub">Tutorial interactivo — Evaluación Curricular Plan 24</div>
