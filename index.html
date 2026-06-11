@@ -3314,29 +3314,35 @@ function buildPDF(title, sections) {
       y += qlines.length * 4.5 + 2;
     }
     else if (sec.type === 'open-answer') {
-      checkPage(12);
-      doc.setFillColor(253,253,251);
-      doc.setDrawColor(74,103,65);
-      doc.setLineWidth(0.6);
-      doc.line(margin, y, margin, y+1); // will extend
+      var estimatedH = 20;
+      checkPage(estimatedH);
+      // Reset fill to white before drawing — clears any lingering table row color
+      doc.setFillColor(255,255,255);
+      doc.setDrawColor(255,255,255);
+      doc.rect(margin, y, contentW, estimatedH, 'F');
       // name
       doc.setFontSize(7.5);
-      doc.setTextColor(100,110,90);
+      doc.setTextColor(74,103,65);
       doc.setFont('helvetica','bold');
       doc.text(sec.nombre + (sec.esp ? ' · ' + sec.esp : ''), margin+4, y+3.5);
       y += 5;
       // text
-      doc.setFontSize(8);
-      doc.setTextColor(30,40,26);
+      doc.setFontSize(8.5);
+      doc.setTextColor(0,0,0);
       doc.setFont('helvetica','normal');
       var textLines = doc.splitTextToSize(sec.text, contentW - 6);
-      checkPage(textLines.length * 4.5 + 4);
+      var blockH = textLines.length * 4.8 + 2;
+      checkPage(blockH + 4);
+      // white background for text area
+      doc.setFillColor(255,255,255);
+      doc.setDrawColor(255,255,255);
+      doc.rect(margin, y-1, contentW, blockH + 2, 'F');
       doc.text(textLines, margin+4, y);
-      // draw left border
+      // left border line
       doc.setDrawColor(74,103,65);
-      doc.setLineWidth(0.6);
-      doc.line(margin, y-5, margin, y + textLines.length*4.5);
-      y += textLines.length * 4.5 + 5;
+      doc.setLineWidth(0.8);
+      doc.line(margin, y-5, margin, y + blockH);
+      y += blockH + 4;
     }
     else if (sec.type === 'spacer') {
       y += sec.h || 4;
