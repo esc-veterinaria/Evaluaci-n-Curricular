@@ -2966,6 +2966,180 @@ var OPEN_QUESTIONS = {
   I10: ['¿Qué curso está mejor articulado con su formación?','¿Qué curso presenta mayor dificultad y por qué?','¿Qué mejora concreta propondría?']
 };
 
+/* ── Load dashboard data ── */
+function loadDashboard() {
+  document.getElementById('dash-loading').style.display = 'block';
+  document.getElementById('dash-content').style.display = 'none';
+  document.getElementById('dash-error').style.display   = 'none';
+  if (dashChart) { try { dashChart.destroy(); } catch(e){} dashChart = null; }
+
+  var sheetId   = '1LAtWwuzqEdGKqT78uJRVQe4R6AsnAUuFb8FbtOJkxWE';
+  var sheetName = encodeURIComponent('Respuestas_EvaluacionCurricular');
+  var url = 'https://docs.google.com/spreadsheets/d/' + sheetId
+          + '/gviz/tq?tqx=out:csv&sheet=' + sheetName;
+
+  fetch(url)
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
+    .then(function(csv) {
+      var rows = parseCSV(csv);
+      if (!rows || rows.length < 2) {
+        showDashError('La hoja está vacía o no tiene respuestas aún.');
+        return;
+      }
+      var headers = rows[0];
+      var data = rows.slice(1).map(function(r) {
+        var obj = {};
+        headers.forEach(function(h, i){ obj[h.trim()] = r[i] || ''; });
+        try { obj['Respuestas (JSON)']  = JSON.parse(obj['Respuestas (JSON)']);  } catch(e){}
+        try { obj['Indicadores (JSON)'] = JSON.parse(obj['Indicadores (JSON)']); } catch(e){}
+        return obj;
+      });
+      onDashDataLoaded(data);
+    })
+    .catch(function(err) {
+      showDashError('No se pudo leer la hoja. Verifica que esté compartida como "Cualquier persona con el enlace puede ver". Error: ' + err.message);
+    });
+}
+
+function parseCSV(text) {
+  var rows = [];
+  var row = [];
+  var cell = '';
+  var inQuotes = false;
+  for (var i = 0; i < text.length; i++) {
+    var ch = text[i];
+    var next = text[i+1];
+    if (inQuotes) {
+      if (ch === '"' && next === '"') { cell += '"'; i++; }
+      else if (ch === '"') { inQuotes = false; }
+      else { cell += ch; }
+    } else {
+      if (ch === '"') { inQuotes = true; }
+      else if (ch === ',') { row.push(cell); cell = ''; }
+      else if (ch === '\n' || (ch === '\r' && next === '\n')) {
+        if (ch === '\r') i++;
+        row.push(cell); cell = '';
+        if (row.some(function(c){ return c !== ''; })) rows.push(row);
+        row = [];
+      } else { cell += ch; }
+    }
+  }
+  if (cell !== '' || row.length) { row.push(cell); if (row.some(function(c){ return c!==''; })) rows.push(row); }
+  return rows;
+}
+
+function onDashDataLoaded(rows) {
+  dashData = rows.map(function(r) {
+    var ind = r['Indicadores (JSON)'];
+    var res = r['Respuestas (JSON)'];
+    if (typeof ind === 'string') { try { ind = JSON.parse(ind); } catch(e){ ind = {}; } }
+    if (typeof res === 'string') { try { res = JSON.parse(res); } catch(e){ res = {}; } }
+    return {
+      grupo:  r['Grupo']  || r['grupo']  || '',
+      nombre: r['Nombre'] || r['nombre'] || '',
+      fecha:  r['Fecha']  || r['fecha']  || '',
+      esp:    r['Especialidad'] || r['especialidad'] || '',
+      ind:    (typeof ind === 'object' && ind !== null) ? ind : {},
+      res:    (typeof res === 'object' && res !== null) ? res : {}
+    };
+  }).filter(function(r){ return r.grupo !== ''; });
+
+  document.getElementById('dash-loading').style.display = 'none';
+  document.getElementById('dash-content').style.display = 'block';
+  renderGrupoSelector();
+}
+
+function showDashError(msg) {
+  document.getElementById('dash-loading').style.display = 'none';
+  document.getElementById('dash-error').style.display   = 'block';
+  document.getElementById('dash-error-msg').textContent  = msg;
+}
+
+function renderGrupoSelector() {
+  dashGrupo = '';
+  document.getElementById('dash-step1').style.display = 'block';
+  document.getElementById('dash-step2').style.display = 'none';
+  document.getElementById('dash-step3').style.display = 'none';
+
+  var countByGrupo = {};
+  dashData.forEach(function(r){ countByGrupo[r.grupo] = (countByGrupo[r.grupo]||0)+1; });
+  var total = dashData.length;
+  document.getElementById('dash-total-badge').textContent = total + ' respuesta' + (total!==1?'s':'');
+
+  var grid = document.getElementById('dash-grupo-grid');
+  grid.innerHTML = '';
+  DASH_GRUPOS.forEach(function(g) {
+    var n = countByGrupo[g.key] || 0;
+    var card = document.createElement('div');
+    card.style.cssText = 'border:1.5px solid var(--border);border-radius:var(--radius);padding:1rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface)';
+    card.innerHTML = '<div style="font-size:22px;margin-bottom:6px">'+g.icon+'</div>'
+      +'<div style="font-size:12px;font-weight:600;color:var(--ink-mid);margin-bottom:4px">'+g.label+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:'+g.color+'">'+n+' resp.</div>';
+    card.onmouseover = function(){ this.style.borderColor=g.color; this.style.background='var(--wine-light)'; };
+    card.onmouseout  = function(){ this.style.borderColor='var(--border)'; this.style.background='var(--surface)'; };
+    card.onclick = function(){ selectDashGrupo(g); };
+    grid.appendChild(card);
+  });
+}
+
+function selectDashGrupo(g) {
+  dashGrupo = g.key;
+  _currentG = g;
+  document.getElementById('dash-step1').style.display = 'none';
+  document.getElementById('dash-step2').style.display = 'block';
+  document.getElementById('dash-step3').style.display = 'none';
+  document.getElementById('dash-grupo-label').textContent = g.icon + ' ' + g.label;
+
+  var indicadores = DASH_INDICADORES[g.key] || [];
+  var grid = document.getElementById('dash-indicador-grid');
+  grid.innerHTML = '';
+  indicadores.forEach(function(ind) {
+    var card = document.createElement('div');
+    var isAbierta = ind.key === '_abierta' || ind.key === '_silabo' || ind.key === '_aportes';
+    card.style.cssText = 'border:1.5px solid var(--border);border-radius:var(--radius);padding:.875rem 1rem;cursor:pointer;transition:all .2s;background:var(--surface)';
+    card.innerHTML = '<div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px">'+ind.label+'</div>'
+      +'<div style="font-size:11px;color:var(--ink-light);line-height:1.4">'+ind.desc+'</div>'
+      +(isAbierta ? '<div style="margin-top:6px;font-size:10px;background:#f3e8ff;color:#6c3d91;padding:2px 6px;border-radius:10px;display:inline-block;font-weight:600">Respuestas abiertas</div>' : '');
+    card.onmouseover = function(){ this.style.borderColor=g.color; this.style.background='var(--wine-light)'; };
+    card.onmouseout  = function(){ this.style.borderColor='var(--border)'; this.style.background='var(--surface)'; };
+    card.onclick = function(){ selectDashIndicador(ind, g); };
+    grid.appendChild(card);
+  });
+}
+
+function dashResetGrupo() {
+  if (dashChart) { try { dashChart.destroy(); } catch(e){} dashChart = null; }
+  renderGrupoSelector();
+}
+
+function dashResetIndicador() {
+  var g = DASH_GRUPOS.find(function(x){ return x.key===dashGrupo; });
+  if (g) selectDashGrupo(g);
+}
+
+function selectDashIndicador(ind, g) {
+  _currentG   = g;
+  _currentInd = ind;
+  document.getElementById('dash-step2').style.display = 'none';
+  document.getElementById('dash-step3').style.display = 'block';
+  document.getElementById('dash-bc-grupo').textContent = g.icon + ' ' + g.label;
+  document.getElementById('dash-bc-indicador').textContent = ind.label;
+  if (dashChart) { try { dashChart.destroy(); } catch(e){} dashChart = null; }
+
+  var viz = document.getElementById('dash-viz');
+  viz.innerHTML = '';
+  var rows = dashData.filter(function(r){ return r.grupo === g.key; });
+
+  if (ind.key === '_abierta' || ind.key === '_silabo') { renderAbiertas(viz, rows, ind.instr, g); return; }
+  if (ind.key === '_aportes') { renderI9Aportes(viz, rows); return; }
+  if (ind.key === 'decision') { renderDecision(viz, rows, g); return; }
+  if (ind.instr === 'I3' && ind.key === '_abierta') { renderAbiertas(viz, rows, 'I3', g); return; }
+  renderNumerico(viz, rows, ind, g);
+}
+
 
 function openTutorial() {
   var el = document.getElementById('page-tutorial');
@@ -2987,6 +3161,339 @@ function openDashboard() {
 function closeDashboard() {
   document.getElementById('page5').style.display = 'none';
   document.body.style.overflow = '';
+}
+
+/* ── DOC MODAL FUNCTIONS ── */
+function openDocModal(which) {
+  var el = document.getElementById('modal-' + which);
+  if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
+}
+function closeDocModal(which, e) {
+  if (e && e.target !== document.getElementById('modal-' + which)) return;
+  var el = document.getElementById('modal-' + which);
+  if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+}
+
+// Delegated click for data-modal buttons (dynamically generated)
+document.addEventListener('click', function(e) {
+  var t = e.target;
+  while (t && t !== document) {
+    if (t.getAttribute && t.getAttribute('data-modal')) {
+      openDocModal(t.getAttribute('data-modal'));
+      return;
+    }
+    t = t.parentElement;
+  }
+});
+
+/* ── RENDER FUNCTIONS ── */
+function renderNumerico(viz, rows, ind, g) {
+  var vals = rows.filter(function(r){ return r.ind[ind.instr] && r.ind[ind.instr][ind.key] !== undefined; })
+                 .map(function(r){ return r.ind[ind.instr][ind.key]; });
+  var avg = vals.length ? Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length) : null;
+  var rango = avg !== null ? getRango(avg, ind.rango, ind.esBrecha) : null;
+
+  if (ind.formula) {
+    var formulaBox = document.createElement('div');
+    formulaBox.style.cssText = 'background:var(--gold-light);border:1px solid var(--gold);border-radius:var(--radius-sm);padding:8px 14px;margin-bottom:1.25rem;font-size:12px;color:var(--ink-mid)';
+    formulaBox.innerHTML = '<strong>Fórmula:</strong> ' + ind.formula;
+    viz.appendChild(formulaBox);
+  }
+
+  var kpi = document.createElement('div');
+  kpi.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem';
+  kpi.innerHTML = '<div class="kpi"><div class="kpi-val" style="color:'+(rango?rango.color:'var(--wine)')+'">'+(avg!==null?avg+'%':'—')+'</div><div class="kpi-label">Promedio '+g.label+'</div></div>'
+    +'<div class="kpi"><div class="kpi-val" style="font-size:14px;color:'+(rango?rango.color:'var(--success)')+'">'+(rango?rango.cat:'—')+'</div><div class="kpi-label">Interpretación</div></div>'
+    +'<div class="kpi"><div class="kpi-val" style="color:var(--gold)">'+vals.length+'</div><div class="kpi-label">Respuestas</div></div>';
+  viz.appendChild(kpi);
+
+  if (avg !== null && rango) {
+    var sem = document.createElement('div');
+    sem.className = 'semaforo';
+    sem.style.cssText = 'border:1px solid '+rango.color+'44;background:'+rango.color+'11;margin-bottom:1rem';
+    sem.innerHTML = '<div class="sem-dot" style="background:'+rango.color+'"></div>'
+      +'<div class="sem-label" style="font-size:14px">'+ind.label+'</div>'
+      +'<div class="sem-bar-wrap"><div class="sem-bar" style="width:'+avg+'%;background:'+rango.color+'"></div></div>'
+      +'<div class="sem-val">'+avg+'%<br><span style="font-size:10px;font-weight:400">'+rango.cat+'</span></div>';
+    viz.appendChild(sem);
+  }
+
+  var rangoTipoLabel = {general:'Escala general positiva',pertinencia:'Escala de pertinencia',coherencia:'Escala de coherencia curricular',satisfaccion:'Escala de satisfacción',brecha:'Escala de brecha (inversa)'};
+  var ACCIONES = {
+    general:     ['Mantener, documentar como buena práctica','Mantener con ajustes menores','Implementar mejoras puntuales','Diseñar acciones de mejora prioritaria','Rediseñar parcialmente','Reformulación prioritaria'],
+    pertinencia: ['Mantener como fortaleza','Mantener y mejorar detalles','Revisar contenidos o redacción','Ajustar con prioridad media-alta','Rediseñar parcialmente','Reformular o reemplazar'],
+    coherencia:  ['Mantener como modelo de referencia','Mantener y optimizar','Revisar articulaciones puntuales','Intervenir cursos o tramos específicos','Rediseñar parcialmente la secuencia','Reformulación prioritaria'],
+    satisfaccion:['Mantener y usar como evidencia','Mantener con mejora continua','Analizar comentarios abiertos','Implementar acciones correctivas','Revisar causas y plan de mejora','Intervención prioritaria'],
+    brecha:      ['Mantener y monitorear','Mejora menor','Incorporar al plan de mejora','Priorizar intervención','Rediseño parcial urgente','Reformulación prioritaria']
+  };
+
+  if (ind.rango && RANGOS[ind.rango]) {
+    var tTitle = document.createElement('div');
+    tTitle.className = 'section-title';
+    tTitle.style.marginBottom = '.75rem';
+    tTitle.textContent = rangoTipoLabel[ind.rango] || 'Valores referenciales';
+    viz.appendChild(tTitle);
+    var tblWrap = document.createElement('div');
+    tblWrap.style.cssText = 'background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem';
+    var tbl = document.createElement('table');
+    tbl.style.cssText = 'width:100%;border-collapse:collapse;font-size:12px';
+    var thead = document.createElement('thead');
+    thead.innerHTML = '<tr style="background:var(--wine-dark);color:#fff"><th style="padding:7px 10px;text-align:left;font-size:10px;letter-spacing:.04em;text-transform:uppercase">Rango</th><th style="padding:7px 10px;text-align:left;font-size:10px;letter-spacing:.04em;text-transform:uppercase">Categoría</th><th style="padding:7px 10px;text-align:left;font-size:10px;letter-spacing:.04em;text-transform:uppercase">Acción recomendada</th></tr>';
+    tbl.appendChild(thead);
+    var tbody = document.createElement('tbody');
+    var brechaRangos = ['0-10%','11-20%','21-30%','31-40%','41-50%','>50%'];
+    var genRangos    = ['90-100%','80-89%','70-79%','60-69%','50-59%','<50%'];
+    var rangoLabels  = ind.esBrecha ? brechaRangos : genRangos;
+    var accionList = ACCIONES[ind.rango] || ACCIONES.general;
+    (RANGOS[ind.rango]||[]).forEach(function(r, ri) {
+      var isCurrentRange = rango && r.cat === rango.cat;
+      var tr = document.createElement('tr');
+      tr.style.background = isCurrentRange ? r.color+'22' : (ri%2===0?'var(--surface)':'var(--surface-2)');
+      tr.innerHTML = '<td style="padding:6px 10px;border-bottom:1px solid var(--border-light);font-weight:'+(isCurrentRange?'700':'400')+'">'+(rangoLabels[ri]||'—')+'</td>'
+        +'<td style="padding:6px 10px;border-bottom:1px solid var(--border-light);color:'+r.color+';font-weight:700">'+r.cat+'</td>'
+        +'<td style="padding:6px 10px;border-bottom:1px solid var(--border-light);font-size:11px;color:var(--ink-mid)">'+(accionList[ri]||'—')+'</td>';
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    tblWrap.appendChild(tbl);
+    viz.appendChild(tblWrap);
+  }
+
+  var compVals=[], compLabels=[], compColors=[];
+  DASH_GRUPOS.forEach(function(gg) {
+    var gRows = dashData.filter(function(r){ return r.grupo===gg.key; });
+    var gVals = gRows.filter(function(r){ return r.ind[ind.instr] && r.ind[ind.instr][ind.key]!==undefined; })
+                     .map(function(r){ return r.ind[ind.instr][ind.key]; });
+    if (gVals.length) {
+      compLabels.push(gg.icon+' '+gg.label);
+      compVals.push(Math.round(gVals.reduce(function(a,b){return a+b;},0)/gVals.length));
+      compColors.push(gg.color);
+    }
+  });
+  if (compLabels.length > 1) {
+    var compTitle = document.createElement('div');
+    compTitle.className = 'section-title';
+    compTitle.textContent = 'Comparativa entre grupos';
+    viz.appendChild(compTitle);
+    var canvasWrap = document.createElement('div');
+    canvasWrap.style.cssText='background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem';
+    var canvas = document.createElement('canvas');
+    canvas.id='dash-chart-main'; canvas.height=180;
+    canvasWrap.appendChild(canvas); viz.appendChild(canvasWrap);
+    dashChart = new Chart(canvas, {
+      type:'bar',
+      data:{labels:compLabels,datasets:[{label:ind.label,data:compVals,
+        backgroundColor:compColors.map(function(c){return c+'cc';}),
+        borderColor:compColors,borderWidth:1.5,borderRadius:6}]},
+      options:{responsive:true,scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+'%';}}}},
+        plugins:{legend:{display:false}}}
+    });
+  }
+
+  if (vals.length) {
+    var tTitle2 = document.createElement('div');
+    tTitle2.className = 'section-title';
+    tTitle2.textContent = 'Respuestas individuales';
+    viz.appendChild(tTitle2);
+    var wrap = document.createElement('div');
+    wrap.style.cssText='background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden';
+    var tbl2 = document.createElement('table');
+    tbl2.className='resp-table';
+    tbl2.innerHTML='<thead><tr><th>Participante</th><th>Especialidad</th><th>Fecha</th><th>Valor</th><th>Interpretación</th></tr></thead>';
+    var tbody2=document.createElement('tbody');
+    rows.filter(function(r){return r.ind[ind.instr]&&r.ind[ind.instr][ind.key]!==undefined;})
+        .forEach(function(r){
+          var v=r.ind[ind.instr][ind.key];
+          var rng=getRango(v,ind.rango,ind.esBrecha);
+          var tr=document.createElement('tr');
+          tr.innerHTML='<td style="font-weight:500">'+(r.nombre||'—')+'</td>'
+            +'<td>'+(r.esp||'—')+'</td>'
+            +'<td>'+(r.fecha?new Date(r.fecha).toLocaleDateString('es-PE'):'—')+'</td>'
+            +'<td style="font-weight:700;color:'+rng.color+'">'+v+'%</td>'
+            +'<td><span style="font-size:11px;font-weight:600;color:'+rng.color+'">'+rng.cat+'</span></td>';
+          tbody2.appendChild(tr);
+        });
+    tbl2.appendChild(tbody2);
+    wrap.appendChild(tbl2);
+    viz.appendChild(wrap);
+  }
+}
+
+function renderDecision(viz, rows, g) {
+  var counts = {};
+  rows.forEach(function(r){ var d=r.ind.I6&&r.ind.I6.decision; if(d){counts[d]=(counts[d]||0)+1;} });
+  if (!Object.keys(counts).length) {
+    viz.innerHTML = '<p style="color:var(--ink-light);font-style:italic;font-size:13px">Sin datos de decisión para este grupo.</p>';
+    return;
+  }
+  var decColors = {'Mantener':'#10b981','Mantener con ajustes':'#f59e0b','Revisar':'#f97316','Reemplazar/Rediseñar':'#ef4444'};
+  Object.keys(counts).forEach(function(d) {
+    var pct = Math.round((counts[d]/rows.length)*100);
+    var col = decColors[d]||'#999';
+    var sem = document.createElement('div');
+    sem.className = 'semaforo';
+    sem.style.cssText = 'border:1px solid '+col+'22;background:'+col+'11;margin-bottom:8px';
+    sem.innerHTML = '<div class="sem-dot" style="background:'+col+'"></div>'
+      +'<div class="sem-label">'+d+'</div>'
+      +'<div class="sem-bar-wrap"><div class="sem-bar" style="width:'+pct+'%;background:'+col+'"></div></div>'
+      +'<div class="sem-val">'+counts[d]+' resp.</div>';
+    viz.appendChild(sem);
+  });
+  var canvasWrap = document.createElement('div');
+  canvasWrap.style.cssText='background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-top:1rem';
+  var canvas = document.createElement('canvas'); canvas.height=180;
+  canvasWrap.appendChild(canvas); viz.appendChild(canvasWrap);
+  dashChart = new Chart(canvas, {
+    type:'doughnut',
+    data:{ labels:Object.keys(counts), datasets:[{data:Object.values(counts),
+      backgroundColor:Object.keys(counts).map(function(d){return decColors[d]||'#999';}), borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}
+  });
+}
+
+function renderAbiertas(viz, rows, instrId, g) {
+  var hasAny = false;
+  if (instrId === 'I3') {
+    var FODA_DIMS = [
+      {key:'F',label:'Fortalezas',rangos:[{min:11,max:12,cat:'Fortaleza estratégica'},{min:9,max:10,cat:'Fortaleza consolidada'},{min:7,max:8,cat:'Fortaleza útil'},{min:5,max:6,cat:'Fortaleza débil'},{min:3,max:4,cat:'No verificable'}]},
+      {key:'O',label:'Oportunidades',rangos:[{min:11,max:12,cat:'Oportunidad estratégica'},{min:9,max:10,cat:'Oportunidad alta'},{min:7,max:8,cat:'Oportunidad media'},{min:5,max:6,cat:'Oportunidad baja'},{min:3,max:4,cat:'No prioritaria'}]},
+      {key:'D',label:'Debilidades',rangos:[{min:11,max:12,cat:'Prioridad crítica'},{min:9,max:10,cat:'Prioridad alta'},{min:7,max:8,cat:'Prioridad media'},{min:5,max:6,cat:'Prioridad baja'},{min:3,max:4,cat:'Prioridad mínima'}]},
+      {key:'A',label:'Amenazas',rangos:[{min:11,max:12,cat:'Prioridad crítica'},{min:9,max:10,cat:'Prioridad alta'},{min:7,max:8,cat:'Prioridad media'},{min:5,max:6,cat:'Prioridad baja'},{min:3,max:4,cat:'Prioridad mínima'}]}
+    ];
+    function getFodaTotal(entry, dim) {
+      if (!entry) return 0;
+      if (dim==='F') return (+entry.relevancia||0)+(+entry.evidencia||0)+(+entry.sostenibilidad||0);
+      if (dim==='O') return (+entry.pertinencia||0)+(+entry.viabilidad||0)+(+entry.impacto||0);
+      return (+entry.impacto||0)+(+entry.urgencia||0)+(+entry.viabilidad||0);
+    }
+    var semColors = {'estratégica':'#10b981','consolidada':'#34d399','alta':'#34d399','útil':'#fbbf24','media':'#fbbf24','baja':'#f97316','crítica':'#ef4444','mínima':'#6b7280','verificable':'#6b7280','prioritaria':'#f97316'};
+    function getSemColor(cat) {
+      var lower = cat.toLowerCase();
+      for (var k in semColors) { if (lower.includes(k)) return semColors[k]; }
+      return '#6b7280';
+    }
+    rows.forEach(function(r) {
+      var asigs = r.res.I3 && r.res.I3.asignaturas;
+      if (!asigs) return;
+      asigs.forEach(function(asig) {
+        if (!asig || !asig.asignatura) return;
+        hasAny = true;
+        var card = document.createElement('div');
+        card.style.cssText = 'background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem';
+        card.innerHTML = '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border-light)">'
+          +'<span style="font-family:DM Serif Display,serif;font-size:16px">'+asig.asignatura+'</span>'
+          +(asig.ciclo?'<span style="font-size:11px;font-weight:700;color:var(--wine)">Ciclo '+asig.ciclo+'</span>':'')
+          +'<span style="margin-left:auto;font-size:11px;color:var(--ink-light)">'+r.nombre+'</span>'
+          +'</div>';
+        var foda = asig.foda || {};
+        FODA_DIMS.forEach(function(dim) {
+          var entries = [foda[dim.key+'1'], foda[dim.key+'2']].filter(Boolean).filter(function(e){return e.hallazgo;});
+          if (!entries.length) return;
+          var dimDiv = document.createElement('div');
+          dimDiv.style.marginBottom = '10px';
+          var dimHeader = document.createElement('div');
+          dimHeader.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-light);margin-bottom:6px';
+          dimHeader.textContent = dim.label;
+          dimDiv.appendChild(dimHeader);
+          entries.forEach(function(e) {
+            var total = getFodaTotal(e, dim.key);
+            var cat = total > 0 ? (function(){ for(var i=0;i<dim.rangos.length;i++){if(total>=dim.rangos[i].min&&total<=dim.rangos[i].max)return dim.rangos[i].cat;} return ''; })() : '';
+            var color = cat ? getSemColor(cat) : 'var(--border)';
+            var rowEl = document.createElement('div');
+            rowEl.style.cssText = 'display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;background:var(--surface-2);margin-bottom:5px;border-left:3px solid '+color;
+            rowEl.innerHTML = '<p style="font-size:13px;color:var(--ink);line-height:1.5;margin:0;flex:1">'+e.hallazgo+'</p>'
+              +(total>0?'<div style="flex-shrink:0;text-align:right"><div style="font-size:16px;font-weight:700;color:'+color+'">'+total+'/12</div><div style="font-size:10px;color:'+color+';font-weight:600;white-space:nowrap">'+cat+'</div></div>':'');
+            dimDiv.appendChild(rowEl);
+          });
+          card.appendChild(dimDiv);
+        });
+        viz.appendChild(card);
+      });
+    });
+    if (!hasAny) viz.innerHTML='<p style="color:var(--ink-light);font-style:italic;font-size:13px">Aún no hay hallazgos FODA registrados.</p>';
+    return;
+  }
+  if (instrId === 'I4') {
+    rows.forEach(function(r) {
+      var sil = r.res.I4 && r.res.I4.silabo;
+      if (!sil) return;
+      var keys = Object.keys(sil).filter(function(k){ return k.endsWith('_obs') && sil[k]; });
+      if (!keys.length) return;
+      hasAny = true;
+      var card = document.createElement('div');
+      card.style.cssText='background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem';
+      card.innerHTML='<div style="font-size:12px;font-weight:600;color:var(--wine);margin-bottom:.75rem">'+r.nombre+(r.res.I4.asignatura?' — '+r.res.I4.asignatura:'')+'</div>';
+      keys.forEach(function(k){
+        var criterio = k.replace('_obs','');
+        card.innerHTML+='<div style="margin-bottom:6px"><span style="font-size:10px;text-transform:uppercase;font-weight:700;color:var(--ink-light);letter-spacing:.06em">'+criterio+'</span><p style="font-size:13px;color:var(--ink);margin-top:2px">'+sil[k]+'</p></div>';
+      });
+      viz.appendChild(card);
+    });
+    if (!hasAny) viz.innerHTML='<p style="color:var(--ink-light);font-style:italic;font-size:13px">Aún no hay observaciones registradas.</p>';
+    return;
+  }
+  var questions = OPEN_QUESTIONS[instrId] || [];
+  questions.forEach(function(q, qi) {
+    var qIdx = qi+1;
+    var respuestas = [];
+    rows.forEach(function(r) {
+      var ab = r.res[instrId] && r.res[instrId].abiertas;
+      var txt = ab && ab[qIdx];
+      if (txt && txt.trim() && txt.trim().toLowerCase() !== 'nada') respuestas.push({nombre:r.nombre, esp:r.esp||'', txt:txt.trim()});
+    });
+    if (!respuestas.length) return;
+    hasAny = true;
+    var section = document.createElement('div');
+    section.style.marginBottom = '1.5rem';
+    var qTitle = document.createElement('div');
+    qTitle.className = 'section-title';
+    qTitle.textContent = qIdx+'. '+q;
+    section.appendChild(qTitle);
+    respuestas.forEach(function(r) {
+      var card = document.createElement('div');
+      card.style.cssText='background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:8px;border-left:3px solid var(--wine)';
+      card.innerHTML='<div style="font-size:11px;font-weight:600;color:var(--ink-light);margin-bottom:5px">'+r.nombre+(r.esp?' · '+r.esp:'')+'</div>'
+        +'<p style="font-size:13px;color:var(--ink);line-height:1.6;margin:0">'+r.txt+'</p>';
+      section.appendChild(card);
+    });
+    viz.appendChild(section);
+  });
+  if (!hasAny) viz.innerHTML='<p style="color:var(--ink-light);font-style:italic;font-size:13px">Aún no hay respuestas abiertas registradas para este grupo.</p>';
+}
+
+function renderI9Aportes(viz, rows) {
+  var hasAny = false;
+  rows.forEach(function(r) {
+    var aportes = r.res.I9 && r.res.I9.aportes;
+    if (!aportes) return;
+    var validos = aportes.filter(function(a){ return a && a.aporte && a.aporte.trim(); });
+    if (!validos.length) return;
+    hasAny = true;
+    var expertCard = document.createElement('div');
+    expertCard.style.cssText = 'background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem';
+    expertCard.innerHTML = '<div style="font-size:12px;font-weight:600;color:var(--wine);margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid var(--border-light)">'
+      +r.nombre+(r.esp?' <span style="font-weight:400;color:var(--ink-light)">· '+r.esp+'</span>':'')+'</div>';
+    validos.forEach(function(a, ai) {
+      var chipColor = function(v,tipo) {
+        if (!v) return '';
+        var col = (v==='Alta'||v==='Alto')?'#10b981':(v==='Media'||v==='Medio')?'#f59e0b':'#ef4444';
+        return '<span style="font-size:10px;font-weight:600;background:'+col+'22;color:'+col+';padding:2px 8px;border-radius:10px;border:1px solid '+col+'44">'+tipo+': '+v+'</span>';
+      };
+      var aDiv = document.createElement('div');
+      aDiv.style.cssText = 'padding:10px 12px;border-radius:6px;background:var(--surface-2);margin-bottom:8px;border-left:3px solid var(--wine)';
+      aDiv.innerHTML = '<p style="font-size:13px;color:var(--ink);line-height:1.5;margin:0 0 8px">'+(ai+1)+'. '+a.aporte+'</p>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
+        +(a.area?'<span style="font-size:10px;font-weight:600;background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:10px">'+a.area+'</span>':'')
+        +(a.tipo?'<span style="font-size:10px;font-weight:600;background:#f3e8ff;color:#7c3aed;padding:2px 8px;border-radius:10px">'+a.tipo+'</span>':'')
+        +chipColor(a.pertinencia,'Pertinencia')
+        +chipColor(a.viabilidad,'Viabilidad')
+        +chipColor(a.impacto,'Impacto')
+        +'</div>';
+      expertCard.appendChild(aDiv);
+    });
+    viz.appendChild(expertCard);
+  });
+  if (!hasAny) viz.innerHTML = '<p style="color:var(--ink-light);font-style:italic;font-size:13px">Aún no hay aportes registrados.</p>';
 }
 
 </script>
