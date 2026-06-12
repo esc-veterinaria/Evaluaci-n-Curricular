@@ -2882,59 +2882,95 @@ function getRango(val, tipo, esBrecha) {
 
 var DASH_INDICADORES = {
   expertos: [
-    // I1 Perfil de egreso
+    // I1
     {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Mide si el perfil responde a la profesión y al mercado laboral.'},
     {id:'I1_coherencia',    instr:'I1', key:'coherencia_competencial',  label:'Coherencia competencial (I1)',   rango:'coherencia',  formula:'Prom. ítems 4,5,6,7 / 4 × 100', desc:'Mide si las competencias específicas están representadas en el perfil.'},
     {id:'I1_integral',      instr:'I1', key:'formacion_integral',       label:'Formación integral (I1)',        rango:'general',     formula:'Prom. ítems 3 y 11 / 4 × 100', desc:'Mide ética, humanismo, bienestar animal y responsabilidad social.'},
     {id:'I1_claridad',      instr:'I1', key:'claridad_perfil',          label:'Claridad del perfil (I1)',       rango:'general',     formula:'Ítem 12 / 4 × 100', desc:'Mide si el perfil se entiende con facilidad.'},
     {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil de egreso.'},
     {id:'I1_brecha',        instr:'I1', key:'brecha_perfil',            label:'Brecha del perfil (I1)',         rango:'brecha',      formula:'100 − índice global', desc:'Mide cuánto falta mejorar el perfil. A menor brecha, mejor resultado.', esBrecha:true},
-    // I2 Estructura curricular
+    {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        rango:null,          formula:'', desc:'Aspectos sólidos, mejoras y competencias a fortalecer en el perfil.'},
+    // I2
     {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            rango:'coherencia',  formula:'Prom. ítems 1,2,3 / 4 × 100', desc:'Mide si los cursos siguen una progresión lógica entre ciclos.'},
     {id:'I2_fluidez',       instr:'I2', key:'fluidez_curricular',       label:'Fluidez curricular (I2)',        rango:'general',     formula:'Prom. ítems 4,5,13 / 4 × 100', desc:'Mide si el estudiante puede avanzar sin obstáculos innecesarios.'},
     {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           rango:'general',     formula:'Prom. ítems 6,7,8 / 4 × 100', desc:'Mide equilibrio entre créditos, horas teóricas y prácticas.'},
     {id:'I2_coherencia',    instr:'I2', key:'coherencia_estructural',   label:'Coherencia estructural (I2)',    rango:'coherencia',  formula:'Prom. ítems 9,10,11 / 4 × 100', desc:'Mide ausencia de vacíos, duplicidades o sobrecarga curricular.'},
     {id:'I2_flexibilidad',  instr:'I2', key:'flexibilidad',             label:'Flexibilidad curricular (I2)',   rango:'general',     formula:'Ítem 12 / 4 × 100', desc:'Mide utilidad de las electivas y rutas formativas disponibles.'},
-    // I9 Expertos
+    {id:'I2_abierta',       instr:'I2', key:'_abierta',                 label:'Opiniones abiertas (I2)',        rango:null,          formula:'', desc:'Comentarios sobre la estructura y organización del plan de estudios.'},
+    // I9
     {id:'I9_pertinencia',   instr:'I9', key:'pertinencia_experta',      label:'Pertinencia experta (I9)',       rango:'pertinencia', formula:'Prom. ítems 1,2,4,10 / 4 × 100', desc:'Mide vigencia profesional del plan desde la mirada del experto.'},
     {id:'I9_practica',      instr:'I9', key:'suficiencia_practica',     label:'Suficiencia práctica (I9)',      rango:'general',     formula:'Prom. ítems 5 y 6 / 4 × 100', desc:'Mide si la formación práctica es suficiente para el internado.'},
-    {id:'I9_actualizacion', instr:'I9', key:'actualizacion_profesional',label:'Actualización profesional (I9)', rango:'general',    formula:'Prom. ítems 4,9,10 / 4 × 100', desc:'Mide actualidad disciplinar, tecnológica y prospectiva del plan.'},
+    {id:'I9_actualizacion', instr:'I9', key:'actualizacion_profesional',label:'Actualización profesional (I9)',rango:'general',     formula:'Prom. ítems 4,9,10 / 4 × 100', desc:'Mide actualidad disciplinar, tecnológica y prospectiva del plan.'},
     {id:'I9_abierta',       instr:'I9', key:'_abierta',                 label:'Opiniones abiertas (I9)',        rango:null,          formula:'', desc:'Fortalezas, brechas y recomendaciones de los expertos.'},
     {id:'I9_aportes',       instr:'I9', key:'_aportes',                 label:'Aportes Parte C (I9)',           rango:null,          formula:'', desc:'Lista de aportes clasificados por área, tipo, pertinencia, viabilidad e impacto.'}
   ],
   empleadores: [
+    // I8
     {id:'I8_satisfaccion',  instr:'I8', key:'satisfaccion_empleador',   label:'Satisfacción del empleador (I8)',rango:'satisfaccion',formula:'Prom. todos los ítems / 4 × 100', desc:'Mide valoración global del desempeño de estudiantes y egresados.'},
     {id:'I8_tecnico',       instr:'I8', key:'desempeno_tecnico',        label:'Desempeño técnico (I8)',         rango:'general',     formula:'Prom. ítems 1–5 / 4 × 100', desc:'Mide conocimientos y aplicación técnica veterinaria.'},
     {id:'I8_profesional',   instr:'I8', key:'desempeno_profesional',    label:'Desempeño profesional (I8)',     rango:'satisfaccion',formula:'Prom. ítems 6–13 / 4 × 100', desc:'Mide responsabilidad, comunicación, bioseguridad y adaptación.'},
-    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Valoración del perfil (I1)',     rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Cómo valoran el perfil de egreso los empleadores.'},
-    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil por parte de los empleadores.'},
-    {id:'I8_abierta',       instr:'I8', key:'_abierta',                 label:'Opiniones abiertas (I8)',        rango:null,          formula:'', desc:'Fortalezas, debilidades y competencias que demandan los empleadores.'}
+    {id:'I8_abierta',       instr:'I8', key:'_abierta',                 label:'Opiniones abiertas (I8)',        rango:null,          formula:'', desc:'Fortalezas, debilidades y competencias que demandan los empleadores.'},
+    // I1
+    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Mide si el perfil responde a la profesión y al mercado laboral.'},
+    {id:'I1_coherencia',    instr:'I1', key:'coherencia_competencial',  label:'Coherencia competencial (I1)',   rango:'coherencia',  formula:'Prom. ítems 4,5,6,7 / 4 × 100', desc:'Mide si las competencias específicas están representadas en el perfil.'},
+    {id:'I1_integral',      instr:'I1', key:'formacion_integral',       label:'Formación integral (I1)',        rango:'general',     formula:'Prom. ítems 3 y 11 / 4 × 100', desc:'Mide ética, humanismo, bienestar animal y responsabilidad social.'},
+    {id:'I1_claridad',      instr:'I1', key:'claridad_perfil',          label:'Claridad del perfil (I1)',       rango:'general',     formula:'Ítem 12 / 4 × 100', desc:'Mide si el perfil se entiende con facilidad.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil de egreso.'},
+    {id:'I1_brecha',        instr:'I1', key:'brecha_perfil',            label:'Brecha del perfil (I1)',         rango:'brecha',      formula:'100 − índice global', desc:'Mide cuánto falta mejorar el perfil. A menor brecha, mejor resultado.', esBrecha:true},
+    {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        rango:null,          formula:'', desc:'Aspectos sólidos, mejoras y competencias a fortalecer en el perfil.'}
   ],
   egresados: [
+    // I7
     {id:'I7_utilidad',      instr:'I7', key:'utilidad_profesional',     label:'Utilidad profesional (I7)',      rango:'satisfaccion',formula:'Prom. ítems 1–11 / 4 × 100', desc:'Mide utilidad de la formación en el ejercicio profesional real.'},
     {id:'I7_insercion',     instr:'I7', key:'insercion_practica',       label:'Inserción práctica (I7)',        rango:'general',     formula:'Prom. ítems 6 y 7 / 4 × 100', desc:'Mide utilidad de prácticas preprofesionales e internado.'},
     {id:'I7_brecha_inv',    instr:'I7', key:'brecha_investigacion',     label:'Brecha en investigación (I7)',   rango:'brecha',      formula:'100 − ítem 4 convertido a %', desc:'Mide necesidad de fortalecer investigación. A menor brecha, mejor.', esBrecha:true},
     {id:'I7_digital',       instr:'I7', key:'necesidad_gestion_digital',label:'Necesidad gestión/digital (I7)',rango:'general',     formula:'Prom. ítems 12 y 13 / 4 × 100', desc:'Valor alto indica demanda de fortalecer gestión, emprendimiento o IA.'},
     {id:'I7_recomendacion', instr:'I7', key:'recomendacion_carrera',    label:'Recomendación de carrera (I7)', rango:'satisfaccion',formula:'Ítem 14 / 4 × 100', desc:'Mide satisfacción global: si recomendarían la carrera.'},
-    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Valoración del perfil (I1)',     rango:'general',     formula:'Prom. general / 4 × 100', desc:'Cómo valoran el perfil de egreso los egresados.'},
-    {id:'I7_abierta',       instr:'I7', key:'_abierta',                 label:'Opiniones abiertas (I7)',        rango:null,          formula:'', desc:'Cursos útiles, áreas a reforzar y competencias que exige el mercado.'}
-  ],
-  docentes_p24: [
-    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Valoración del perfil de egreso por docentes Plan 24.'},
-    {id:'I1_coherencia',    instr:'I1', key:'coherencia_competencial',  label:'Coherencia competencial (I1)',   rango:'coherencia',  formula:'Prom. ítems 4,5,6,7 / 4 × 100', desc:'Articulación del perfil con las 4 competencias específicas.'},
-    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil por docentes Plan 24.'},
-    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            rango:'coherencia',  formula:'Prom. ítems 1,2,3 / 4 × 100', desc:'Orden y progresión lógica de asignaturas.'},
-    {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           rango:'general',     formula:'Prom. ítems 6,7,8 / 4 × 100', desc:'Equilibrio entre carga teórica y práctica por ciclo.'},
-    {id:'I2_coherencia',    instr:'I2', key:'coherencia_estructural',   label:'Coherencia estructural (I2)',    rango:'coherencia',  formula:'Prom. ítems 9,10,11 / 4 × 100', desc:'Coherencia interna del plan: vacíos, duplicidades y adecuación.'},
-    {id:'I3_foda',          instr:'I3', key:'_abierta',                 label:'Hallazgos FODA por asignatura (I3)', rango:null,      formula:'', desc:'Hallazgos, puntajes de prioridad y categorías por cuadrante y asignatura.'},
+    {id:'I7_abierta',       instr:'I7', key:'_abierta',                 label:'Opiniones abiertas (I7)',        rango:null,          formula:'', desc:'Cursos útiles, áreas a reforzar y competencias que exige el mercado.'},
+    // I1
+    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Mide si el perfil responde a la profesión y al mercado laboral.'},
+    {id:'I1_coherencia',    instr:'I1', key:'coherencia_competencial',  label:'Coherencia competencial (I1)',   rango:'coherencia',  formula:'Prom. ítems 4,5,6,7 / 4 × 100', desc:'Mide si las competencias específicas están representadas en el perfil.'},
+    {id:'I1_integral',      instr:'I1', key:'formacion_integral',       label:'Formación integral (I1)',        rango:'general',     formula:'Prom. ítems 3 y 11 / 4 × 100', desc:'Mide ética, humanismo, bienestar animal y responsabilidad social.'},
+    {id:'I1_claridad',      instr:'I1', key:'claridad_perfil',          label:'Claridad del perfil (I1)',       rango:'general',     formula:'Ítem 12 / 4 × 100', desc:'Mide si el perfil se entiende con facilidad.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil de egreso.'},
+    {id:'I1_brecha',        instr:'I1', key:'brecha_perfil',            label:'Brecha del perfil (I1)',         rango:'brecha',      formula:'100 − índice global', desc:'Mide cuánto falta mejorar el perfil. A menor brecha, mejor resultado.', esBrecha:true},
     {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        rango:null,          formula:'', desc:'Aspectos sólidos, mejoras y competencias a fortalecer en el perfil.'}
   ],
+  docentes_p24: [
+    // I1
+    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Mide si el perfil responde a la profesión y al mercado laboral.'},
+    {id:'I1_coherencia',    instr:'I1', key:'coherencia_competencial',  label:'Coherencia competencial (I1)',   rango:'coherencia',  formula:'Prom. ítems 4,5,6,7 / 4 × 100', desc:'Mide si las competencias específicas están representadas en el perfil.'},
+    {id:'I1_integral',      instr:'I1', key:'formacion_integral',       label:'Formación integral (I1)',        rango:'general',     formula:'Prom. ítems 3 y 11 / 4 × 100', desc:'Mide ética, humanismo, bienestar animal y responsabilidad social.'},
+    {id:'I1_claridad',      instr:'I1', key:'claridad_perfil',          label:'Claridad del perfil (I1)',       rango:'general',     formula:'Ítem 12 / 4 × 100', desc:'Mide si el perfil se entiende con facilidad.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil de egreso.'},
+    {id:'I1_brecha',        instr:'I1', key:'brecha_perfil',            label:'Brecha del perfil (I1)',         rango:'brecha',      formula:'100 − índice global', desc:'Mide cuánto falta mejorar el perfil. A menor brecha, mejor resultado.', esBrecha:true},
+    {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        rango:null,          formula:'', desc:'Aspectos sólidos, mejoras y competencias a fortalecer en el perfil.'},
+    // I2
+    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            rango:'coherencia',  formula:'Prom. ítems 1,2,3 / 4 × 100', desc:'Mide si los cursos siguen una progresión lógica entre ciclos.'},
+    {id:'I2_fluidez',       instr:'I2', key:'fluidez_curricular',       label:'Fluidez curricular (I2)',        rango:'general',     formula:'Prom. ítems 4,5,13 / 4 × 100', desc:'Mide si el estudiante puede avanzar sin obstáculos innecesarios.'},
+    {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           rango:'general',     formula:'Prom. ítems 6,7,8 / 4 × 100', desc:'Mide equilibrio entre créditos, horas teóricas y prácticas.'},
+    {id:'I2_coherencia',    instr:'I2', key:'coherencia_estructural',   label:'Coherencia estructural (I2)',    rango:'coherencia',  formula:'Prom. ítems 9,10,11 / 4 × 100', desc:'Mide ausencia de vacíos, duplicidades o sobrecarga curricular.'},
+    {id:'I2_flexibilidad',  instr:'I2', key:'flexibilidad',             label:'Flexibilidad curricular (I2)',   rango:'general',     formula:'Ítem 12 / 4 × 100', desc:'Mide utilidad de las electivas y rutas formativas disponibles.'},
+    {id:'I2_abierta',       instr:'I2', key:'_abierta',                 label:'Opiniones abiertas (I2)',        rango:null,          formula:'', desc:'Comentarios sobre la estructura y organización del plan de estudios.'},
+    // I3 FODA
+    {id:'I3_foda',          instr:'I3', key:'_abierta',                 label:'Hallazgos FODA por asignatura (I3)',rango:null,        formula:'', desc:'Hallazgos, puntajes de prioridad y categorías por cuadrante y asignatura.'}
+  ],
   docentes_p52: [
-    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Valoración del perfil de egreso por docentes Plan 52.'},
-    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil por docentes Plan 52.'},
-    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            rango:'coherencia',  formula:'Prom. ítems 1,2,3 / 4 × 100', desc:'Orden y progresión lógica de asignaturas en el plan.'},
-    {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           rango:'general',     formula:'Prom. ítems 6,7,8 / 4 × 100', desc:'Percepción sobre equilibrio de carga académica.'},
-    {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        rango:null,          formula:'', desc:'Comentarios sobre el perfil y estructura del plan.'}
+    // I1
+    {id:'I1_pertinencia',   instr:'I1', key:'pertinencia_perfil',       label:'Pertinencia del perfil (I1)',    rango:'pertinencia', formula:'Prom. ítems 1,2,8,9 / 4 × 100', desc:'Mide si el perfil responde a la profesión y al mercado laboral.'},
+    {id:'I1_coherencia',    instr:'I1', key:'coherencia_competencial',  label:'Coherencia competencial (I1)',   rango:'coherencia',  formula:'Prom. ítems 4,5,6,7 / 4 × 100', desc:'Mide si las competencias específicas están representadas en el perfil.'},
+    {id:'I1_integral',      instr:'I1', key:'formacion_integral',       label:'Formación integral (I1)',        rango:'general',     formula:'Prom. ítems 3 y 11 / 4 × 100', desc:'Mide ética, humanismo, bienestar animal y responsabilidad social.'},
+    {id:'I1_claridad',      instr:'I1', key:'claridad_perfil',          label:'Claridad del perfil (I1)',       rango:'general',     formula:'Ítem 12 / 4 × 100', desc:'Mide si el perfil se entiende con facilidad.'},
+    {id:'I1_global',        instr:'I1', key:'indice_global',            label:'Índice global perfil (I1)',      rango:'general',     formula:'Prom. general / 4 × 100', desc:'Valoración global del perfil de egreso.'},
+    {id:'I1_brecha',        instr:'I1', key:'brecha_perfil',            label:'Brecha del perfil (I1)',         rango:'brecha',      formula:'100 − índice global', desc:'Mide cuánto falta mejorar el perfil. A menor brecha, mejor resultado.', esBrecha:true},
+    {id:'I1_abierta',       instr:'I1', key:'_abierta',                 label:'Opiniones abiertas (I1)',        rango:null,          formula:'', desc:'Aspectos sólidos, mejoras y competencias a fortalecer en el perfil.'},
+    // I2
+    {id:'I2_secuencia',     instr:'I2', key:'secuencialidad',           label:'Secuencialidad (I2)',            rango:'coherencia',  formula:'Prom. ítems 1,2,3 / 4 × 100', desc:'Mide si los cursos siguen una progresión lógica entre ciclos.'},
+    {id:'I2_fluidez',       instr:'I2', key:'fluidez_curricular',       label:'Fluidez curricular (I2)',        rango:'general',     formula:'Prom. ítems 4,5,13 / 4 × 100', desc:'Mide si el estudiante puede avanzar sin obstáculos innecesarios.'},
+    {id:'I2_carga',         instr:'I2', key:'carga_academica',          label:'Carga académica (I2)',           rango:'general',     formula:'Prom. ítems 6,7,8 / 4 × 100', desc:'Mide equilibrio entre créditos, horas teóricas y prácticas.'},
+    {id:'I2_coherencia',    instr:'I2', key:'coherencia_estructural',   label:'Coherencia estructural (I2)',    rango:'coherencia',  formula:'Prom. ítems 9,10,11 / 4 × 100', desc:'Mide ausencia de vacíos, duplicidades o sobrecarga curricular.'},
+    {id:'I2_flexibilidad',  instr:'I2', key:'flexibilidad',             label:'Flexibilidad curricular (I2)',   rango:'general',     formula:'Ítem 12 / 4 × 100', desc:'Mide utilidad de las electivas y rutas formativas disponibles.'},
+    {id:'I2_abierta',       instr:'I2', key:'_abierta',                 label:'Opiniones abiertas (I2)',        rango:null,          formula:'', desc:'Comentarios sobre la estructura y organización del plan de estudios.'}
   ],
   docente_satelite: [
     {id:'I6_pertinencia',   instr:'I6', key:'pertinencia_satelite',     label:'Pertinencia satélite (I6)',      rango:'pertinencia', formula:'Prom. ítems 1,4,5,10 / 4 × 100', desc:'Mide si el curso es adecuado para evaluar el nivel de competencia.'},
@@ -3985,6 +4021,34 @@ function downloadInformeGrupo() {
   var doc = buildPDF(title, allSections);
   if (doc) doc.save('Informe_Completo_' + g.key + '.pdf');
 }
+function downloadInformeConsolidado() {
+  if (!dashData || !dashData.length) {
+    alert('No hay datos cargados. Asegúrese de que el dashboard haya cargado correctamente.');
+    return;
+  }
+  var allSections = [];
+  var fecha = new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'});
+  allSections.push({type:'text', text:'Informe Consolidado — Evaluación Curricular Plan 24 · EPMV · URP', bold:true});
+  allSections.push({type:'text', text:'Fecha de generación: ' + fecha + '  ·  Total de respuestas: ' + dashData.length});
+  allSections.push({type:'spacer', h:6});
+
+  DASH_GRUPOS.forEach(function(g) {
+    var gRows = dashData.filter(function(r){ return r.grupo === g.key; });
+    if (!gRows.length) return;
+    var indicadores = DASH_INDICADORES[g.key] || [];
+    allSections.push({type:'section-title', text: g.icon + ' ' + g.label + '  (' + gRows.length + ' respuesta' + (gRows.length!==1?'s':'') + ')'});
+    indicadores.forEach(function(ind) {
+      var secs = buildIndicadorSections(ind, g);
+      allSections = allSections.concat(secs);
+      allSections.push({type:'spacer', h:4});
+    });
+    allSections.push({type:'spacer', h:8});
+  });
+
+  var doc = buildPDF('Informe Consolidado — Todos los grupos', allSections);
+  if (doc) doc.save('Informe_Consolidado_EPMV_Plan24.pdf');
+}
+
 </script>
 <!-- PAGE 5: DASHBOARD — full screen overlay outside layout -->
 <div id="page5" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:var(--surface-2)">
@@ -4031,7 +4095,13 @@ function downloadInformeGrupo() {
 
     <!-- STEP 1: Selector de grupo -->
     <div id="dash-step1">
-      <div class="section-title">Selecciona un grupo</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+        <div class="section-title" style="margin-bottom:0">Selecciona un grupo</div>
+        <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px;min-height:36px" onclick="downloadInformeConsolidado()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar informe consolidado
+        </button>
+      </div>
       <div id="dash-grupo-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:1.5rem"></div>
     </div>
 
