@@ -3000,7 +3000,14 @@ function loadDashboard() {
       onDashDataLoaded(data);
     })
     .catch(function(err) {
-      showDashError('No se pudo leer la hoja. Verifica que esté compartida como "Cualquier persona con el enlace puede ver". Error: ' + err.message);
+      var msg = err.message || '';
+      if (msg.includes('403') || msg.includes('Forbidden')) {
+        showDashError('El Google Sheet no está compartido públicamente. Ve a Google Sheets → Compartir → "Cualquier persona con el enlace" → Lector.');
+      } else if (msg.includes('Failed to fetch') || msg.includes('Load failed') || msg.includes('NetworkError')) {
+        showDashError('Sin conexión a internet o el Sheet no es accesible. Verifica tu conexión y que el Sheet esté compartido como "Cualquier persona con el enlace puede ver".');
+      } else {
+        showDashError('Error al leer la hoja: ' + msg + '. Verifica que el Sheet esté compartido como "Cualquier persona con el enlace puede ver".');
+      }
     });
 }
 
@@ -3496,6 +3503,488 @@ function renderI9Aportes(viz, rows) {
   if (!hasAny) viz.innerHTML = '<p style="color:var(--ink-light);font-style:italic;font-size:13px">Aún no hay aportes registrados.</p>';
 }
 
+var _currentG   = null;  // grupo object
+var _currentInd = null;  // indicador object
+
+// Override selectDashIndicador to track current state
+var _origSelectInd = selectDashIndicador;
+selectDashIndicador = function(ind, g) {
+  _currentG   = g;
+  _currentInd = ind;
+  _origSelectInd(ind, g);
+};
+
+var _origSelectGrupo = selectDashGrupo;
+selectDashGrupo = function(g) {
+  _currentG   = g;
+  _currentInd = null;
+  _origSelectGrupo(g);
+};
+
+/* ── PDF builder ── */
+function buildPDF(title, sections) {
+  var jsPDF = window.jspdf ? window.jspdf.jsPDF : (window.jsPDF || (window.jspdf && window.jspdf.jsPDF));
+  if (!jsPDF) { alert('La librería PDF no está disponible. Verifica tu conexión a internet.'); return; }
+
+  var doc = new jsPDF({orientation:'p', unit:'mm', format:'a4'});
+  var pageW   = doc.internal.pageSize.getWidth();
+  var pageH   = doc.internal.pageSize.getHeight();
+  var margin  = 18;
+  var contentW = pageW - margin*2;
+  var y = margin;
+  var lineH = 5.5;
+
+  function checkPage(needed) {
+    if (y + needed > pageH - margin) {
+      doc.addPage();
+      y = margin;
+      // header line on new page
+      doc.setDrawColor(74,103,65);
+      doc.setLineWidth(0.4);
+      doc.line(margin, 12, pageW-margin, 12);
+      doc.setFontSize(7);
+      doc.setTextColor(120,132,112);
+      doc.text(title, margin, 10);
+      y = 18;
+    }
+  }
+
+  // Header bar
+  doc.setFillColor(51,74,46);
+  doc.rect(0, 0, pageW, 18, 'F');
+  doc.setFontSize(11);
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.text('EPMV · URP — Evaluación Curricular Plan 24', margin, 8);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','normal');
+  doc.text(title, margin, 13.5);
+  doc.setFontSize(7);
+  doc.setTextColor(180,200,170);
+  doc.text('Generado: ' + new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'}), pageW-margin, 13.5, {align:'right'});
+  y = 24;
+
+  // Render each section
+  sections.forEach(function(sec) {
+    checkPage(20);
+
+    if (sec.type === 'section-title') {
+      // Green section bar
+      doc.setFillColor(74,103,65);
+      doc.rect(margin, y, contentW, 7, 'F');
+      doc.setFontSize(9);
+      doc.setTextColor(255,255,255);
+      doc.setFont('helvetica','bold');
+      doc.text(sec.text, margin+3, y+5);
+      y += 10;
+    }
+    else if (sec.type === 'formula') {
+      checkPage(10);
+      doc.setFillColor(240,245,232);
+      doc.setDrawColor(138,158,58);
+      doc.rect(margin, y, contentW, 8, 'FD');
+      doc.setFontSize(8);
+      doc.setTextColor(51,74,46);
+      doc.setFont('helvetica','bold');
+      doc.text('Fórmula: ', margin+2, y+5.5);
+      doc.setFont('helvetica','normal');
+      doc.text(sec.text, margin+20, y+5.5);
+      y += 11;
+    }
+    else if (sec.type === 'kpi') {
+      checkPage(18);
+      var kpiW = contentW/3 - 2;
+      sec.items.forEach(function(k, ki) {
+        var kx = margin + ki*(kpiW+3);
+        doc.setFillColor(253,253,251);
+        doc.setDrawColor(212,217,204);
+        doc.rect(kx, y, kpiW, 16, 'FD');
+        doc.setFontSize(14);
+        doc.setTextColor(74,103,65);
+        doc.setFont('helvetica','bold');
+        doc.text(String(k.val), kx + kpiW/2, y+9, {align:'center'});
+        doc.setFontSize(7);
+        doc.setTextColor(122,132,112);
+        doc.setFont('helvetica','normal');
+        var lbl = doc.splitTextToSize(k.label, kpiW-2);
+        doc.text(lbl, kx + kpiW/2, y+13, {align:'center'});
+      });
+      y += 20;
+    }
+    else if (sec.type === 'semaforo') {
+      checkPage(14);
+      var colorMap = {green:[16,185,129], yellow:[245,158,11], red:[239,68,68]};
+      var col = colorMap[sec.color] || [120,120,120];
+      // White background first
+      doc.setFillColor(255,255,255);
+      doc.setDrawColor(255,255,255);
+      doc.rect(margin, y, contentW, 12, 'F');
+      // Color left bar
+      doc.setFillColor(col[0], col[1], col[2]);
+      doc.rect(margin, y, 3, 11, 'F');
+      // Border only (no fill) on main row
+      doc.setFillColor(255,255,255);
+      doc.setDrawColor(col[0],col[1],col[2]);
+      doc.setLineWidth(0.5);
+      doc.rect(margin+3, y, contentW-3, 11, 'D');
+      // Label
+      doc.setFontSize(9);
+      doc.setTextColor(20,20,20);
+      doc.setFont('helvetica','bold');
+      doc.text(sec.label, margin+6, y+5);
+      // Value + category
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(col[0],col[1],col[2]);
+      doc.text(sec.val + '% — ' + sec.cat, pageW-margin-3, y+5, {align:'right'});
+      // Action
+      doc.setFontSize(7.5);
+      doc.setTextColor(80,80,80);
+      doc.text('Acción recomendada: ' + sec.accion, margin+6, y+9.5);
+      y += 14;
+    }
+    else if (sec.type === 'table') {
+      checkPage(14);
+      // Table header
+      doc.setFillColor(51,74,46);
+      var colWidths = sec.colWidths || [];
+      var totalW = colWidths.reduce(function(a,b){return a+b;},0) || contentW;
+      var scale = contentW / totalW;
+      var scaledWidths = colWidths.map(function(w){return w*scale;});
+      var cx = margin;
+      sec.headers.forEach(function(h, hi) {
+        var cw = scaledWidths[hi] || contentW/sec.headers.length;
+        doc.setFillColor(51,74,46);
+        doc.rect(cx, y, cw, 6, 'F');
+        doc.setFontSize(7);
+        doc.setTextColor(255,255,255);
+        doc.setFont('helvetica','bold');
+        doc.text(h, cx+2, y+4.2);
+        cx += cw;
+      });
+      y += 6;
+      var rangoColors = ['#10b981','#34d399','#fbbf24','#f97316','#ef4444','#dc2626'];
+      var hexToRgb = function(hex) {
+        var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+        return [r,g,b];
+      };
+      sec.rows.forEach(function(row, ri) {
+        var rowH = 6;
+        var maxLines = 1;
+        row.forEach(function(cell, ci) {
+          var cw = (scaledWidths[ci] || contentW/row.length) - 2;
+          var lines = doc.splitTextToSize(String(cell||''), cw);
+          if (lines.length > maxLines) maxLines = lines.length;
+        });
+        rowH = Math.max(7, maxLines * 4.5 + 3);
+        checkPage(rowH);
+        // Row background — explicitly white or very light
+        var bgR = ri%2===0 ? 255 : 248;
+        var bgG = ri%2===0 ? 255 : 250;
+        var bgB = ri%2===0 ? 255 : 248;
+        doc.setDrawColor(220,225,215);
+        cx = margin;
+        row.forEach(function(cell, ci) {
+          var cw = scaledWidths[ci] || contentW/row.length;
+          // Fill each cell explicitly with white/light
+          doc.setFillColor(bgR, bgG, bgB);
+          doc.rect(cx, y, cw, rowH, 'FD');
+          doc.setFontSize(7.5);
+          doc.setFont('helvetica','normal');
+          // Category column (index 1) of range tables gets colored text
+          var isRangoTable = sec.headers && sec.headers[1] === 'Categoría' && ci === 1 && rangoColors[ri];
+          if (isRangoTable) {
+            var rc = hexToRgb(rangoColors[ri]);
+            doc.setTextColor(rc[0], rc[1], rc[2]);
+            doc.setFont('helvetica','bold');
+          } else {
+            doc.setTextColor(20, 20, 20);
+          }
+          var lines = doc.splitTextToSize(String(cell||'—'), cw-2);
+          doc.text(lines, cx+2, y+4.5);
+          cx += cw;
+        });
+        y += rowH;
+      });
+      y += 4;
+    }
+    else if (sec.type === 'open-question') {
+      checkPage(10);
+      doc.setFontSize(8.5);
+      doc.setTextColor(51,74,46);
+      doc.setFont('helvetica','bold');
+      var qlines = doc.splitTextToSize(sec.question, contentW);
+      doc.text(qlines, margin, y);
+      y += qlines.length * 4.5 + 2;
+    }
+    else if (sec.type === 'open-answer') {
+      var estimatedH = 20;
+      checkPage(estimatedH);
+      // Reset fill to white before drawing — clears any lingering table row color
+      doc.setFillColor(255,255,255);
+      doc.setDrawColor(255,255,255);
+      doc.rect(margin, y, contentW, estimatedH, 'F');
+      // name
+      doc.setFontSize(7.5);
+      doc.setTextColor(74,103,65);
+      doc.setFont('helvetica','bold');
+      doc.text(sec.nombre + (sec.esp ? ' · ' + sec.esp : ''), margin+4, y+3.5);
+      y += 8;
+      // text
+      doc.setFontSize(8.5);
+      doc.setTextColor(0,0,0);
+      doc.setFont('helvetica','normal');
+      var textLines = doc.splitTextToSize(sec.text, contentW - 6);
+      var blockH = textLines.length * 4.8 + 2;
+      checkPage(blockH + 4);
+      // white background for text area
+      doc.setFillColor(255,255,255);
+      doc.setDrawColor(255,255,255);
+      doc.rect(margin, y-1, contentW, blockH + 2, 'F');
+      doc.text(textLines, margin+4, y);
+      // left border line
+      doc.setDrawColor(74,103,65);
+      doc.setLineWidth(0.8);
+      doc.line(margin, y-5, margin, y + blockH);
+      y += blockH + 4;
+    }
+    else if (sec.type === 'spacer') {
+      y += sec.h || 4;
+    }
+    else if (sec.type === 'text') {
+      checkPage(8);
+      doc.setFontSize(8);
+      doc.setTextColor(sec.color||'#222');
+      doc.setFont('helvetica', sec.bold?'bold':'normal');
+      var tlines = doc.splitTextToSize(sec.text, contentW);
+      doc.text(tlines, margin, y);
+      y += tlines.length * 4.5 + 2;
+    }
+  });
+
+  // Page numbers
+  var totalPages = doc.internal.getNumberOfPages();
+  for (var i=1; i<=totalPages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(7);
+    doc.setTextColor(150,160,140);
+    doc.text('Página ' + i + ' de ' + totalPages, pageW/2, pageH-8, {align:'center'});
+  }
+
+  return doc;
+}
+
+/* ── Build sections for one indicator ── */
+function buildIndicadorSections(ind, g) {
+  var sections = [];
+  var rows = dashData.filter(function(r){ return r.grupo === g.key; });
+
+  sections.push({type:'section-title', text: g.icon + ' ' + g.label + '  ·  ' + ind.label});
+
+  // RESPUESTAS ABIERTAS
+  if (ind.key === '_abierta' || ind.key === '_silabo') {
+    sections = sections.concat(buildAbiertasSections(rows, ind.instr));
+    return sections;
+  }
+  // APORTES I9
+  if (ind.key === '_aportes') {
+    sections = sections.concat(buildAportesSections(rows));
+    return sections;
+  }
+  // DECISION I6
+  if (ind.key === 'decision') {
+    sections = sections.concat(buildDecisionSections(rows));
+    return sections;
+  }
+  // FODA I3
+  if (ind.instr === 'I3' && ind.key === '_abierta') {
+    sections = sections.concat(buildFodaSections(rows));
+    return sections;
+  }
+
+  // NUMÉRICO
+  if (ind.formula) {
+    sections.push({type:'formula', text: ind.formula});
+  }
+
+  var vals = rows.filter(function(r){ return r.ind[ind.instr] && r.ind[ind.instr][ind.key] !== undefined; })
+                 .map(function(r){ return r.ind[ind.instr][ind.key]; });
+  var avg = vals.length ? Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length) : null;
+  var rango = avg !== null ? getRango(avg, ind.rango, ind.esBrecha) : null;
+
+  // KPI
+  if (avg !== null) {
+    sections.push({type:'kpi', items:[
+      {val: avg+'%', label:'Promedio ' + g.label},
+      {val: rango ? rango.cat : '—', label:'Interpretación'},
+      {val: vals.length, label:'Respuestas'}
+    ]});
+    var semColor = rango ? (rango.color==='#10b981'||rango.color==='#34d399'?'green':rango.color==='#fbbf24'?'yellow':'red') : 'red';
+    var ACCIONES = {
+      general:     ['Mantener, documentar como buena práctica','Mantener con ajustes menores','Implementar mejoras puntuales','Diseñar acciones de mejora prioritaria','Rediseñar parcialmente','Reformulación prioritaria'],
+      pertinencia: ['Mantener como fortaleza','Mantener y mejorar detalles','Revisar contenidos o redacción','Ajustar con prioridad media-alta','Rediseñar parcialmente','Reformular o reemplazar'],
+      coherencia:  ['Mantener como modelo de referencia','Mantener y optimizar','Revisar articulaciones puntuales','Intervenir cursos o tramos específicos','Rediseñar parcialmente la secuencia','Reformulación prioritaria'],
+      satisfaccion:['Mantener y usar como evidencia','Mantener con mejora continua','Analizar comentarios abiertos','Implementar acciones correctivas','Revisar causas y plan de mejora','Intervención prioritaria'],
+      brecha:      ['Mantener y monitorear','Mejora menor','Incorporar al plan de mejora','Priorizar intervención','Rediseño parcial urgente','Reformulación prioritaria']
+    };
+    var scale = RANGOS[ind.rango] || RANGOS.general;
+    var accionIdx = scale.findIndex ? scale.findIndex(function(r){return r.cat===rango.cat;}) : 0;
+    var accionList = ACCIONES[ind.rango] || ACCIONES.general;
+    var accion = accionList[Math.max(0,accionIdx)] || '—';
+    sections.push({type:'semaforo', label:ind.label, val:avg, cat:rango.cat, color:semColor, accion:accion});
+  }
+
+  // Tabla de rangos
+  var rangoTipoLabel = {general:'Escala general positiva',pertinencia:'Escala de pertinencia',coherencia:'Escala de coherencia curricular',satisfaccion:'Escala de satisfacción',brecha:'Escala de brecha (inversa)'};
+  if (ind.rango && RANGOS[ind.rango]) {
+    sections.push({type:'spacer', h:3});
+    sections.push({type:'text', text: rangoTipoLabel[ind.rango]||'Valores referenciales', bold:true});
+    var brechaRangos = ['0-10%','11-20%','21-30%','31-40%','41-50%','>50%'];
+    var genRangos    = ['90-100%','80-89%','70-79%','60-69%','50-59%','<50%'];
+    var rangoLabels  = ind.esBrecha ? brechaRangos : genRangos;
+    var tRows = (RANGOS[ind.rango]||[]).map(function(r,ri){
+      return [rangoLabels[ri]||'—', r.cat, (ACCIONES[ind.rango]||ACCIONES.general)[ri]||'—'];
+    });
+    sections.push({type:'table', headers:['Rango','Categoría','Acción recomendada'], colWidths:[25,45,90], rows:tRows});
+  }
+
+  // Comparativa entre grupos
+  var compRows = [];
+  DASH_GRUPOS.forEach(function(gg) {
+    var gRows = dashData.filter(function(r){ return r.grupo===gg.key; });
+    var gVals = gRows.filter(function(r){ return r.ind[ind.instr] && r.ind[ind.instr][ind.key]!==undefined; })
+                     .map(function(r){ return r.ind[ind.instr][ind.key]; });
+    if (gVals.length) {
+      var gAvg = Math.round(gVals.reduce(function(a,b){return a+b;},0)/gVals.length);
+      var gRango = getRango(gAvg, ind.rango, ind.esBrecha);
+      compRows.push([gg.label, gAvg+'%', gRango.cat, gVals.length+' resp.']);
+    }
+  });
+  if (compRows.length > 1) {
+    sections.push({type:'spacer',h:3});
+    sections.push({type:'text', text:'Comparativa entre grupos', bold:true});
+    sections.push({type:'table', headers:['Grupo','Promedio','Interpretación','N'], colWidths:[55,25,60,20], rows:compRows});
+  }
+
+  // Respuestas individuales
+  if (vals.length) {
+    sections.push({type:'spacer',h:3});
+    sections.push({type:'text', text:'Respuestas individuales', bold:true});
+    var indRows = rows.filter(function(r){ return r.ind[ind.instr] && r.ind[ind.instr][ind.key]!==undefined; })
+      .map(function(r){
+        var v = r.ind[ind.instr][ind.key];
+        var rng = getRango(v, ind.rango, ind.esBrecha);
+        return [r.nombre||'—', r.esp||'—', v+'%', rng.cat];
+      });
+    sections.push({type:'table', headers:['Participante','Especialidad','Valor','Interpretación'], colWidths:[55,40,20,45], rows:indRows});
+  }
+
+  return sections;
+}
+
+function buildAbiertasSections(rows, instrId) {
+  var sections = [];
+  var questions = OPEN_QUESTIONS[instrId] || [];
+  questions.forEach(function(q, qi) {
+    var qIdx = qi+1;
+    var respuestas = [];
+    rows.forEach(function(r) {
+      var ab = r.res[instrId] && r.res[instrId].abiertas;
+      var txt = ab && ab[qIdx];
+      if (txt && txt.trim()) respuestas.push({nombre:r.nombre, esp:r.esp||'', text:txt.trim()});
+    });
+    if (!respuestas.length) return;
+    sections.push({type:'spacer',h:2});
+    sections.push({type:'open-question', question: qIdx + '. ' + q});
+    respuestas.forEach(function(r){ sections.push({type:'open-answer', nombre:r.nombre, esp:r.esp, text:r.text}); });
+  });
+  if (!sections.length) sections.push({type:'text', text:'Sin respuestas abiertas registradas.'});
+  return sections;
+}
+
+function buildFodaSections(rows) {
+  var sections = [];
+  var DIMS = [{key:'F',label:'Fortalezas'},{key:'O',label:'Oportunidades'},{key:'D',label:'Debilidades'},{key:'A',label:'Amenazas'}];
+  rows.forEach(function(r) {
+    var asigs = r.res.I3 && r.res.I3.asignaturas;
+    if (!asigs) return;
+    asigs.forEach(function(asig) {
+      if (!asig || !asig.asignatura) return;
+      sections.push({type:'text', text: asig.asignatura + (asig.ciclo?' — Ciclo '+asig.ciclo:'') + ' · ' + (r.nombre||''), bold:true});
+      var foda = asig.foda || {};
+      DIMS.forEach(function(d) {
+        [foda[d.key+'1'],foda[d.key+'2']].forEach(function(e){
+          if (!e || !e.hallazgo) return;
+          var total = d.key==='F'?(+e.relevancia||0)+(+e.evidencia||0)+(+e.sostenibilidad||0)
+                     :d.key==='O'?(+e.pertinencia||0)+(+e.viabilidad||0)+(+e.impacto||0)
+                     :(+e.impacto||0)+(+e.urgencia||0)+(+e.viabilidad||0);
+          sections.push({type:'text', text:d.label+': '+e.hallazgo+(total?' [Puntaje: '+total+'/12]':'')});
+        });
+      });
+      sections.push({type:'spacer',h:3});
+    });
+  });
+  if (!sections.length) sections.push({type:'text',text:'Sin hallazgos FODA registrados.'});
+  return sections;
+}
+
+function buildAportesSections(rows) {
+  var sections = [];
+  rows.forEach(function(r) {
+    var aportes = r.res.I9 && r.res.I9.aportes;
+    if (!aportes) return;
+    var validos = aportes.filter(function(a){ return a && a.aporte && a.aporte.trim(); });
+    if (!validos.length) return;
+    sections.push({type:'text', text: (r.nombre||'—') + (r.esp?' · '+r.esp:''), bold:true});
+    var tRows = validos.map(function(a){
+      return [a.aporte||'—', a.area||'—', a.tipo||'—', a.pertinencia||'—', a.viabilidad||'—', a.impacto||'—'];
+    });
+    sections.push({type:'table', headers:['Aporte','Área','Tipo','Pertinencia','Viabilidad','Impacto'], colWidths:[60,28,22,20,20,20], rows:tRows});
+    sections.push({type:'spacer',h:3});
+  });
+  if (!sections.length) sections.push({type:'text',text:'Sin aportes registrados.'});
+  return sections;
+}
+
+function buildDecisionSections(rows) {
+  var sections = [];
+  var counts = {};
+  rows.forEach(function(r){ var d=r.ind.I6&&r.ind.I6.decision; if(d){counts[d]=(counts[d]||0)+1;} });
+  var tRows = Object.keys(counts).map(function(d){ return [d, counts[d], Math.round(counts[d]/rows.length*100)+'%']; });
+  sections.push({type:'table', headers:['Decisión','N° respuestas','%'], colWidths:[80,30,30], rows:tRows});
+  return sections;
+}
+
+/* ── Download one indicator ── */
+function downloadInformeIndicador() {
+  if (!_currentG || !_currentInd) { alert('Selecciona un indicador primero.'); return; }
+  var sections = buildIndicadorSections(_currentInd, _currentG);
+  var title = _currentG.label + ' — ' + _currentInd.label;
+  var doc = buildPDF(title, sections);
+  if (doc) doc.save('Informe_' + _currentG.key + '_' + _currentInd.id + '.pdf');
+}
+
+/* ── Download all indicators for current group ── */
+function downloadInformeGrupo() {
+  if (!_currentG) { alert('Selecciona un grupo primero.'); return; }
+  var g = _currentG;
+  var indicadores = DASH_INDICADORES[g.key] || [];
+  if (!indicadores.length) { alert('Sin indicadores disponibles para este grupo.'); return; }
+
+  var allSections = [];
+  allSections.push({type:'text', text:'Grupo: ' + g.label + '  ·  Total de respuestas: ' + dashData.filter(function(r){return r.grupo===g.key;}).length, bold:true});
+  allSections.push({type:'spacer', h:4});
+
+  indicadores.forEach(function(ind) {
+    var secs = buildIndicadorSections(ind, g);
+    allSections = allSections.concat(secs);
+    allSections.push({type:'spacer', h:6});
+  });
+
+  var title = 'Informe completo — ' + g.label;
+  var doc = buildPDF(title, allSections);
+  if (doc) doc.save('Informe_Completo_' + g.key + '.pdf');
+}
 </script>
 <!-- PAGE 5: DASHBOARD — full screen overlay outside layout -->
 <div id="page5" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:var(--surface-2)">
