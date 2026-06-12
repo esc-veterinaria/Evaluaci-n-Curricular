@@ -3281,35 +3281,35 @@ function closeTutorial() {
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-title">Grupos de interés</div>
-    <button class="group-btn" id="gb-expertos" onclick="selectGroup('expertos')">
+    <button class="group-btn" id="gb-expertos" onclick="tutSelectGroup('expertos')">
       <span class="icon">🔬</span> Expertos
       <span class="badge" id="bd-expertos">5 pasos</span>
     </button>
-    <button class="group-btn" id="gb-empleadores" onclick="selectGroup('empleadores')">
+    <button class="group-btn" id="gb-empleadores" onclick="tutSelectGroup('empleadores')">
       <span class="icon">🏥</span> Empleadores
       <span class="badge" id="bd-empleadores">5 pasos</span>
     </button>
-    <button class="group-btn" id="gb-egresados" onclick="selectGroup('egresados')">
+    <button class="group-btn" id="gb-egresados" onclick="tutSelectGroup('egresados')">
       <span class="icon">🎓</span> Egresados
       <span class="badge" id="bd-egresados">5 pasos</span>
     </button>
-    <button class="group-btn" id="gb-docentesp24" onclick="selectGroup('docentesp24')">
+    <button class="group-btn" id="gb-docentesp24" onclick="tutSelectGroup('docentesp24')">
       <span class="icon">📗</span> Docentes P24
       <span class="badge" id="bd-docentesp24">6 pasos</span>
     </button>
-    <button class="group-btn" id="gb-docentesp52" onclick="selectGroup('docentesp52')">
+    <button class="group-btn" id="gb-docentesp52" onclick="tutSelectGroup('docentesp52')">
       <span class="icon">📘</span> Docentes P52
       <span class="badge" id="bd-docentesp52">5 pasos</span>
     </button>
-    <button class="group-btn" id="gb-satelite" onclick="selectGroup('satelite')">
+    <button class="group-btn" id="gb-satelite" onclick="tutSelectGroup('satelite')">
       <span class="icon">🛰️</span> Doc. Satélite
       <span class="badge" id="bd-satelite">5 pasos</span>
     </button>
-    <button class="group-btn" id="gb-comision" onclick="selectGroup('comision')">
+    <button class="group-btn" id="gb-comision" onclick="tutSelectGroup('comision')">
       <span class="icon">⚙️</span> Comisión
       <span class="badge" id="bd-comision">5 pasos</span>
     </button>
-    <button class="group-btn" id="gb-estudiantes" onclick="selectGroup('estudiantes')">
+    <button class="group-btn" id="gb-estudiantes" onclick="tutSelectGroup('estudiantes')">
       <span class="icon">📖</span> Estudiantes
       <span class="badge" id="bd-estudiantes">5 pasos</span>
     </button>
@@ -3321,14 +3321,14 @@ function closeTutorial() {
   <!-- MOBILE GROUP BAR -->
   <div class="mobile-group-bar" id="mobile-group-bar">
     <div class="mobile-group-scroll" id="mobile-group-scroll">
-      <button class="mobile-group-pill" id="mg-expertos" onclick="selectGroup('expertos')"><span class="mg-icon">🔬</span>Expertos</button>
-      <button class="mobile-group-pill" id="mg-empleadores" onclick="selectGroup('empleadores')"><span class="mg-icon">🏥</span>Empleadores</button>
-      <button class="mobile-group-pill" id="mg-egresados" onclick="selectGroup('egresados')"><span class="mg-icon">🎓</span>Egresados</button>
-      <button class="mobile-group-pill" id="mg-docentesp24" onclick="selectGroup('docentesp24')"><span class="mg-icon">📗</span>Doc. P24</button>
-      <button class="mobile-group-pill" id="mg-docentesp52" onclick="selectGroup('docentesp52')"><span class="mg-icon">📘</span>Doc. P52</button>
-      <button class="mobile-group-pill" id="mg-satelite" onclick="selectGroup('satelite')"><span class="mg-icon">🛰️</span>Satélite</button>
-      <button class="mobile-group-pill" id="mg-comision" onclick="selectGroup('comision')"><span class="mg-icon">⚙️</span>Comisión</button>
-      <button class="mobile-group-pill" id="mg-estudiantes" onclick="selectGroup('estudiantes')"><span class="mg-icon">📖</span>Estudiantes</button>
+      <button class="mobile-group-pill" id="mg-expertos" onclick="tutSelectGroup('expertos')"><span class="mg-icon">🔬</span>Expertos</button>
+      <button class="mobile-group-pill" id="mg-empleadores" onclick="tutSelectGroup('empleadores')"><span class="mg-icon">🏥</span>Empleadores</button>
+      <button class="mobile-group-pill" id="mg-egresados" onclick="tutSelectGroup('egresados')"><span class="mg-icon">🎓</span>Egresados</button>
+      <button class="mobile-group-pill" id="mg-docentesp24" onclick="tutSelectGroup('docentesp24')"><span class="mg-icon">📗</span>Doc. P24</button>
+      <button class="mobile-group-pill" id="mg-docentesp52" onclick="tutSelectGroup('docentesp52')"><span class="mg-icon">📘</span>Doc. P52</button>
+      <button class="mobile-group-pill" id="mg-satelite" onclick="tutSelectGroup('satelite')"><span class="mg-icon">🛰️</span>Satélite</button>
+      <button class="mobile-group-pill" id="mg-comision" onclick="tutSelectGroup('comision')"><span class="mg-icon">⚙️</span>Comisión</button>
+      <button class="mobile-group-pill" id="mg-estudiantes" onclick="tutSelectGroup('estudiantes')"><span class="mg-icon">📖</span>Estudiantes</button>
     </div>
   </div>
 
@@ -4029,7 +4029,7 @@ var completed    = {};
 /* ══════════════════════════════════════════
    FUNCTIONS
 ══════════════════════════════════════════ */
-function selectGroup(key) {
+function tutSelectGroup(key) {
   currentGroup = key;
   currentStep  = 0;
 
@@ -4141,7 +4141,7 @@ function finishGroup() {
     document.getElementById('step-desc').textContent  = 'Has terminado el tutorial para el grupo ' + GRUPOS[currentGroup].label + '. Selecciona otro grupo en el panel izquierdo para continuar.';
     document.getElementById('step-tip').style.display = 'none';
     document.getElementById('btn-next').textContent = 'Siguiente grupo →';
-    document.getElementById('btn-next').onclick = function(){ selectGroup(next); };
+    document.getElementById('btn-next').onclick = function(){ tutSelectGroup(next); };
   } else {
     // All done
     document.getElementById('step-title').textContent = '¡Todos los tutoriales completados!';
