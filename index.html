@@ -2976,6 +2976,19 @@ function closeTutorial() {
   if (el) { el.classList.remove('open'); document.body.style.overflow=''; }
 }
 
+function openDashboard() {
+  var pwd = prompt('Ingrese la contraseña para acceder al Dashboard:');
+  if (pwd === null) return;
+  if (pwd !== 'EPMVcurricular') { alert('Contraseña incorrecta.'); return; }
+  document.getElementById('page5').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  loadDashboard();
+}
+function closeDashboard() {
+  document.getElementById('page5').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
 </script>
 <!-- PAGE 5: DASHBOARD — full screen overlay outside layout -->
 <div id="page5" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:var(--surface-2)">
