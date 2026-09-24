@@ -3480,7 +3480,9 @@ function renderAbiertas(viz, rows, instrId, g) {
     var qIdx = qi+1;
     var respuestas = [];
     rows.forEach(function(r) {
-      var ab = r.res[instrId] && r.res[instrId].abiertas;
+      var instrRes = r.res[instrId];
+      if (typeof instrRes === 'string') { try { instrRes = JSON.parse(instrRes); } catch(e){ instrRes = null; } }
+      var ab = instrRes && instrRes.abiertas;
       var txt = ab && ab[qIdx];
       if (txt && txt.trim() && txt.trim().toLowerCase() !== 'nada') respuestas.push({nombre:r.nombre, esp:r.esp||'', txt:txt.trim()});
     });
@@ -3817,9 +3819,9 @@ function buildIndicadorSections(ind, g) {
 
   sections.push({type:'section-title', text: g.icon + ' ' + g.label + '  ·  ' + ind.label});
 
-  // RESPUESTAS ABIERTAS
-  if (ind.key === '_abierta' || ind.key === '_silabo') {
-    sections = sections.concat(buildAbiertasSections(rows, ind.instr));
+  // FODA I3 — must be checked BEFORE generic _abierta
+  if (ind.instr === 'I3' && ind.key === '_abierta') {
+    sections = sections.concat(buildFodaSections(rows));
     return sections;
   }
   // APORTES I9
@@ -3832,9 +3834,9 @@ function buildIndicadorSections(ind, g) {
     sections = sections.concat(buildDecisionSections(rows));
     return sections;
   }
-  // FODA I3
-  if (ind.instr === 'I3' && ind.key === '_abierta') {
-    sections = sections.concat(buildFodaSections(rows));
+  // RESPUESTAS ABIERTAS (generic)
+  if (ind.key === '_abierta' || ind.key === '_silabo') {
+    sections = sections.concat(buildAbiertasSections(rows, ind.instr));
     return sections;
   }
 
@@ -3926,7 +3928,8 @@ function buildAbiertasSections(rows, instrId) {
     var respuestas = [];
     rows.forEach(function(r) {
       var ab = r.res[instrId] && r.res[instrId].abiertas;
-      var txt = ab && ab[qIdx];
+      // Keys may be numeric or string depending on how they were saved
+      var txt = ab && (ab[qIdx] || ab[String(qIdx)]);
       if (txt && txt.trim()) respuestas.push({nombre:r.nombre, esp:r.esp||'', text:txt.trim()});
     });
     if (!respuestas.length) return;
@@ -3942,7 +3945,10 @@ function buildFodaSections(rows) {
   var sections = [];
   var DIMS = [{key:'F',label:'Fortalezas'},{key:'O',label:'Oportunidades'},{key:'D',label:'Debilidades'},{key:'A',label:'Amenazas'}];
   rows.forEach(function(r) {
-    var asigs = r.res.I3 && r.res.I3.asignaturas;
+    var i3 = r.res.I3;
+    // Handle double-serialized JSON
+    if (typeof i3 === 'string') { try { i3 = JSON.parse(i3); } catch(e){ i3 = null; } }
+    var asigs = i3 && i3.asignaturas;
     if (!asigs) return;
     asigs.forEach(function(asig) {
       if (!asig || !asig.asignatura) return;
