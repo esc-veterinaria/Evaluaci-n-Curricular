@@ -3416,8 +3416,10 @@ function renderAbiertas(viz, rows, instrId, g) {
       return '#6b7280';
     }
     rows.forEach(function(r) {
-      var asigs = r.res.I3 && r.res.I3.asignaturas;
-      if (!asigs) return;
+      var _i3 = r.res.I3;
+      if (typeof _i3 === 'string') { try { _i3 = JSON.parse(_i3); } catch(e){ _i3 = null; } }
+      var asigs = _i3 && _i3.asignaturas;
+      if (!asigs || !asigs.length) return;
       asigs.forEach(function(asig) {
         if (!asig || !asig.asignatura) return;
         hasAny = true;
@@ -3483,7 +3485,8 @@ function renderAbiertas(viz, rows, instrId, g) {
       var instrRes = r.res[instrId];
       if (typeof instrRes === 'string') { try { instrRes = JSON.parse(instrRes); } catch(e){ instrRes = null; } }
       var ab = instrRes && instrRes.abiertas;
-      var txt = ab && ab[qIdx];
+      if (typeof ab === 'string') { try { ab = JSON.parse(ab); } catch(e){ ab = null; } }
+      var txt = ab && (ab[qIdx] || ab[String(qIdx)]);
       if (txt && txt.trim() && txt.trim().toLowerCase() !== 'nada') respuestas.push({nombre:r.nombre, esp:r.esp||'', txt:txt.trim()});
     });
     if (!respuestas.length) return;
@@ -3927,8 +3930,10 @@ function buildAbiertasSections(rows, instrId) {
     var qIdx = qi+1;
     var respuestas = [];
     rows.forEach(function(r) {
-      var ab = r.res[instrId] && r.res[instrId].abiertas;
-      // Keys may be numeric or string depending on how they were saved
+      var _instrRes = r.res[instrId];
+      if (typeof _instrRes === 'string') { try { _instrRes = JSON.parse(_instrRes); } catch(e){ _instrRes = null; } }
+      var ab = _instrRes && _instrRes.abiertas;
+      if (typeof ab === 'string') { try { ab = JSON.parse(ab); } catch(e){ ab = null; } }
       var txt = ab && (ab[qIdx] || ab[String(qIdx)]);
       if (txt && txt.trim()) respuestas.push({nombre:r.nombre, esp:r.esp||'', text:txt.trim()});
     });
@@ -3946,10 +3951,10 @@ function buildFodaSections(rows) {
   var DIMS = [{key:'F',label:'Fortalezas'},{key:'O',label:'Oportunidades'},{key:'D',label:'Debilidades'},{key:'A',label:'Amenazas'}];
   rows.forEach(function(r) {
     var i3 = r.res.I3;
-    // Handle double-serialized JSON
     if (typeof i3 === 'string') { try { i3 = JSON.parse(i3); } catch(e){ i3 = null; } }
-    var asigs = i3 && i3.asignaturas;
-    if (!asigs) return;
+    if (!i3) return;
+    var asigs = i3.asignaturas;
+    if (!asigs || !asigs.length) return;
     asigs.forEach(function(asig) {
       if (!asig || !asig.asignatura) return;
       sections.push({type:'text', text: asig.asignatura + (asig.ciclo?' — Ciclo '+asig.ciclo:'') + ' · ' + (r.nombre||''), bold:true});
